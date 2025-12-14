@@ -44,7 +44,7 @@ export default function LocationScreen() {
   }));
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+    <ThemedView style={[styles.container, { paddingTop: insets.top + 40 }]}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -59,17 +59,35 @@ export default function LocationScreen() {
         <View style={styles.chartSpacing} />
 
         {/* Latitude Chart */}
-        <AreaChart color="#3498DB" data={latData} title="Latitude" shouldAnimate={isFocused} />
+        <AreaChart
+          color="#3498DB"
+          data={latData}
+          title="Latitude"
+          shouldAnimate={isFocused}
+          iconName="location.north"
+        />
 
         <View style={styles.chartSpacing} />
 
         {/* Longitude Chart */}
-        <AreaChart color="#E74C3C" data={lonData} title="Longitude" shouldAnimate={isFocused} />
+        <AreaChart
+          color="#E74C3C"
+          data={lonData}
+          title="Longitude"
+          shouldAnimate={isFocused}
+          iconName="arrow.left.and.right"
+        />
 
         <View style={styles.chartSpacing} />
 
         {/* Speed Chart */}
-        <AreaChart color="#27AE60" data={speedData} title="Speed" shouldAnimate={isFocused} />
+        <AreaChart
+          color="#27AE60"
+          data={speedData}
+          title="Speed"
+          shouldAnimate={isFocused}
+          iconName="gauge"
+        />
       </ScrollView>
 
       <FullscreenMapView

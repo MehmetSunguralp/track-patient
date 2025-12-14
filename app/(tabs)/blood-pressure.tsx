@@ -29,12 +29,13 @@ export default function BloodPressureScreen() {
   const isFocused = useIsFocused();
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+    <ThemedView style={[styles.container, { paddingTop: insets.top + 40 }]}>
       <AreaChart
         color="#8E44AD"
         data={chartData}
         title="Blood Pressure"
         shouldAnimate={isFocused}
+        iconName="waveform.path"
       />
     </ThemedView>
   );

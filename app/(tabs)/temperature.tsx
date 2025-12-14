@@ -15,8 +15,14 @@ export default function TemperatureScreen() {
   const isFocused = useIsFocused();
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
-      <AreaChart color="#E74C3C" data={chartData} title="Temperature" shouldAnimate={isFocused} />
+    <ThemedView style={[styles.container, { paddingTop: insets.top + 40 }]}>
+      <AreaChart
+        color="#E74C3C"
+        data={chartData}
+        title="Temperature"
+        shouldAnimate={isFocused}
+        iconName="thermometer"
+      />
     </ThemedView>
   );
 }

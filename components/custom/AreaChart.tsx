@@ -1,15 +1,31 @@
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Text, View } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
+
+type IconSymbolName =
+  | 'heart.fill'
+  | 'thermometer'
+  | 'waveform.path'
+  | 'location.north'
+  | 'arrow.left.and.right'
+  | 'gauge';
 
 interface AreaChartProps {
   readonly color: string;
   readonly data: { value: number; label: string }[];
   readonly title: string;
   readonly shouldAnimate?: boolean;
+  readonly iconName?: IconSymbolName;
 }
 
-export default function AreaChart({ color, data, title, shouldAnimate = true }: AreaChartProps) {
+export default function AreaChart({
+  color,
+  data,
+  title,
+  shouldAnimate = true,
+  iconName,
+}: AreaChartProps) {
   const [animationKey, setAnimationKey] = useState(0);
   const prevFocusedRef = useRef(false);
   const opacity = useRef(new Animated.Value(1)).current;
@@ -45,11 +61,19 @@ export default function AreaChart({ color, data, title, shouldAnimate = true }: 
 
   return (
     <View style={{ marginLeft: 12 }}>
-      <Text
-        style={{ color, fontSize: 24, fontWeight: '600', marginBottom: 8, textAlign: 'center' }}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 8,
+        }}
       >
-        {title}
-      </Text>
+        {iconName && (
+          <IconSymbol name={iconName as any} size={24} color={color} style={{ marginRight: 8 }} />
+        )}
+        <Text style={{ color, fontSize: 24, fontWeight: '600', textAlign: 'center' }}>{title}</Text>
+      </View>
       <Animated.View style={{ opacity }}>
         <LineChart
           key={animationKey}

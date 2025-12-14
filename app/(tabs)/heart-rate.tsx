@@ -15,8 +15,14 @@ export default function HeartRateScreen() {
   const isFocused = useIsFocused();
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
-      <AreaChart color="#CEA023" data={chartData} title="Heart Rate" shouldAnimate={isFocused} />
+    <ThemedView style={[styles.container, { paddingTop: insets.top + 40 }]}>
+      <AreaChart
+        color="#CEA023"
+        data={chartData}
+        title="Heart Rate"
+        shouldAnimate={isFocused}
+        iconName="heart.fill"
+      />
     </ThemedView>
   );
 }
