@@ -1,21 +1,16 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 
-import { HapticTab } from '@/components/haptic-tab';
+import { ScrollableTabBar } from '@/components/custom/ScrollableTabBar';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
       }}
+      tabBar={(props) => <ScrollableTabBar {...props} />}
     >
       <Tabs.Screen
         name="index"
@@ -25,10 +20,24 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="heart-rate"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Heart Rate',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="heart.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="temperature"
+        options={{
+          title: 'Temperature',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="thermometer" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="blood-pressure"
+        options={{
+          title: 'Blood Pressure',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="waveform.path" color={color} />,
         }}
       />
     </Tabs>

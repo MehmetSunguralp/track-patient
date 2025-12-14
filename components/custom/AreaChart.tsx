@@ -14,9 +14,9 @@ export default function AreaChart({ color, data, title }: AreaChartProps) {
   const yAxisMaxValue = stepValue * 6; // +1 step headroom
 
   return (
-    <View>
+    <View style={{ marginLeft: 12 }}>
       <Text
-        style={{ color, fontSize: 18, fontWeight: '600', marginBottom: 8, textAlign: 'center' }}
+        style={{ color, fontSize: 24, fontWeight: '600', marginBottom: 8, textAlign: 'center' }}
       >
         {title}
       </Text>
