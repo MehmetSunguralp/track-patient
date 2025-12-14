@@ -10,6 +10,7 @@ const chartColors: Record<string, string> = {
   'heart-rate': '#CEA023',
   temperature: '#E74C3C',
   'blood-pressure': '#8E44AD',
+  location: '#3498DB',
 };
 
 export function ScrollableTabBar({ state, descriptors, navigation }: BottomTabBarProps) {

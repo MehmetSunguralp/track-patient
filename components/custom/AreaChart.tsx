@@ -57,6 +57,7 @@ export default function AreaChart({ color, data, title, shouldAnimate = true }: 
           areaChart
           endSpacing={9}
           isAnimated
+          curved
           disableScroll
           /* Y AXIS */
           maxValue={yAxisMaxValue}
