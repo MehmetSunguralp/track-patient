@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface StatusBarProps {
@@ -7,6 +8,31 @@ interface StatusBarProps {
 
 export default function CustomStatusBar({ lastUpdateTime }: StatusBarProps) {
   const insets = useSafeAreaInsets();
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    // Create pulsing animation loop
+    const pulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 0.4,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    pulseAnimation.start();
+
+    return () => {
+      pulseAnimation.stop();
+    };
+  }, [scaleAnim]);
 
   // Format timestamp to readable time
   const formatTime = (timestamp: string) => {
@@ -20,7 +46,7 @@ export default function CustomStatusBar({ lastUpdateTime }: StatusBarProps) {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.content}>
         <View style={styles.statusIndicator}>
-          <View style={styles.greenDot} />
+          <Animated.View style={[styles.greenDot, { transform: [{ scale: scaleAnim }] }]} />
           <Text style={styles.statusText}>Connected</Text>
         </View>
         <Text style={styles.timeText}>Last Update: {formatTime(lastUpdateTime)}</Text>
