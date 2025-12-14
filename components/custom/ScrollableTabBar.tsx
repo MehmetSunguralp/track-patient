@@ -5,6 +5,13 @@ import * as Haptics from 'expo-haptics';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+// Chart colors for each tab
+const chartColors: Record<string, string> = {
+  'heart-rate': '#CEA023',
+  temperature: '#E74C3C',
+  'blood-pressure': '#8E44AD',
+};
+
 export function ScrollableTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
@@ -27,9 +34,21 @@ export function ScrollableTabBar({ state, descriptors, navigation }: BottomTabBa
       >
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
-          const label = options.tabBarLabel ?? options.title ?? route.name;
-
           const isFocused = state.index === index;
+          // Use chart color if tab is focused and has a chart color, otherwise use theme tint or default
+          const activeColor = chartColors[route.name] ?? Colors[theme].tint;
+          const color = isFocused ? activeColor : Colors[theme].tabIconDefault;
+
+          const labelValue = options.tabBarLabel ?? options.title ?? route.name;
+          const label =
+            typeof labelValue === 'function'
+              ? labelValue({
+                  focused: isFocused,
+                  color,
+                  position: 'below-icon' as const,
+                  children: route.name,
+                })
+              : labelValue;
 
           const onPress = () => {
             const event = navigation.emit({
@@ -54,7 +73,6 @@ export function ScrollableTabBar({ state, descriptors, navigation }: BottomTabBa
             });
           };
 
-          const color = isFocused ? Colors[theme].tint : Colors[theme].tabIconDefault;
           const icon = options.tabBarIcon
             ? options.tabBarIcon({ focused: isFocused, color, size: 28 })
             : null;
@@ -65,7 +83,6 @@ export function ScrollableTabBar({ state, descriptors, navigation }: BottomTabBa
               accessibilityRole="button"
               accessibilityState={isFocused ? { selected: true } : {}}
               accessibilityLabel={options.tabBarAccessibilityLabel}
-              testID={options.tabBarTestID}
               onPress={onPress}
               onLongPress={onLongPress}
               style={styles.tabItem}
