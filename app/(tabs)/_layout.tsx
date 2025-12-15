@@ -4,14 +4,11 @@ import React from 'react';
 import { ScrollableTabBar } from '@/components/custom/ScrollableTabBar';
 import CustomStatusBar from '@/components/custom/StatusBar';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import dummyData from '@/data/dummyData.json';
-
-const lastUpdateTime = dummyData.data.at(-1)?.timestamp || '';
 
 export default function TabLayout() {
   return (
     <>
-      <CustomStatusBar lastUpdateTime={lastUpdateTime} />
+      <CustomStatusBar />
       <Tabs
         screenOptions={{
           headerShown: false,
@@ -21,8 +18,8 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Home',
-            tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+            title: 'Overall',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="gauge" color={color} />,
           }}
         />
         <Tabs.Screen

@@ -1,17 +1,20 @@
+import { usePathname, useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-interface StatusBarProps {
-  readonly lastUpdateTime: string;
-}
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { usePatients } from '@/hooks/PatientsContext';
 
-export default function CustomStatusBar({ lastUpdateTime }: StatusBarProps) {
+export default function CustomStatusBar() {
   const insets = useSafeAreaInsets();
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
+  const { selectedPatient } = usePatients();
+  const pathname = usePathname();
+  const router = useRouter();
+
   useEffect(() => {
-    // Create pulsing animation loop
     const pulseAnimation = Animated.loop(
       Animated.sequence([
         Animated.timing(scaleAnim, {
@@ -34,22 +37,83 @@ export default function CustomStatusBar({ lastUpdateTime }: StatusBarProps) {
     };
   }, [scaleAnim]);
 
-  // Format timestamp to readable time
+  const lastUpdateTime = selectedPatient.data?.data.at(-1)?.timestamp ?? '';
+
   const formatTime = (timestamp: string) => {
+    if (!timestamp) {
+      return '--:--';
+    }
+
     const date = new Date(timestamp);
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
   };
 
+  const statusLabel = selectedPatient.isConnected ? 'Live' : 'Disconnected';
+  const statusColor = selectedPatient.isConnected ? '#27AE60' : '#7f8c8d';
+
+  const isPatientsScreen = pathname === '/' || pathname === '/index';
+
+  if (isPatientsScreen) {
+    // Scenario 1: patients list – generic connection + last update
+    return (
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.content}>
+          <View style={styles.statusRow}>
+            <View style={styles.statusIndicator}>
+              <Animated.View
+                style={[
+                  styles.greenDot,
+                  { backgroundColor: '#27AE60', transform: [{ scale: scaleAnim }] },
+                ]}
+              />
+              <Text style={styles.statusText}>System Connected</Text>
+            </View>
+            <Text style={styles.timeText}>Last Update: {formatTime(lastUpdateTime)}</Text>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  // Scenario 2: patient detail tabs – show patient info only
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.content}>
-        <View style={styles.statusIndicator}>
-          <Animated.View style={[styles.greenDot, { transform: [{ scale: scaleAnim }] }]} />
-          <Text style={styles.statusText}>Connected</Text>
+        <View style={styles.topRow}>
+          <Pressable style={styles.backButton} onPress={() => router.push('/')}>
+            <IconSymbol name="chevron.left" size={20} color="#ffffff" />
+          </Pressable>
+          <View style={styles.patientInfo}>
+            <Image source={{ uri: selectedPatient.avatarUrl }} style={styles.avatar} />
+            <View>
+              <Text style={styles.patientName}>
+                {selectedPatient.firstName} {selectedPatient.lastName}
+              </Text>
+              <Text style={styles.patientMeta}>
+                {selectedPatient.uuid} • {selectedPatient.age}y • {selectedPatient.sex}
+              </Text>
+            </View>
+          </View>
         </View>
-        <Text style={styles.timeText}>Last Update: {formatTime(lastUpdateTime)}</Text>
+
+        <View style={styles.statusRow}>
+          <View style={styles.statusIndicator}>
+            {selectedPatient.isConnected ? (
+              <Animated.View
+                style={[
+                  styles.greenDot,
+                  { backgroundColor: statusColor, transform: [{ scale: scaleAnim }] },
+                ]}
+              />
+            ) : (
+              <View style={[styles.greenDot, { backgroundColor: statusColor }]} />
+            )}
+            <Text style={styles.statusText}>{statusLabel}</Text>
+          </View>
+          <Text style={styles.timeText}>Last Update: {formatTime(lastUpdateTime)}</Text>
+        </View>
       </View>
     </View>
   );
@@ -70,7 +134,41 @@ const styles = StyleSheet.create({
     paddingTop: 4,
     flexDirection: 'column',
     justifyContent: 'space-between',
+    alignItems: 'stretch',
+  },
+  topRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 6,
+  },
+  backButton: {
+    marginRight: 8,
+    padding: 4,
+  },
+  patientInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 10,
+  },
+  patientName: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  patientMeta: {
+    color: '#ffffff',
+    fontSize: 11,
+    opacity: 0.75,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   statusIndicator: {
     flexDirection: 'row',

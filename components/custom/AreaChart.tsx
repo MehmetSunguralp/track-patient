@@ -64,7 +64,7 @@ export default function AreaChart({
   const yAxisMaxValue = stepValue * 6; // +1 step headroom
 
   return (
-    <View style={{ marginLeft: 12 }}>
+    <View style={{ marginHorizontal: 12 }}>
       <View
         style={{
           flexDirection: 'row',

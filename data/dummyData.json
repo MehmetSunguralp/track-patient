@@ -1,144 +1,2904 @@
 {
-  "sessionId": "SESSION_2025_01",
-  "intervalSeconds": 10,
-  "data": [
+  "patients": [
     {
-      "timestamp": "2025-01-01T10:00:00Z",
-      "gps": {
-        "lat": 41.015137,
-        "lon": 28.97953,
-        "speedKmh": 2.1,
-        "distanceTotalM": 0
-      },
-      "heart": {
-        "bpm": 78,
-        "rrMs": 770,
-        "maxBpmSession": 78
-      },
-      "movement": {
-        "metabolicPowerWkg": 2.3,
-        "activityZone": "Z1",
-        "stepBalanceSide": "left",
-        "stepBalancePercent": 4.2
-      },
-      "temperature": {
-        "skinC": 36.4
-      }
+      "id": "p1",
+      "sessionId": "SESSION_2025_01",
+      "intervalSeconds": 10,
+      "data": [
+        {
+          "timestamp": "2025-01-01T10:00:00Z",
+          "gps": {
+            "lat": 41.015137,
+            "lon": 28.97953,
+            "speedKmh": 2.1,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 78,
+            "rrMs": 770,
+            "maxBpmSession": 78
+          },
+          "movement": {
+            "metabolicPowerWkg": 2.3,
+            "activityZone": "Z1",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 4.2
+          },
+          "temperature": {
+            "skinC": 36.4
+          }
+        },
+        {
+          "timestamp": "2025-01-01T10:00:10Z",
+          "gps": {
+            "lat": 41.015152,
+            "lon": 28.97955,
+            "speedKmh": 2.8,
+            "distanceTotalM": 8
+          },
+          "heart": {
+            "bpm": 82,
+            "rrMs": 745,
+            "maxBpmSession": 82
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.1,
+            "activityZone": "Z2",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 3.8
+          },
+          "temperature": {
+            "skinC": 36.5
+          }
+        },
+        {
+          "timestamp": "2025-01-01T10:00:20Z",
+          "gps": {
+            "lat": 41.01518,
+            "lon": 28.9796,
+            "speedKmh": 4.6,
+            "distanceTotalM": 21
+          },
+          "heart": {
+            "bpm": 96,
+            "rrMs": 690,
+            "maxBpmSession": 96
+          },
+          "movement": {
+            "metabolicPowerWkg": 5.9,
+            "activityZone": "Z4",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 6.1
+          },
+          "temperature": {
+            "skinC": 36.6
+          }
+        },
+        {
+          "timestamp": "2025-01-01T10:00:30.000Z",
+          "gps": {
+            "lat": 41.015141,
+            "lon": 28.979619,
+            "speedKmh": 5.1,
+            "distanceTotalM": 30
+          },
+          "heart": {
+            "bpm": 96,
+            "rrMs": 707,
+            "maxBpmSession": 96
+          },
+          "movement": {
+            "metabolicPowerWkg": 6.1,
+            "activityZone": "Z4",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 5.3
+          },
+          "temperature": {
+            "skinC": 36.5
+          }
+        },
+        {
+          "timestamp": "2025-01-01T10:00:40.000Z",
+          "gps": {
+            "lat": 41.01513,
+            "lon": 28.979589,
+            "speedKmh": 4.6,
+            "distanceTotalM": 31
+          },
+          "heart": {
+            "bpm": 99,
+            "rrMs": 712,
+            "maxBpmSession": 103
+          },
+          "movement": {
+            "metabolicPowerWkg": 5.7,
+            "activityZone": "Z5",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 4.5
+          },
+          "temperature": {
+            "skinC": 36.5
+          }
+        },
+        {
+          "timestamp": "2025-01-01T10:00:50.000Z",
+          "gps": {
+            "lat": 41.01515,
+            "lon": 28.979625,
+            "speedKmh": 5.2,
+            "distanceTotalM": 44
+          },
+          "heart": {
+            "bpm": 100,
+            "rrMs": 709,
+            "maxBpmSession": 103
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.9,
+            "activityZone": "Z4",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 4.4
+          },
+          "temperature": {
+            "skinC": 36.5
+          }
+        }
+      ]
     },
     {
-      "timestamp": "2025-01-01T10:00:10Z",
-      "gps": {
-        "lat": 41.015152,
-        "lon": 28.97955,
-        "speedKmh": 2.8,
-        "distanceTotalM": 8
-      },
-      "heart": {
-        "bpm": 82,
-        "rrMs": 745,
-        "maxBpmSession": 82
-      },
-      "movement": {
-        "metabolicPowerWkg": 3.1,
-        "activityZone": "Z2",
-        "stepBalanceSide": "left",
-        "stepBalancePercent": 3.8
-      },
-      "temperature": {
-        "skinC": 36.5
-      }
+      "id": "p2",
+      "sessionId": "SESSION_2025_02",
+      "intervalSeconds": 12,
+      "data": [
+        {
+          "timestamp": "2025-01-02T11:00:00Z",
+          "gps": {
+            "lat": 41.012,
+            "lon": 28.975,
+            "speedKmh": 1.5,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 72,
+            "rrMs": 830,
+            "maxBpmSession": 72
+          },
+          "movement": {
+            "metabolicPowerWkg": 1.8,
+            "activityZone": "Z1",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 2.5
+          },
+          "temperature": {
+            "skinC": 36.2
+          }
+        },
+        {
+          "timestamp": "2025-01-02T11:00:12Z",
+          "gps": {
+            "lat": 41.0122,
+            "lon": 28.9753,
+            "speedKmh": 3.2,
+            "distanceTotalM": 10
+          },
+          "heart": {
+            "bpm": 88,
+            "rrMs": 710,
+            "maxBpmSession": 88
+          },
+          "movement": {
+            "metabolicPowerWkg": 4,
+            "activityZone": "Z3",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 5.1
+          },
+          "temperature": {
+            "skinC": 36.7
+          }
+        },
+        {
+          "timestamp": "2025-01-02T11:00:24Z",
+          "gps": {
+            "lat": 41.0125,
+            "lon": 28.9758,
+            "speedKmh": 5.1,
+            "distanceTotalM": 24
+          },
+          "heart": {
+            "bpm": 101,
+            "rrMs": 650,
+            "maxBpmSession": 101
+          },
+          "movement": {
+            "metabolicPowerWkg": 6.3,
+            "activityZone": "Z4",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 7.8
+          },
+          "temperature": {
+            "skinC": 37.1
+          }
+        },
+        {
+          "timestamp": "2025-01-02T11:00:36.000Z",
+          "gps": {
+            "lat": 41.012502,
+            "lon": 28.975832,
+            "speedKmh": 4.6,
+            "distanceTotalM": 26
+          },
+          "heart": {
+            "bpm": 101,
+            "rrMs": 672,
+            "maxBpmSession": 103
+          },
+          "movement": {
+            "metabolicPowerWkg": 6.2,
+            "activityZone": "Z2",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 7.6
+          },
+          "temperature": {
+            "skinC": 37
+          }
+        },
+        {
+          "timestamp": "2025-01-02T11:00:48.000Z",
+          "gps": {
+            "lat": 41.012527,
+            "lon": 28.975834,
+            "speedKmh": 4,
+            "distanceTotalM": 37
+          },
+          "heart": {
+            "bpm": 95,
+            "rrMs": 686,
+            "maxBpmSession": 103
+          },
+          "movement": {
+            "metabolicPowerWkg": 5.4,
+            "activityZone": "Z2",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 7.4
+          },
+          "temperature": {
+            "skinC": 36.9
+          }
+        },
+        {
+          "timestamp": "2025-01-02T11:01:00.000Z",
+          "gps": {
+            "lat": 41.012534,
+            "lon": 28.975807,
+            "speedKmh": 4.5,
+            "distanceTotalM": 44
+          },
+          "heart": {
+            "bpm": 97,
+            "rrMs": 669,
+            "maxBpmSession": 103
+          },
+          "movement": {
+            "metabolicPowerWkg": 5.1,
+            "activityZone": "Z2",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 6.8
+          },
+          "temperature": {
+            "skinC": 37
+          }
+        }
+      ]
     },
     {
-      "timestamp": "2025-01-01T10:00:20Z",
-      "gps": {
-        "lat": 41.01518,
-        "lon": 28.9796,
-        "speedKmh": 4.6,
-        "distanceTotalM": 21
-      },
-      "heart": {
-        "bpm": 96,
-        "rrMs": 690,
-        "maxBpmSession": 96
-      },
-      "movement": {
-        "metabolicPowerWkg": 5.9,
-        "activityZone": "Z4",
-        "stepBalanceSide": "right",
-        "stepBalancePercent": 6.1
-      },
-      "temperature": {
-        "skinC": 36.6
-      }
+      "id": "p3",
+      "sessionId": "SESSION_2025_03",
+      "intervalSeconds": 15,
+      "data": [
+        {
+          "timestamp": "2025-01-03T09:30:00Z",
+          "gps": {
+            "lat": 41.017,
+            "lon": 28.982,
+            "speedKmh": 0.8,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 65,
+            "rrMs": 900,
+            "maxBpmSession": 65
+          },
+          "movement": {
+            "metabolicPowerWkg": 1.2,
+            "activityZone": "Z1",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 1.8
+          },
+          "temperature": {
+            "skinC": 36
+          }
+        },
+        {
+          "timestamp": "2025-01-03T09:30:15Z",
+          "gps": {
+            "lat": 41.0172,
+            "lon": 28.9823,
+            "speedKmh": 2,
+            "distanceTotalM": 5
+          },
+          "heart": {
+            "bpm": 74,
+            "rrMs": 820,
+            "maxBpmSession": 74
+          },
+          "movement": {
+            "metabolicPowerWkg": 2.5,
+            "activityZone": "Z2",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 3
+          },
+          "temperature": {
+            "skinC": 36.3
+          }
+        },
+        {
+          "timestamp": "2025-01-03T09:30:30Z",
+          "gps": {
+            "lat": 41.0175,
+            "lon": 28.9827,
+            "speedKmh": 3.4,
+            "distanceTotalM": 14
+          },
+          "heart": {
+            "bpm": 83,
+            "rrMs": 780,
+            "maxBpmSession": 83
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.6,
+            "activityZone": "Z3",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 4.4
+          },
+          "temperature": {
+            "skinC": 36.5
+          }
+        },
+        {
+          "timestamp": "2025-01-03T09:30:45.000Z",
+          "gps": {
+            "lat": 41.017486,
+            "lon": 28.982724,
+            "speedKmh": 2.4,
+            "distanceTotalM": 17
+          },
+          "heart": {
+            "bpm": 77,
+            "rrMs": 782,
+            "maxBpmSession": 83
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.7,
+            "activityZone": "Z2",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 3.4
+          },
+          "temperature": {
+            "skinC": 36.5
+          }
+        },
+        {
+          "timestamp": "2025-01-03T09:31:00.000Z",
+          "gps": {
+            "lat": 41.017536,
+            "lon": 28.98274,
+            "speedKmh": 2.2,
+            "distanceTotalM": 23
+          },
+          "heart": {
+            "bpm": 70,
+            "rrMs": 760,
+            "maxBpmSession": 83
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.3,
+            "activityZone": "Z5",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 2.6
+          },
+          "temperature": {
+            "skinC": 36.4
+          }
+        },
+        {
+          "timestamp": "2025-01-03T09:31:15.000Z",
+          "gps": {
+            "lat": 41.017496,
+            "lon": 28.982781,
+            "speedKmh": 2.4,
+            "distanceTotalM": 36
+          },
+          "heart": {
+            "bpm": 72,
+            "rrMs": 779,
+            "maxBpmSession": 83
+          },
+          "movement": {
+            "metabolicPowerWkg": 4,
+            "activityZone": "Z5",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 2.7
+          },
+          "temperature": {
+            "skinC": 36.4
+          }
+        }
+      ]
     },
     {
-      "timestamp": "2025-01-01T10:00:30Z",
-      "gps": {
-        "lat": 41.01524,
-        "lon": 28.97968,
-        "speedKmh": 6.9,
-        "distanceTotalM": 40
-      },
-      "heart": {
-        "bpm": 118,
-        "rrMs": 610,
-        "maxBpmSession": 118
-      },
-      "movement": {
-        "metabolicPowerWkg": 9.8,
-        "activityZone": "Z6",
-        "stepBalanceSide": "right",
-        "stepBalancePercent": 8.4
-      },
-      "temperature": {
-        "skinC": 36.7
-      }
+      "id": "p4",
+      "sessionId": "SESSION_2025_04",
+      "intervalSeconds": 10,
+      "data": [
+        {
+          "timestamp": "2025-01-04T15:10:00Z",
+          "gps": {
+            "lat": 41.013,
+            "lon": 28.981,
+            "speedKmh": 3,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 90,
+            "rrMs": 720,
+            "maxBpmSession": 90
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.5,
+            "activityZone": "Z3",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 6
+          },
+          "temperature": {
+            "skinC": 36.9
+          }
+        },
+        {
+          "timestamp": "2025-01-04T15:10:10Z",
+          "gps": {
+            "lat": 41.0134,
+            "lon": 28.9814,
+            "speedKmh": 5.8,
+            "distanceTotalM": 20
+          },
+          "heart": {
+            "bpm": 110,
+            "rrMs": 640,
+            "maxBpmSession": 110
+          },
+          "movement": {
+            "metabolicPowerWkg": 7.9,
+            "activityZone": "Z5",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 8.2
+          },
+          "temperature": {
+            "skinC": 37.3
+          }
+        },
+        {
+          "timestamp": "2025-01-04T15:10:20Z",
+          "gps": {
+            "lat": 41.0138,
+            "lon": 28.9819,
+            "speedKmh": 6.5,
+            "distanceTotalM": 38
+          },
+          "heart": {
+            "bpm": 122,
+            "rrMs": 600,
+            "maxBpmSession": 122
+          },
+          "movement": {
+            "metabolicPowerWkg": 9.5,
+            "activityZone": "Z6",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 9
+          },
+          "temperature": {
+            "skinC": 37.6
+          }
+        },
+        {
+          "timestamp": "2025-01-04T15:10:30.000Z",
+          "gps": {
+            "lat": 41.013777,
+            "lon": 28.981933,
+            "speedKmh": 6.5,
+            "distanceTotalM": 43
+          },
+          "heart": {
+            "bpm": 122,
+            "rrMs": 624,
+            "maxBpmSession": 122
+          },
+          "movement": {
+            "metabolicPowerWkg": 8.9,
+            "activityZone": "Z2",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 8.6
+          },
+          "temperature": {
+            "skinC": 37.6
+          }
+        },
+        {
+          "timestamp": "2025-01-04T15:10:40.000Z",
+          "gps": {
+            "lat": 41.01376,
+            "lon": 28.981887,
+            "speedKmh": 5.8,
+            "distanceTotalM": 44
+          },
+          "heart": {
+            "bpm": 127,
+            "rrMs": 635,
+            "maxBpmSession": 122
+          },
+          "movement": {
+            "metabolicPowerWkg": 8.9,
+            "activityZone": "Z4",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 9.5
+          },
+          "temperature": {
+            "skinC": 37.7
+          }
+        },
+        {
+          "timestamp": "2025-01-04T15:10:50.000Z",
+          "gps": {
+            "lat": 41.013802,
+            "lon": 28.981913,
+            "speedKmh": 6.4,
+            "distanceTotalM": 45
+          },
+          "heart": {
+            "bpm": 128,
+            "rrMs": 631,
+            "maxBpmSession": 123
+          },
+          "movement": {
+            "metabolicPowerWkg": 9.1,
+            "activityZone": "Z3",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 10.4
+          },
+          "temperature": {
+            "skinC": 37.6
+          }
+        }
+      ]
     },
     {
-      "timestamp": "2025-01-01T10:00:40Z",
-      "gps": {
-        "lat": 41.01527,
-        "lon": 28.97972,
-        "speedKmh": 4.1,
-        "distanceTotalM": 52
-      },
-      "heart": {
-        "bpm": 104,
-        "rrMs": 660,
-        "maxBpmSession": 118
-      },
-      "movement": {
-        "metabolicPowerWkg": 6.2,
-        "activityZone": "Z4",
-        "stepBalanceSide": "left",
-        "stepBalancePercent": 5.0
-      },
-      "temperature": {
-        "skinC": 35.6
-      }
+      "id": "p5",
+      "sessionId": "SESSION_2025_05",
+      "intervalSeconds": 8,
+      "data": [
+        {
+          "timestamp": "2025-01-05T08:20:00Z",
+          "gps": {
+            "lat": 41.018,
+            "lon": 28.977,
+            "speedKmh": 1.2,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 70,
+            "rrMs": 840,
+            "maxBpmSession": 70
+          },
+          "movement": {
+            "metabolicPowerWkg": 1.6,
+            "activityZone": "Z1",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 2.1
+          },
+          "temperature": {
+            "skinC": 36.1
+          }
+        },
+        {
+          "timestamp": "2025-01-05T08:20:08Z",
+          "gps": {
+            "lat": 41.0183,
+            "lon": 28.9774,
+            "speedKmh": 2.9,
+            "distanceTotalM": 9
+          },
+          "heart": {
+            "bpm": 82,
+            "rrMs": 760,
+            "maxBpmSession": 82
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.2,
+            "activityZone": "Z2",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 3.7
+          },
+          "temperature": {
+            "skinC": 36.4
+          }
+        },
+        {
+          "timestamp": "2025-01-05T08:20:16Z",
+          "gps": {
+            "lat": 41.0186,
+            "lon": 28.9779,
+            "speedKmh": 4.3,
+            "distanceTotalM": 19
+          },
+          "heart": {
+            "bpm": 93,
+            "rrMs": 720,
+            "maxBpmSession": 93
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.8,
+            "activityZone": "Z3",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 5
+          },
+          "temperature": {
+            "skinC": 36.8
+          }
+        },
+        {
+          "timestamp": "2025-01-05T08:20:24.000Z",
+          "gps": {
+            "lat": 41.018596,
+            "lon": 28.977902,
+            "speedKmh": 5.3,
+            "distanceTotalM": 19
+          },
+          "heart": {
+            "bpm": 87,
+            "rrMs": 733,
+            "maxBpmSession": 98
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.2,
+            "activityZone": "Z4",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 5.2
+          },
+          "temperature": {
+            "skinC": 36.9
+          }
+        },
+        {
+          "timestamp": "2025-01-05T08:20:32.000Z",
+          "gps": {
+            "lat": 41.018593,
+            "lon": 28.977876,
+            "speedKmh": 4.9,
+            "distanceTotalM": 27
+          },
+          "heart": {
+            "bpm": 80,
+            "rrMs": 721,
+            "maxBpmSession": 98
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.4,
+            "activityZone": "Z1",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 5.6
+          },
+          "temperature": {
+            "skinC": 36.8
+          }
+        },
+        {
+          "timestamp": "2025-01-05T08:20:40.000Z",
+          "gps": {
+            "lat": 41.018602,
+            "lon": 28.977831,
+            "speedKmh": 5.2,
+            "distanceTotalM": 32
+          },
+          "heart": {
+            "bpm": 77,
+            "rrMs": 720,
+            "maxBpmSession": 98
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.1,
+            "activityZone": "Z2",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 6.5
+          },
+          "temperature": {
+            "skinC": 36.8
+          }
+        }
+      ]
     },
     {
-      "timestamp": "2025-01-01T10:00:50Z",
-      "gps": {
-        "lat": 41.01529,
-        "lon": 28.97974,
-        "speedKmh": 1.9,
-        "distanceTotalM": 58
-      },
-      "heart": {
-        "bpm": 86,
-        "rrMs": 730,
-        "maxBpmSession": 118
-      },
-      "movement": {
-        "metabolicPowerWkg": 2.0,
-        "activityZone": "Z1",
-        "stepBalanceSide": "left",
-        "stepBalancePercent": 3.2
-      },
-      "temperature": {
-        "skinC": 37
-      }
+      "id": "p6",
+      "sessionId": "SESSION_2025_06",
+      "intervalSeconds": 11,
+      "data": [
+        {
+          "timestamp": "2025-01-06T14:15:00Z",
+          "gps": {
+            "lat": 41.014,
+            "lon": 28.978,
+            "speedKmh": 2.5,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 85,
+            "rrMs": 750,
+            "maxBpmSession": 85
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.5,
+            "activityZone": "Z2",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 5.5
+          },
+          "temperature": {
+            "skinC": 36.7
+          }
+        },
+        {
+          "timestamp": "2025-01-06T14:15:11Z",
+          "gps": {
+            "lat": 41.0143,
+            "lon": 28.9784,
+            "speedKmh": 4.2,
+            "distanceTotalM": 12
+          },
+          "heart": {
+            "bpm": 95,
+            "rrMs": 700,
+            "maxBpmSession": 95
+          },
+          "movement": {
+            "metabolicPowerWkg": 5.2,
+            "activityZone": "Z3",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 6.8
+          },
+          "temperature": {
+            "skinC": 37
+          }
+        },
+        {
+          "timestamp": "2025-01-06T14:15:22Z",
+          "gps": {
+            "lat": 41.0147,
+            "lon": 28.9789,
+            "speedKmh": 5.5,
+            "distanceTotalM": 28
+          },
+          "heart": {
+            "bpm": 105,
+            "rrMs": 660,
+            "maxBpmSession": 105
+          },
+          "movement": {
+            "metabolicPowerWkg": 7.1,
+            "activityZone": "Z5",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 8.3
+          },
+          "temperature": {
+            "skinC": 37.4
+          }
+        },
+        {
+          "timestamp": "2025-01-06T14:15:33.000Z",
+          "gps": {
+            "lat": 41.014705,
+            "lon": 28.978904,
+            "speedKmh": 5,
+            "distanceTotalM": 37
+          },
+          "heart": {
+            "bpm": 98,
+            "rrMs": 651,
+            "maxBpmSession": 105
+          },
+          "movement": {
+            "metabolicPowerWkg": 7.7,
+            "activityZone": "Z1",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 7.9
+          },
+          "temperature": {
+            "skinC": 37.3
+          }
+        },
+        {
+          "timestamp": "2025-01-06T14:15:44.000Z",
+          "gps": {
+            "lat": 41.014687,
+            "lon": 28.978922,
+            "speedKmh": 4.5,
+            "distanceTotalM": 48
+          },
+          "heart": {
+            "bpm": 95,
+            "rrMs": 666,
+            "maxBpmSession": 105
+          },
+          "movement": {
+            "metabolicPowerWkg": 8.1,
+            "activityZone": "Z6",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 7.9
+          },
+          "temperature": {
+            "skinC": 37.4
+          }
+        },
+        {
+          "timestamp": "2025-01-06T14:15:55.000Z",
+          "gps": {
+            "lat": 41.014722,
+            "lon": 28.978913,
+            "speedKmh": 4,
+            "distanceTotalM": 57
+          },
+          "heart": {
+            "bpm": 103,
+            "rrMs": 646,
+            "maxBpmSession": 105
+          },
+          "movement": {
+            "metabolicPowerWkg": 8.6,
+            "activityZone": "Z2",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 8.7
+          },
+          "temperature": {
+            "skinC": 37.4
+          }
+        }
+      ]
+    },
+    {
+      "id": "p7",
+      "sessionId": "SESSION_2025_07",
+      "intervalSeconds": 9,
+      "data": [
+        {
+          "timestamp": "2025-01-07T16:30:00Z",
+          "gps": {
+            "lat": 41.016,
+            "lon": 28.98,
+            "speedKmh": 1.8,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 68,
+            "rrMs": 860,
+            "maxBpmSession": 68
+          },
+          "movement": {
+            "metabolicPowerWkg": 2,
+            "activityZone": "Z1",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 2.8
+          },
+          "temperature": {
+            "skinC": 36.3
+          }
+        },
+        {
+          "timestamp": "2025-01-07T16:30:09Z",
+          "gps": {
+            "lat": 41.0162,
+            "lon": 28.9803,
+            "speedKmh": 3.5,
+            "distanceTotalM": 7
+          },
+          "heart": {
+            "bpm": 79,
+            "rrMs": 780,
+            "maxBpmSession": 79
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.8,
+            "activityZone": "Z2",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 4.2
+          },
+          "temperature": {
+            "skinC": 36.6
+          }
+        },
+        {
+          "timestamp": "2025-01-07T16:30:18Z",
+          "gps": {
+            "lat": 41.0165,
+            "lon": 28.9807,
+            "speedKmh": 4.8,
+            "distanceTotalM": 18
+          },
+          "heart": {
+            "bpm": 89,
+            "rrMs": 730,
+            "maxBpmSession": 89
+          },
+          "movement": {
+            "metabolicPowerWkg": 5.5,
+            "activityZone": "Z4",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 6.5
+          },
+          "temperature": {
+            "skinC": 36.9
+          }
+        },
+        {
+          "timestamp": "2025-01-07T16:30:27.000Z",
+          "gps": {
+            "lat": 41.016451,
+            "lon": 28.980743,
+            "speedKmh": 5.3,
+            "distanceTotalM": 19
+          },
+          "heart": {
+            "bpm": 89,
+            "rrMs": 741,
+            "maxBpmSession": 94
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.8,
+            "activityZone": "Z3",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 6.5
+          },
+          "temperature": {
+            "skinC": 37
+          }
+        },
+        {
+          "timestamp": "2025-01-07T16:30:36.000Z",
+          "gps": {
+            "lat": 41.016426,
+            "lon": 28.980789,
+            "speedKmh": 5.2,
+            "distanceTotalM": 23
+          },
+          "heart": {
+            "bpm": 83,
+            "rrMs": 745,
+            "maxBpmSession": 94
+          },
+          "movement": {
+            "metabolicPowerWkg": 5.2,
+            "activityZone": "Z6",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 6.8
+          },
+          "temperature": {
+            "skinC": 37.1
+          }
+        },
+        {
+          "timestamp": "2025-01-07T16:30:45.000Z",
+          "gps": {
+            "lat": 41.016446,
+            "lon": 28.980821,
+            "speedKmh": 5.4,
+            "distanceTotalM": 37
+          },
+          "heart": {
+            "bpm": 88,
+            "rrMs": 720,
+            "maxBpmSession": 94
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.4,
+            "activityZone": "Z4",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 6.3
+          },
+          "temperature": {
+            "skinC": 37.2
+          }
+        }
+      ]
+    },
+    {
+      "id": "p8",
+      "sessionId": "SESSION_2025_08",
+      "intervalSeconds": 13,
+      "data": [
+        {
+          "timestamp": "2025-01-08T10:45:00Z",
+          "gps": {
+            "lat": 41.011,
+            "lon": 28.974,
+            "speedKmh": 2.3,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 76,
+            "rrMs": 790,
+            "maxBpmSession": 76
+          },
+          "movement": {
+            "metabolicPowerWkg": 2.8,
+            "activityZone": "Z1",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 3.9
+          },
+          "temperature": {
+            "skinC": 36.5
+          }
+        },
+        {
+          "timestamp": "2025-01-08T10:45:13Z",
+          "gps": {
+            "lat": 41.0114,
+            "lon": 28.9745,
+            "speedKmh": 3.9,
+            "distanceTotalM": 11
+          },
+          "heart": {
+            "bpm": 87,
+            "rrMs": 730,
+            "maxBpmSession": 87
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.6,
+            "activityZone": "Z3",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 5.7
+          },
+          "temperature": {
+            "skinC": 36.8
+          }
+        },
+        {
+          "timestamp": "2025-01-08T10:45:26Z",
+          "gps": {
+            "lat": 41.0118,
+            "lon": 28.9751,
+            "speedKmh": 5.3,
+            "distanceTotalM": 25
+          },
+          "heart": {
+            "bpm": 98,
+            "rrMs": 680,
+            "maxBpmSession": 98
+          },
+          "movement": {
+            "metabolicPowerWkg": 6.7,
+            "activityZone": "Z4",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 7.4
+          },
+          "temperature": {
+            "skinC": 37.2
+          }
+        },
+        {
+          "timestamp": "2025-01-08T10:45:39.000Z",
+          "gps": {
+            "lat": 41.011822,
+            "lon": 28.975148,
+            "speedKmh": 5,
+            "distanceTotalM": 25
+          },
+          "heart": {
+            "bpm": 96,
+            "rrMs": 669,
+            "maxBpmSession": 104
+          },
+          "movement": {
+            "metabolicPowerWkg": 7.2,
+            "activityZone": "Z6",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 7.7
+          },
+          "temperature": {
+            "skinC": 37.2
+          }
+        },
+        {
+          "timestamp": "2025-01-08T10:45:52.000Z",
+          "gps": {
+            "lat": 41.011853,
+            "lon": 28.975109,
+            "speedKmh": 5.8,
+            "distanceTotalM": 31
+          },
+          "heart": {
+            "bpm": 91,
+            "rrMs": 687,
+            "maxBpmSession": 104
+          },
+          "movement": {
+            "metabolicPowerWkg": 7.5,
+            "activityZone": "Z6",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 7.5
+          },
+          "temperature": {
+            "skinC": 37.1
+          }
+        },
+        {
+          "timestamp": "2025-01-08T10:46:05.000Z",
+          "gps": {
+            "lat": 41.01189,
+            "lon": 28.9751,
+            "speedKmh": 5.2,
+            "distanceTotalM": 45
+          },
+          "heart": {
+            "bpm": 89,
+            "rrMs": 704,
+            "maxBpmSession": 104
+          },
+          "movement": {
+            "metabolicPowerWkg": 6.8,
+            "activityZone": "Z6",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 8.1
+          },
+          "temperature": {
+            "skinC": 37.1
+          }
+        }
+      ]
+    },
+    {
+      "id": "p9",
+      "sessionId": "SESSION_2025_09",
+      "intervalSeconds": 10,
+      "data": [
+        {
+          "timestamp": "2025-01-09T13:20:00Z",
+          "gps": {
+            "lat": 41.019,
+            "lon": 28.983,
+            "speedKmh": 1,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 63,
+            "rrMs": 920,
+            "maxBpmSession": 63
+          },
+          "movement": {
+            "metabolicPowerWkg": 1.4,
+            "activityZone": "Z1",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 1.9
+          },
+          "temperature": {
+            "skinC": 36.1
+          }
+        },
+        {
+          "timestamp": "2025-01-09T13:20:10Z",
+          "gps": {
+            "lat": 41.0192,
+            "lon": 28.9833,
+            "speedKmh": 2.2,
+            "distanceTotalM": 4
+          },
+          "heart": {
+            "bpm": 71,
+            "rrMs": 850,
+            "maxBpmSession": 71
+          },
+          "movement": {
+            "metabolicPowerWkg": 2.7,
+            "activityZone": "Z2",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 3.3
+          },
+          "temperature": {
+            "skinC": 36.4
+          }
+        },
+        {
+          "timestamp": "2025-01-09T13:20:20Z",
+          "gps": {
+            "lat": 41.0195,
+            "lon": 28.9837,
+            "speedKmh": 3.7,
+            "distanceTotalM": 13
+          },
+          "heart": {
+            "bpm": 81,
+            "rrMs": 790,
+            "maxBpmSession": 81
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.1,
+            "activityZone": "Z3",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 4.9
+          },
+          "temperature": {
+            "skinC": 36.7
+          }
+        },
+        {
+          "timestamp": "2025-01-09T13:20:30.000Z",
+          "gps": {
+            "lat": 41.019457,
+            "lon": 28.983733,
+            "speedKmh": 3.1,
+            "distanceTotalM": 22
+          },
+          "heart": {
+            "bpm": 78,
+            "rrMs": 790,
+            "maxBpmSession": 81
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.4,
+            "activityZone": "Z3",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 4.6
+          },
+          "temperature": {
+            "skinC": 36.7
+          }
+        },
+        {
+          "timestamp": "2025-01-09T13:20:40.000Z",
+          "gps": {
+            "lat": 41.019471,
+            "lon": 28.983752,
+            "speedKmh": 3.5,
+            "distanceTotalM": 23
+          },
+          "heart": {
+            "bpm": 81,
+            "rrMs": 803,
+            "maxBpmSession": 81
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.3,
+            "activityZone": "Z5",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 3.7
+          },
+          "temperature": {
+            "skinC": 36.6
+          }
+        },
+        {
+          "timestamp": "2025-01-09T13:20:50.000Z",
+          "gps": {
+            "lat": 41.01949,
+            "lon": 28.983775,
+            "speedKmh": 3.4,
+            "distanceTotalM": 34
+          },
+          "heart": {
+            "bpm": 84,
+            "rrMs": 801,
+            "maxBpmSession": 86
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.3,
+            "activityZone": "Z4",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 4
+          },
+          "temperature": {
+            "skinC": 36.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "p10",
+      "sessionId": "SESSION_2025_10",
+      "intervalSeconds": 12,
+      "data": [
+        {
+          "timestamp": "2025-01-10T09:00:00Z",
+          "gps": {
+            "lat": 41.01,
+            "lon": 28.976,
+            "speedKmh": 2.7,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 91,
+            "rrMs": 710,
+            "maxBpmSession": 91
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.3,
+            "activityZone": "Z3",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 6.2
+          },
+          "temperature": {
+            "skinC": 36.8
+          }
+        },
+        {
+          "timestamp": "2025-01-10T09:00:12Z",
+          "gps": {
+            "lat": 41.0104,
+            "lon": 28.9765,
+            "speedKmh": 4.5,
+            "distanceTotalM": 15
+          },
+          "heart": {
+            "bpm": 103,
+            "rrMs": 660,
+            "maxBpmSession": 103
+          },
+          "movement": {
+            "metabolicPowerWkg": 6.2,
+            "activityZone": "Z4",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 7.9
+          },
+          "temperature": {
+            "skinC": 37.1
+          }
+        },
+        {
+          "timestamp": "2025-01-10T09:00:24Z",
+          "gps": {
+            "lat": 41.0108,
+            "lon": 28.9771,
+            "speedKmh": 6.2,
+            "distanceTotalM": 32
+          },
+          "heart": {
+            "bpm": 115,
+            "rrMs": 610,
+            "maxBpmSession": 115
+          },
+          "movement": {
+            "metabolicPowerWkg": 8.4,
+            "activityZone": "Z5",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 9.5
+          },
+          "temperature": {
+            "skinC": 37.5
+          }
+        },
+        {
+          "timestamp": "2025-01-10T09:00:36.000Z",
+          "gps": {
+            "lat": 41.010812,
+            "lon": 28.977101,
+            "speedKmh": 5.9,
+            "distanceTotalM": 32
+          },
+          "heart": {
+            "bpm": 115,
+            "rrMs": 621,
+            "maxBpmSession": 115
+          },
+          "movement": {
+            "metabolicPowerWkg": 8.4,
+            "activityZone": "Z4",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 9.4
+          },
+          "temperature": {
+            "skinC": 37.5
+          }
+        },
+        {
+          "timestamp": "2025-01-10T09:00:48.000Z",
+          "gps": {
+            "lat": 41.010846,
+            "lon": 28.977113,
+            "speedKmh": 5.7,
+            "distanceTotalM": 34
+          },
+          "heart": {
+            "bpm": 111,
+            "rrMs": 622,
+            "maxBpmSession": 119
+          },
+          "movement": {
+            "metabolicPowerWkg": 8.9,
+            "activityZone": "Z5",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 10.4
+          },
+          "temperature": {
+            "skinC": 37.5
+          }
+        },
+        {
+          "timestamp": "2025-01-10T09:01:00.000Z",
+          "gps": {
+            "lat": 41.010846,
+            "lon": 28.977159,
+            "speedKmh": 6.4,
+            "distanceTotalM": 35
+          },
+          "heart": {
+            "bpm": 112,
+            "rrMs": 640,
+            "maxBpmSession": 119
+          },
+          "movement": {
+            "metabolicPowerWkg": 9.1,
+            "activityZone": "Z4",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 11.1
+          },
+          "temperature": {
+            "skinC": 37.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "p11",
+      "sessionId": "SESSION_2025_11",
+      "intervalSeconds": 14,
+      "data": [
+        {
+          "timestamp": "2025-01-11T11:30:00Z",
+          "gps": {
+            "lat": 41.02,
+            "lon": 28.984,
+            "speedKmh": 0.5,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 58,
+            "rrMs": 980,
+            "maxBpmSession": 58
+          },
+          "movement": {
+            "metabolicPowerWkg": 0.9,
+            "activityZone": "Z1",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 1.2
+          },
+          "temperature": {
+            "skinC": 35.9
+          }
+        },
+        {
+          "timestamp": "2025-01-11T11:30:14Z",
+          "gps": {
+            "lat": 41.0201,
+            "lon": 28.9842,
+            "speedKmh": 1.5,
+            "distanceTotalM": 2
+          },
+          "heart": {
+            "bpm": 66,
+            "rrMs": 900,
+            "maxBpmSession": 66
+          },
+          "movement": {
+            "metabolicPowerWkg": 2.1,
+            "activityZone": "Z1",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 2.6
+          },
+          "temperature": {
+            "skinC": 36.2
+          }
+        },
+        {
+          "timestamp": "2025-01-11T11:30:28Z",
+          "gps": {
+            "lat": 41.0203,
+            "lon": 28.9845,
+            "speedKmh": 2.8,
+            "distanceTotalM": 8
+          },
+          "heart": {
+            "bpm": 75,
+            "rrMs": 840,
+            "maxBpmSession": 75
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.3,
+            "activityZone": "Z2",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 4.1
+          },
+          "temperature": {
+            "skinC": 36.5
+          }
+        },
+        {
+          "timestamp": "2025-01-11T11:30:42.000Z",
+          "gps": {
+            "lat": 41.020266,
+            "lon": 28.984467,
+            "speedKmh": 2.2,
+            "distanceTotalM": 15
+          },
+          "heart": {
+            "bpm": 70,
+            "rrMs": 828,
+            "maxBpmSession": 77
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.2,
+            "activityZone": "Z1",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 4.5
+          },
+          "temperature": {
+            "skinC": 36.6
+          }
+        },
+        {
+          "timestamp": "2025-01-11T11:30:56.000Z",
+          "gps": {
+            "lat": 41.020291,
+            "lon": 28.98447,
+            "speedKmh": 1.5,
+            "distanceTotalM": 21
+          },
+          "heart": {
+            "bpm": 65,
+            "rrMs": 837,
+            "maxBpmSession": 77
+          },
+          "movement": {
+            "metabolicPowerWkg": 2.3,
+            "activityZone": "Z6",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 4.4
+          },
+          "temperature": {
+            "skinC": 36.7
+          }
+        },
+        {
+          "timestamp": "2025-01-11T11:31:10.000Z",
+          "gps": {
+            "lat": 41.020324,
+            "lon": 28.984516,
+            "speedKmh": 0.6,
+            "distanceTotalM": 24
+          },
+          "heart": {
+            "bpm": 66,
+            "rrMs": 829,
+            "maxBpmSession": 77
+          },
+          "movement": {
+            "metabolicPowerWkg": 2.5,
+            "activityZone": "Z6",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 4.7
+          },
+          "temperature": {
+            "skinC": 36.6
+          }
+        }
+      ]
+    },
+    {
+      "id": "p12",
+      "sessionId": "SESSION_2025_12",
+      "intervalSeconds": 10,
+      "data": [
+        {
+          "timestamp": "2025-01-12T15:50:00Z",
+          "gps": {
+            "lat": 41.009,
+            "lon": 28.973,
+            "speedKmh": 3.2,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 94,
+            "rrMs": 700,
+            "maxBpmSession": 94
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.7,
+            "activityZone": "Z3",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 6.5
+          },
+          "temperature": {
+            "skinC": 36.9
+          }
+        },
+        {
+          "timestamp": "2025-01-12T15:50:10Z",
+          "gps": {
+            "lat": 41.0094,
+            "lon": 28.9736,
+            "speedKmh": 5.1,
+            "distanceTotalM": 17
+          },
+          "heart": {
+            "bpm": 108,
+            "rrMs": 650,
+            "maxBpmSession": 108
+          },
+          "movement": {
+            "metabolicPowerWkg": 6.8,
+            "activityZone": "Z4",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 8.1
+          },
+          "temperature": {
+            "skinC": 37.2
+          }
+        },
+        {
+          "timestamp": "2025-01-12T15:50:20Z",
+          "gps": {
+            "lat": 41.0098,
+            "lon": 28.9742,
+            "speedKmh": 6.8,
+            "distanceTotalM": 35
+          },
+          "heart": {
+            "bpm": 120,
+            "rrMs": 590,
+            "maxBpmSession": 120
+          },
+          "movement": {
+            "metabolicPowerWkg": 9.1,
+            "activityZone": "Z6",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 10.2
+          },
+          "temperature": {
+            "skinC": 37.7
+          }
+        },
+        {
+          "timestamp": "2025-01-12T15:50:30.000Z",
+          "gps": {
+            "lat": 41.009774,
+            "lon": 28.974162,
+            "speedKmh": 6.3,
+            "distanceTotalM": 35
+          },
+          "heart": {
+            "bpm": 116,
+            "rrMs": 614,
+            "maxBpmSession": 122
+          },
+          "movement": {
+            "metabolicPowerWkg": 9.8,
+            "activityZone": "Z4",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 10.8
+          },
+          "temperature": {
+            "skinC": 37.8
+          }
+        },
+        {
+          "timestamp": "2025-01-12T15:50:40.000Z",
+          "gps": {
+            "lat": 41.009756,
+            "lon": 28.974129,
+            "speedKmh": 7.2,
+            "distanceTotalM": 36
+          },
+          "heart": {
+            "bpm": 121,
+            "rrMs": 638,
+            "maxBpmSession": 122
+          },
+          "movement": {
+            "metabolicPowerWkg": 10,
+            "activityZone": "Z6",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 10.2
+          },
+          "temperature": {
+            "skinC": 38
+          }
+        },
+        {
+          "timestamp": "2025-01-12T15:50:50.000Z",
+          "gps": {
+            "lat": 41.009761,
+            "lon": 28.974103,
+            "speedKmh": 7.5,
+            "distanceTotalM": 39
+          },
+          "heart": {
+            "bpm": 116,
+            "rrMs": 623,
+            "maxBpmSession": 122
+          },
+          "movement": {
+            "metabolicPowerWkg": 10.3,
+            "activityZone": "Z4",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 9.7
+          },
+          "temperature": {
+            "skinC": 37.9
+          }
+        }
+      ]
+    },
+    {
+      "id": "p13",
+      "sessionId": "SESSION_2025_13",
+      "intervalSeconds": 9,
+      "data": [
+        {
+          "timestamp": "2025-01-13T07:15:00Z",
+          "gps": {
+            "lat": 41.021,
+            "lon": 28.985,
+            "speedKmh": 1.3,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 69,
+            "rrMs": 850,
+            "maxBpmSession": 69
+          },
+          "movement": {
+            "metabolicPowerWkg": 1.9,
+            "activityZone": "Z1",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 2.4
+          },
+          "temperature": {
+            "skinC": 36.2
+          }
+        },
+        {
+          "timestamp": "2025-01-13T07:15:09Z",
+          "gps": {
+            "lat": 41.0213,
+            "lon": 28.9854,
+            "speedKmh": 2.6,
+            "distanceTotalM": 6
+          },
+          "heart": {
+            "bpm": 77,
+            "rrMs": 800,
+            "maxBpmSession": 77
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.4,
+            "activityZone": "Z2",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 4
+          },
+          "temperature": {
+            "skinC": 36.5
+          }
+        },
+        {
+          "timestamp": "2025-01-13T07:15:18Z",
+          "gps": {
+            "lat": 41.0216,
+            "lon": 28.9858,
+            "speedKmh": 3.9,
+            "distanceTotalM": 15
+          },
+          "heart": {
+            "bpm": 86,
+            "rrMs": 750,
+            "maxBpmSession": 86
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.9,
+            "activityZone": "Z3",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 5.8
+          },
+          "temperature": {
+            "skinC": 36.8
+          }
+        },
+        {
+          "timestamp": "2025-01-13T07:15:27.000Z",
+          "gps": {
+            "lat": 41.02158,
+            "lon": 28.9858,
+            "speedKmh": 4.6,
+            "distanceTotalM": 25
+          },
+          "heart": {
+            "bpm": 85,
+            "rrMs": 768,
+            "maxBpmSession": 86
+          },
+          "movement": {
+            "metabolicPowerWkg": 5.3,
+            "activityZone": "Z2",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 6.2
+          },
+          "temperature": {
+            "skinC": 36.7
+          }
+        },
+        {
+          "timestamp": "2025-01-13T07:15:36.000Z",
+          "gps": {
+            "lat": 41.021563,
+            "lon": 28.985847,
+            "speedKmh": 4.4,
+            "distanceTotalM": 34
+          },
+          "heart": {
+            "bpm": 86,
+            "rrMs": 779,
+            "maxBpmSession": 87
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.9,
+            "activityZone": "Z2",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 6.1
+          },
+          "temperature": {
+            "skinC": 36.8
+          }
+        },
+        {
+          "timestamp": "2025-01-13T07:15:45.000Z",
+          "gps": {
+            "lat": 41.021594,
+            "lon": 28.985877,
+            "speedKmh": 4.3,
+            "distanceTotalM": 45
+          },
+          "heart": {
+            "bpm": 86,
+            "rrMs": 757,
+            "maxBpmSession": 87
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.7,
+            "activityZone": "Z5",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 5.2
+          },
+          "temperature": {
+            "skinC": 36.9
+          }
+        }
+      ]
+    },
+    {
+      "id": "p14",
+      "sessionId": "SESSION_2025_14",
+      "intervalSeconds": 11,
+      "data": [
+        {
+          "timestamp": "2025-01-14T12:40:00Z",
+          "gps": {
+            "lat": 41.008,
+            "lon": 28.972,
+            "speedKmh": 2.9,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 88,
+            "rrMs": 740,
+            "maxBpmSession": 88
+          },
+          "movement": {
+            "metabolicPowerWkg": 4,
+            "activityZone": "Z2",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 5.6
+          },
+          "temperature": {
+            "skinC": 36.6
+          }
+        },
+        {
+          "timestamp": "2025-01-14T12:40:11Z",
+          "gps": {
+            "lat": 41.0083,
+            "lon": 28.9725,
+            "speedKmh": 4.3,
+            "distanceTotalM": 13
+          },
+          "heart": {
+            "bpm": 99,
+            "rrMs": 690,
+            "maxBpmSession": 99
+          },
+          "movement": {
+            "metabolicPowerWkg": 5.7,
+            "activityZone": "Z3",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 7
+          },
+          "temperature": {
+            "skinC": 36.9
+          }
+        },
+        {
+          "timestamp": "2025-01-14T12:40:22Z",
+          "gps": {
+            "lat": 41.0087,
+            "lon": 28.9731,
+            "speedKmh": 5.7,
+            "distanceTotalM": 27
+          },
+          "heart": {
+            "bpm": 111,
+            "rrMs": 630,
+            "maxBpmSession": 111
+          },
+          "movement": {
+            "metabolicPowerWkg": 7.6,
+            "activityZone": "Z5",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 8.7
+          },
+          "temperature": {
+            "skinC": 37.3
+          }
+        },
+        {
+          "timestamp": "2025-01-14T12:40:33.000Z",
+          "gps": {
+            "lat": 41.008676,
+            "lon": 28.973063,
+            "speedKmh": 6.1,
+            "distanceTotalM": 35
+          },
+          "heart": {
+            "bpm": 107,
+            "rrMs": 633,
+            "maxBpmSession": 111
+          },
+          "movement": {
+            "metabolicPowerWkg": 6.7,
+            "activityZone": "Z1",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 8.8
+          },
+          "temperature": {
+            "skinC": 37.4
+          }
+        },
+        {
+          "timestamp": "2025-01-14T12:40:44.000Z",
+          "gps": {
+            "lat": 41.008637,
+            "lon": 28.973036,
+            "speedKmh": 5.7,
+            "distanceTotalM": 45
+          },
+          "heart": {
+            "bpm": 111,
+            "rrMs": 643,
+            "maxBpmSession": 111
+          },
+          "movement": {
+            "metabolicPowerWkg": 7.2,
+            "activityZone": "Z2",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 9
+          },
+          "temperature": {
+            "skinC": 37.3
+          }
+        },
+        {
+          "timestamp": "2025-01-14T12:40:55.000Z",
+          "gps": {
+            "lat": 41.008633,
+            "lon": 28.973042,
+            "speedKmh": 5.3,
+            "distanceTotalM": 52
+          },
+          "heart": {
+            "bpm": 113,
+            "rrMs": 658,
+            "maxBpmSession": 111
+          },
+          "movement": {
+            "metabolicPowerWkg": 7.7,
+            "activityZone": "Z3",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 9.1
+          },
+          "temperature": {
+            "skinC": 37.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "p15",
+      "sessionId": "SESSION_2025_15",
+      "intervalSeconds": 10,
+      "data": [
+        {
+          "timestamp": "2025-01-15T17:00:00Z",
+          "gps": {
+            "lat": 41.022,
+            "lon": 28.986,
+            "speedKmh": 0.9,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 61,
+            "rrMs": 940,
+            "maxBpmSession": 61
+          },
+          "movement": {
+            "metabolicPowerWkg": 1.1,
+            "activityZone": "Z1",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 1.5
+          },
+          "temperature": {
+            "skinC": 36
+          }
+        },
+        {
+          "timestamp": "2025-01-15T17:00:10Z",
+          "gps": {
+            "lat": 41.0222,
+            "lon": 28.9863,
+            "speedKmh": 1.9,
+            "distanceTotalM": 3
+          },
+          "heart": {
+            "bpm": 68,
+            "rrMs": 880,
+            "maxBpmSession": 68
+          },
+          "movement": {
+            "metabolicPowerWkg": 2.4,
+            "activityZone": "Z1",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 3
+          },
+          "temperature": {
+            "skinC": 36.3
+          }
+        },
+        {
+          "timestamp": "2025-01-15T17:00:20Z",
+          "gps": {
+            "lat": 41.0225,
+            "lon": 28.9867,
+            "speedKmh": 3.1,
+            "distanceTotalM": 10
+          },
+          "heart": {
+            "bpm": 76,
+            "rrMs": 820,
+            "maxBpmSession": 76
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.7,
+            "activityZone": "Z2",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 4.5
+          },
+          "temperature": {
+            "skinC": 36.6
+          }
+        },
+        {
+          "timestamp": "2025-01-15T17:00:30.000Z",
+          "gps": {
+            "lat": 41.022496,
+            "lon": 28.986707,
+            "speedKmh": 4.1,
+            "distanceTotalM": 22
+          },
+          "heart": {
+            "bpm": 79,
+            "rrMs": 802,
+            "maxBpmSession": 76
+          },
+          "movement": {
+            "metabolicPowerWkg": 4,
+            "activityZone": "Z4",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 4.9
+          },
+          "temperature": {
+            "skinC": 36.6
+          }
+        },
+        {
+          "timestamp": "2025-01-15T17:00:40.000Z",
+          "gps": {
+            "lat": 41.022512,
+            "lon": 28.986686,
+            "speedKmh": 4.8,
+            "distanceTotalM": 27
+          },
+          "heart": {
+            "bpm": 79,
+            "rrMs": 822,
+            "maxBpmSession": 76
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.7,
+            "activityZone": "Z5",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 4.9
+          },
+          "temperature": {
+            "skinC": 36.5
+          }
+        },
+        {
+          "timestamp": "2025-01-15T17:00:50.000Z",
+          "gps": {
+            "lat": 41.022528,
+            "lon": 28.986707,
+            "speedKmh": 4.2,
+            "distanceTotalM": 41
+          },
+          "heart": {
+            "bpm": 73,
+            "rrMs": 843,
+            "maxBpmSession": 76
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.2,
+            "activityZone": "Z6",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 4.6
+          },
+          "temperature": {
+            "skinC": 36.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "p16",
+      "sessionId": "SESSION_2025_16",
+      "intervalSeconds": 12,
+      "data": [
+        {
+          "timestamp": "2025-01-16T10:25:00Z",
+          "gps": {
+            "lat": 41.007,
+            "lon": 28.971,
+            "speedKmh": 3.4,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 92,
+            "rrMs": 710,
+            "maxBpmSession": 92
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.6,
+            "activityZone": "Z3",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 6.3
+          },
+          "temperature": {
+            "skinC": 36.8
+          }
+        },
+        {
+          "timestamp": "2025-01-16T10:25:12Z",
+          "gps": {
+            "lat": 41.0074,
+            "lon": 28.9716,
+            "speedKmh": 4.9,
+            "distanceTotalM": 16
+          },
+          "heart": {
+            "bpm": 104,
+            "rrMs": 660,
+            "maxBpmSession": 104
+          },
+          "movement": {
+            "metabolicPowerWkg": 6.4,
+            "activityZone": "Z4",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 7.6
+          },
+          "temperature": {
+            "skinC": 37.1
+          }
+        },
+        {
+          "timestamp": "2025-01-16T10:25:24Z",
+          "gps": {
+            "lat": 41.0078,
+            "lon": 28.9722,
+            "speedKmh": 6.4,
+            "distanceTotalM": 31
+          },
+          "heart": {
+            "bpm": 116,
+            "rrMs": 600,
+            "maxBpmSession": 116
+          },
+          "movement": {
+            "metabolicPowerWkg": 8.7,
+            "activityZone": "Z5",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 9.8
+          },
+          "temperature": {
+            "skinC": 37.5
+          }
+        },
+        {
+          "timestamp": "2025-01-16T10:25:36.000Z",
+          "gps": {
+            "lat": 41.00784,
+            "lon": 28.972248,
+            "speedKmh": 5.6,
+            "distanceTotalM": 38
+          },
+          "heart": {
+            "bpm": 119,
+            "rrMs": 586,
+            "maxBpmSession": 117
+          },
+          "movement": {
+            "metabolicPowerWkg": 8.2,
+            "activityZone": "Z4",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 10.7
+          },
+          "temperature": {
+            "skinC": 37.5
+          }
+        },
+        {
+          "timestamp": "2025-01-16T10:25:48.000Z",
+          "gps": {
+            "lat": 41.007794,
+            "lon": 28.97224,
+            "speedKmh": 5.4,
+            "distanceTotalM": 43
+          },
+          "heart": {
+            "bpm": 112,
+            "rrMs": 611,
+            "maxBpmSession": 122
+          },
+          "movement": {
+            "metabolicPowerWkg": 7.9,
+            "activityZone": "Z6",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 10.5
+          },
+          "temperature": {
+            "skinC": 37.6
+          }
+        },
+        {
+          "timestamp": "2025-01-16T10:26:00.000Z",
+          "gps": {
+            "lat": 41.007836,
+            "lon": 28.972271,
+            "speedKmh": 5.8,
+            "distanceTotalM": 43
+          },
+          "heart": {
+            "bpm": 116,
+            "rrMs": 589,
+            "maxBpmSession": 122
+          },
+          "movement": {
+            "metabolicPowerWkg": 8.8,
+            "activityZone": "Z1",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 10.3
+          },
+          "temperature": {
+            "skinC": 37.7
+          }
+        }
+      ]
+    },
+    {
+      "id": "p17",
+      "sessionId": "SESSION_2025_17",
+      "intervalSeconds": 13,
+      "data": [
+        {
+          "timestamp": "2025-01-17T14:55:00Z",
+          "gps": {
+            "lat": 41.023,
+            "lon": 28.987,
+            "speedKmh": 1.6,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 73,
+            "rrMs": 810,
+            "maxBpmSession": 73
+          },
+          "movement": {
+            "metabolicPowerWkg": 2.2,
+            "activityZone": "Z1",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 3.1
+          },
+          "temperature": {
+            "skinC": 36.4
+          }
+        },
+        {
+          "timestamp": "2025-01-17T14:55:13Z",
+          "gps": {
+            "lat": 41.0233,
+            "lon": 28.9874,
+            "speedKmh": 3.1,
+            "distanceTotalM": 9
+          },
+          "heart": {
+            "bpm": 84,
+            "rrMs": 760,
+            "maxBpmSession": 84
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.9,
+            "activityZone": "Z2",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 4.8
+          },
+          "temperature": {
+            "skinC": 36.7
+          }
+        },
+        {
+          "timestamp": "2025-01-17T14:55:26Z",
+          "gps": {
+            "lat": 41.0237,
+            "lon": 28.9879,
+            "speedKmh": 4.4,
+            "distanceTotalM": 20
+          },
+          "heart": {
+            "bpm": 95,
+            "rrMs": 710,
+            "maxBpmSession": 95
+          },
+          "movement": {
+            "metabolicPowerWkg": 5.3,
+            "activityZone": "Z3",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 6.2
+          },
+          "temperature": {
+            "skinC": 37
+          }
+        },
+        {
+          "timestamp": "2025-01-17T14:55:39.000Z",
+          "gps": {
+            "lat": 41.023708,
+            "lon": 28.987883,
+            "speedKmh": 3.6,
+            "distanceTotalM": 28
+          },
+          "heart": {
+            "bpm": 96,
+            "rrMs": 702,
+            "maxBpmSession": 102
+          },
+          "movement": {
+            "metabolicPowerWkg": 5.2,
+            "activityZone": "Z4",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 6.6
+          },
+          "temperature": {
+            "skinC": 37.1
+          }
+        },
+        {
+          "timestamp": "2025-01-17T14:55:52.000Z",
+          "gps": {
+            "lat": 41.023727,
+            "lon": 28.987876,
+            "speedKmh": 3.6,
+            "distanceTotalM": 28
+          },
+          "heart": {
+            "bpm": 97,
+            "rrMs": 688,
+            "maxBpmSession": 102
+          },
+          "movement": {
+            "metabolicPowerWkg": 6.1,
+            "activityZone": "Z1",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 5.7
+          },
+          "temperature": {
+            "skinC": 37.3
+          }
+        },
+        {
+          "timestamp": "2025-01-17T14:56:05.000Z",
+          "gps": {
+            "lat": 41.023756,
+            "lon": 28.987878,
+            "speedKmh": 3.9,
+            "distanceTotalM": 28
+          },
+          "heart": {
+            "bpm": 90,
+            "rrMs": 713,
+            "maxBpmSession": 102
+          },
+          "movement": {
+            "metabolicPowerWkg": 6.4,
+            "activityZone": "Z1",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 6.1
+          },
+          "temperature": {
+            "skinC": 37.4
+          }
+        }
+      ]
+    },
+    {
+      "id": "p18",
+      "sessionId": "SESSION_2025_18",
+      "intervalSeconds": 10,
+      "data": [
+        {
+          "timestamp": "2025-01-18T08:10:00Z",
+          "gps": {
+            "lat": 41.006,
+            "lon": 28.97,
+            "speedKmh": 2.8,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 86,
+            "rrMs": 750,
+            "maxBpmSession": 86
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.8,
+            "activityZone": "Z2",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 5.2
+          },
+          "temperature": {
+            "skinC": 36.6
+          }
+        },
+        {
+          "timestamp": "2025-01-18T08:10:10Z",
+          "gps": {
+            "lat": 41.0064,
+            "lon": 28.9705,
+            "speedKmh": 4.1,
+            "distanceTotalM": 11
+          },
+          "heart": {
+            "bpm": 97,
+            "rrMs": 700,
+            "maxBpmSession": 97
+          },
+          "movement": {
+            "metabolicPowerWkg": 5.4,
+            "activityZone": "Z3",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 6.9
+          },
+          "temperature": {
+            "skinC": 36.9
+          }
+        },
+        {
+          "timestamp": "2025-01-18T08:10:20Z",
+          "gps": {
+            "lat": 41.0068,
+            "lon": 28.9711,
+            "speedKmh": 5.6,
+            "distanceTotalM": 24
+          },
+          "heart": {
+            "bpm": 109,
+            "rrMs": 640,
+            "maxBpmSession": 109
+          },
+          "movement": {
+            "metabolicPowerWkg": 7.2,
+            "activityZone": "Z4",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 8.4
+          },
+          "temperature": {
+            "skinC": 37.3
+          }
+        },
+        {
+          "timestamp": "2025-01-18T08:10:30.000Z",
+          "gps": {
+            "lat": 41.006757,
+            "lon": 28.971087,
+            "speedKmh": 5,
+            "distanceTotalM": 26
+          },
+          "heart": {
+            "bpm": 114,
+            "rrMs": 659,
+            "maxBpmSession": 110
+          },
+          "movement": {
+            "metabolicPowerWkg": 6.3,
+            "activityZone": "Z3",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 8.7
+          },
+          "temperature": {
+            "skinC": 37.3
+          }
+        },
+        {
+          "timestamp": "2025-01-18T08:10:40.000Z",
+          "gps": {
+            "lat": 41.006746,
+            "lon": 28.971115,
+            "speedKmh": 4.9,
+            "distanceTotalM": 33
+          },
+          "heart": {
+            "bpm": 112,
+            "rrMs": 683,
+            "maxBpmSession": 117
+          },
+          "movement": {
+            "metabolicPowerWkg": 6.6,
+            "activityZone": "Z1",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 8.9
+          },
+          "temperature": {
+            "skinC": 37.3
+          }
+        },
+        {
+          "timestamp": "2025-01-18T08:10:50.000Z",
+          "gps": {
+            "lat": 41.006756,
+            "lon": 28.971117,
+            "speedKmh": 4.2,
+            "distanceTotalM": 41
+          },
+          "heart": {
+            "bpm": 119,
+            "rrMs": 662,
+            "maxBpmSession": 117
+          },
+          "movement": {
+            "metabolicPowerWkg": 7.2,
+            "activityZone": "Z4",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 8.5
+          },
+          "temperature": {
+            "skinC": 37.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "p19",
+      "sessionId": "SESSION_2025_19",
+      "intervalSeconds": 11,
+      "data": [
+        {
+          "timestamp": "2025-01-19T13:35:00Z",
+          "gps": {
+            "lat": 41.024,
+            "lon": 28.988,
+            "speedKmh": 1.1,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 64,
+            "rrMs": 910,
+            "maxBpmSession": 64
+          },
+          "movement": {
+            "metabolicPowerWkg": 1.5,
+            "activityZone": "Z1",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 2
+          },
+          "temperature": {
+            "skinC": 36.1
+          }
+        },
+        {
+          "timestamp": "2025-01-19T13:35:11Z",
+          "gps": {
+            "lat": 41.0242,
+            "lon": 28.9883,
+            "speedKmh": 2.4,
+            "distanceTotalM": 5
+          },
+          "heart": {
+            "bpm": 72,
+            "rrMs": 850,
+            "maxBpmSession": 72
+          },
+          "movement": {
+            "metabolicPowerWkg": 2.9,
+            "activityZone": "Z2",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 3.6
+          },
+          "temperature": {
+            "skinC": 36.4
+          }
+        },
+        {
+          "timestamp": "2025-01-19T13:35:22Z",
+          "gps": {
+            "lat": 41.0245,
+            "lon": 28.9887,
+            "speedKmh": 3.6,
+            "distanceTotalM": 14
+          },
+          "heart": {
+            "bpm": 80,
+            "rrMs": 800,
+            "maxBpmSession": 80
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.2,
+            "activityZone": "Z3",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 5.1
+          },
+          "temperature": {
+            "skinC": 36.7
+          }
+        },
+        {
+          "timestamp": "2025-01-19T13:35:33.000Z",
+          "gps": {
+            "lat": 41.02452,
+            "lon": 28.988708,
+            "speedKmh": 4.1,
+            "distanceTotalM": 26
+          },
+          "heart": {
+            "bpm": 81,
+            "rrMs": 811,
+            "maxBpmSession": 83
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.4,
+            "activityZone": "Z6",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 6
+          },
+          "temperature": {
+            "skinC": 36.7
+          }
+        },
+        {
+          "timestamp": "2025-01-19T13:35:44.000Z",
+          "gps": {
+            "lat": 41.024554,
+            "lon": 28.988751,
+            "speedKmh": 3.7,
+            "distanceTotalM": 30
+          },
+          "heart": {
+            "bpm": 87,
+            "rrMs": 796,
+            "maxBpmSession": 85
+          },
+          "movement": {
+            "metabolicPowerWkg": 3.6,
+            "activityZone": "Z5",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 6
+          },
+          "temperature": {
+            "skinC": 36.8
+          }
+        },
+        {
+          "timestamp": "2025-01-19T13:35:55.000Z",
+          "gps": {
+            "lat": 41.024539,
+            "lon": 28.988717,
+            "speedKmh": 4.1,
+            "distanceTotalM": 31
+          },
+          "heart": {
+            "bpm": 86,
+            "rrMs": 813,
+            "maxBpmSession": 85
+          },
+          "movement": {
+            "metabolicPowerWkg": 2.9,
+            "activityZone": "Z1",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 5.2
+          },
+          "temperature": {
+            "skinC": 36.9
+          }
+        }
+      ]
+    },
+    {
+      "id": "p20",
+      "sessionId": "SESSION_2025_20",
+      "intervalSeconds": 10,
+      "data": [
+        {
+          "timestamp": "2025-01-20T16:20:00Z",
+          "gps": {
+            "lat": 41.005,
+            "lon": 28.969,
+            "speedKmh": 3.6,
+            "distanceTotalM": 0
+          },
+          "heart": {
+            "bpm": 95,
+            "rrMs": 700,
+            "maxBpmSession": 95
+          },
+          "movement": {
+            "metabolicPowerWkg": 4.9,
+            "activityZone": "Z3",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 6.7
+          },
+          "temperature": {
+            "skinC": 36.9
+          }
+        },
+        {
+          "timestamp": "2025-01-20T16:20:10Z",
+          "gps": {
+            "lat": 41.0054,
+            "lon": 28.9696,
+            "speedKmh": 5.2,
+            "distanceTotalM": 19
+          },
+          "heart": {
+            "bpm": 107,
+            "rrMs": 650,
+            "maxBpmSession": 107
+          },
+          "movement": {
+            "metabolicPowerWkg": 6.6,
+            "activityZone": "Z4",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 8
+          },
+          "temperature": {
+            "skinC": 37.2
+          }
+        },
+        {
+          "timestamp": "2025-01-20T16:20:20Z",
+          "gps": {
+            "lat": 41.0058,
+            "lon": 28.9702,
+            "speedKmh": 7,
+            "distanceTotalM": 38
+          },
+          "heart": {
+            "bpm": 119,
+            "rrMs": 590,
+            "maxBpmSession": 119
+          },
+          "movement": {
+            "metabolicPowerWkg": 9,
+            "activityZone": "Z6",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 10.5
+          },
+          "temperature": {
+            "skinC": 37.6
+          }
+        },
+        {
+          "timestamp": "2025-01-20T16:20:30.000Z",
+          "gps": {
+            "lat": 41.005802,
+            "lon": 28.970177,
+            "speedKmh": 7.5,
+            "distanceTotalM": 44
+          },
+          "heart": {
+            "bpm": 113,
+            "rrMs": 584,
+            "maxBpmSession": 126
+          },
+          "movement": {
+            "metabolicPowerWkg": 9.9,
+            "activityZone": "Z3",
+            "stepBalanceSide": "right",
+            "stepBalancePercent": 11.4
+          },
+          "temperature": {
+            "skinC": 37.6
+          }
+        },
+        {
+          "timestamp": "2025-01-20T16:20:40.000Z",
+          "gps": {
+            "lat": 41.005769,
+            "lon": 28.970218,
+            "speedKmh": 7.9,
+            "distanceTotalM": 55
+          },
+          "heart": {
+            "bpm": 116,
+            "rrMs": 583,
+            "maxBpmSession": 126
+          },
+          "movement": {
+            "metabolicPowerWkg": 10.6,
+            "activityZone": "Z3",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 11.7
+          },
+          "temperature": {
+            "skinC": 37.7
+          }
+        },
+        {
+          "timestamp": "2025-01-20T16:20:50.000Z",
+          "gps": {
+            "lat": 41.005786,
+            "lon": 28.970265,
+            "speedKmh": 7.1,
+            "distanceTotalM": 64
+          },
+          "heart": {
+            "bpm": 122,
+            "rrMs": 586,
+            "maxBpmSession": 126
+          },
+          "movement": {
+            "metabolicPowerWkg": 10,
+            "activityZone": "Z1",
+            "stepBalanceSide": "left",
+            "stepBalancePercent": 11.8
+          },
+          "temperature": {
+            "skinC": 37.7
+          }
+        }
+      ]
     }
   ]
 }
