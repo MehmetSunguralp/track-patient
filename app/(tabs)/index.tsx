@@ -168,11 +168,9 @@ const styles = StyleSheet.create({
   },
   statusCard: {
     width: '48%',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#010D13',
     borderRadius: 12,
     padding: 16,
-    borderWidth: 1,
-    borderColor: '#2a2a2a',
     marginBottom: 12,
   },
   statusCardHeader: {
