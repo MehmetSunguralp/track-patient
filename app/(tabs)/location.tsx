@@ -101,6 +101,13 @@ export default function LocationScreen() {
                 if (showDetails) {
                   setShowDetails(false);
                   setPendingScrollToDetails(false);
+                  // Scroll to top when hiding details
+                  if (scrollViewRef.current) {
+                    scrollViewRef.current.scrollTo({
+                      y: 0,
+                      animated: true,
+                    });
+                  }
                   return;
                 }
 

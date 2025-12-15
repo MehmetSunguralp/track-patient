@@ -1,9 +1,8 @@
 import { usePathname, useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
-import { Animated, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Image, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { usePatients } from '@/hooks/PatientsContext';
 
 interface CustomStatusBarProps {
@@ -123,9 +122,9 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
         </View>
 
         <View style={styles.topRow}>
-          <Pressable style={styles.backButton} onPress={() => router.push('/')}>
+          {/* <Pressable style={styles.backButton} onPress={() => router.push('/')}>
             <IconSymbol name="chevron.left" size={20} color="#ffffff" />
-          </Pressable>
+          </Pressable> */}
           <View style={styles.patientInfo}>
             <Image source={{ uri: selectedPatient.avatarUrl }} style={styles.avatar} />
             <View>
@@ -133,7 +132,7 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
                 {selectedPatient.firstName} {selectedPatient.lastName}
               </Text>
               <Text style={styles.patientMeta}>
-                {selectedPatient.uuid} • {selectedPatient.age}y • {selectedPatient.sex}
+                {selectedPatient.uuid} • {selectedPatient.age}y
               </Text>
             </View>
           </View>
