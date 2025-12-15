@@ -19,6 +19,10 @@ interface AreaChartProps {
   readonly iconName?: IconSymbolName;
 }
 
+interface ChartData {
+  value: number;
+  label: string;
+}
 export default function AreaChart({
   color,
   data,
@@ -108,11 +112,27 @@ export default function AreaChart({
           /* POINTERS */
           hideDataPoints
           pointerConfig={{
-            pointerStripHeight: 0,
-            pointerStripWidth: 0,
-            pointerStripColor: 'transparent',
-            pointerColor: 'transparent',
-            radius: 0,
+            pointerStripColor: color,
+            pointer1Color: color,
+            pointerLabelComponent: (items: ChartData[]) => {
+              return (
+                <View
+                  style={{
+                    width: 64,
+                    height: 20,
+                    backgroundColor: color,
+                    borderRadius: 100,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text style={{ color: '#ffffff', fontSize: 14, fontWeight: '600' }}>
+                    {items[0].value}
+                  </Text>
+                </View>
+              );
+            },
           }}
         />
       </Animated.View>
