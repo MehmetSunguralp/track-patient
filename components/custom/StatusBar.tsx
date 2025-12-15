@@ -6,11 +6,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { usePatients } from '@/hooks/PatientsContext';
 
-export default function CustomStatusBar() {
+interface CustomStatusBarProps {
+  readonly variant?: 'patients-list' | 'tabs';
+}
+
+export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) {
   const insets = useSafeAreaInsets();
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  const { selectedPatient } = usePatients();
+  const { selectedPatient, selectedPatientId } = usePatients();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -53,7 +57,27 @@ export default function CustomStatusBar() {
   const statusLabel = selectedPatient.isConnected ? 'Live' : 'Disconnected';
   const statusColor = selectedPatient.isConnected ? '#27AE60' : '#7f8c8d';
 
-  const isPatientsScreen = pathname === '/' || pathname === '/index';
+  // Determine which variant to show based on prop or pathname
+  // If variant prop is provided, use it; otherwise detect from pathname
+  let isPatientsScreen: boolean;
+
+  if (variant === 'patients-list') {
+    isPatientsScreen = true;
+  } else if (variant === 'tabs') {
+    isPatientsScreen = false;
+  } else {
+    // Auto-detect: check if pathname includes '(tabs)' or matches tab routes
+    const tabRoutes = ['index', 'heart-rate', 'temperature', 'blood-pressure', 'location'];
+    const pathSegments = pathname.split('/').filter(Boolean);
+    const lastSegment = pathSegments.at(-1) || '';
+
+    const isInTabs =
+      pathname.includes('(tabs)') ||
+      pathname.startsWith('/(tabs)') ||
+      tabRoutes.includes(lastSegment);
+
+    isPatientsScreen = pathname === '/' && !isInTabs;
+  }
 
   if (isPatientsScreen) {
     // Scenario 1: patients list – generic connection + last update
@@ -77,27 +101,10 @@ export default function CustomStatusBar() {
     );
   }
 
-  // Scenario 2: patient detail tabs – show patient info only
+  // Scenario 2: patient detail tabs – show patient info
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.content}>
-        <View style={styles.topRow}>
-          <Pressable style={styles.backButton} onPress={() => router.push('/')}>
-            <IconSymbol name="chevron.left" size={20} color="#ffffff" />
-          </Pressable>
-          <View style={styles.patientInfo}>
-            <Image source={{ uri: selectedPatient.avatarUrl }} style={styles.avatar} />
-            <View>
-              <Text style={styles.patientName}>
-                {selectedPatient.firstName} {selectedPatient.lastName}
-              </Text>
-              <Text style={styles.patientMeta}>
-                {selectedPatient.uuid} • {selectedPatient.age}y • {selectedPatient.sex}
-              </Text>
-            </View>
-          </View>
-        </View>
-
         <View style={styles.statusRow}>
           <View style={styles.statusIndicator}>
             {selectedPatient.isConnected ? (
@@ -113,6 +120,23 @@ export default function CustomStatusBar() {
             <Text style={styles.statusText}>{statusLabel}</Text>
           </View>
           <Text style={styles.timeText}>Last Update: {formatTime(lastUpdateTime)}</Text>
+        </View>
+
+        <View style={styles.topRow}>
+          <Pressable style={styles.backButton} onPress={() => router.push('/')}>
+            <IconSymbol name="chevron.left" size={20} color="#ffffff" />
+          </Pressable>
+          <View style={styles.patientInfo}>
+            <Image source={{ uri: selectedPatient.avatarUrl }} style={styles.avatar} />
+            <View>
+              <Text style={styles.patientName}>
+                {selectedPatient.firstName} {selectedPatient.lastName}
+              </Text>
+              <Text style={styles.patientMeta}>
+                {selectedPatient.uuid} • {selectedPatient.age}y • {selectedPatient.sex}
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
     </View>
@@ -139,7 +163,6 @@ const styles = StyleSheet.create({
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
   },
   backButton: {
     marginRight: 8,
@@ -169,6 +192,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginBottom: 6,
   },
   statusIndicator: {
     flexDirection: 'row',

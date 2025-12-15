@@ -116,7 +116,7 @@ export default function CustomMapView({
               latitude: loc.lat,
               longitude: loc.lon,
             }))}
-            strokeColor="#3498DB"
+            strokeColor="#FFD700"
             strokeWidth={3}
           />
         )}
@@ -143,7 +143,7 @@ export default function CustomMapView({
 
 const styles = StyleSheet.create({
   container: {
-    height: 200,
+    height: 160,
     position: 'relative',
   },
   map: {
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   },
   fullscreenButton: {
     position: 'absolute',
-    bottom: 12,
+    top: 12,
     right: 12,
     backgroundColor: '#3498DB',
     borderRadius: 24,

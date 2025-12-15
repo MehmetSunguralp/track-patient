@@ -26,7 +26,7 @@ export default function BloodPressureScreen() {
   });
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top + 72 }]}>
+    <ThemedView style={[styles.container, { paddingTop: insets.top + 110 }]}>
       {chartData.length > 0 ? (
         <AreaChart
           color="#8E44AD"

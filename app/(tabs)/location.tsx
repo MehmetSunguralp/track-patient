@@ -68,7 +68,7 @@ export default function LocationScreen() {
   const hasData = samples.length > 0;
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top + 72 }]}>
+    <ThemedView style={[styles.container, { paddingTop: insets.top + 70 }]}>
       {hasData ? (
         <>
           <ScrollView
@@ -83,8 +83,6 @@ export default function LocationScreen() {
               locations={locations}
               onFullscreenPress={() => setIsFullscreenMapVisible(true)}
             />
-
-            <View style={styles.chartSpacing} />
 
             {/* Speed Chart */}
             <AreaChart
@@ -190,7 +188,7 @@ const styles = StyleSheet.create({
   },
   detailsButton: {
     alignSelf: 'center',
-    marginTop: 4,
+    marginTop: -4,
   },
   detailsButtonContent: {
     flexDirection: 'row',

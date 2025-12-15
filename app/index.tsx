@@ -12,7 +12,7 @@ export default function PatientsScreen() {
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + 72 }]}>
-      <CustomStatusBar />
+      <CustomStatusBar variant="patients-list" />
       <Text style={styles.heading}>Patients</Text>
       <FlatList
         data={patients}

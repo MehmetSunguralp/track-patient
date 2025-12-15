@@ -78,7 +78,7 @@ export default function FullscreenMapView({ visible, onClose, locations }: Fulls
                 latitude: loc.lat,
                 longitude: loc.lon,
               }))}
-              strokeColor="#3498DB"
+              strokeColor="#FFD700"
               strokeWidth={3}
             />
           )}

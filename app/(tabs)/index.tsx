@@ -46,7 +46,7 @@ export default function OverallStatusScreen() {
   }));
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top + 72 }]}>
+    <ThemedView style={[styles.container, { paddingTop: insets.top + 70 }]}>
       {latestSample ? (
         <ScrollView
           style={styles.scrollView}

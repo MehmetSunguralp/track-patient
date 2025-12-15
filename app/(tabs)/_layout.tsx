@@ -8,7 +8,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 export default function TabLayout() {
   return (
     <>
-      <CustomStatusBar />
+      <CustomStatusBar variant="tabs" />
       <Tabs
         screenOptions={{
           headerShown: false,
