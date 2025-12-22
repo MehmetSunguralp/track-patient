@@ -9,7 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSBluetoothAlwaysUsageDescription": "This app needs Bluetooth access to connect to patient monitoring devices.",
+        "NSBluetoothPeripheralUsageDescription": "This app needs Bluetooth access to connect to patient monitoring devices."
+      }
     },
     "android": {
       "adaptiveIcon": {

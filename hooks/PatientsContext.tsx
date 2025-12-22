@@ -1,6 +1,7 @@
 import { ReactNode, createContext, useContext, useMemo, useState } from 'react';
 
 import { Patient, patients as initialPatients } from '@/data/patients';
+import { useAppMode } from './AppModeContext';
 
 interface PatientsContextValue {
   readonly patients: Patient[];
@@ -16,19 +17,37 @@ interface PatientsProviderProps {
 }
 
 export function PatientsProvider({ children }: PatientsProviderProps) {
+  const { isProductionMode } = useAppMode();
   const [selectedPatientId, setSelectedPatientId] = useState<string>(initialPatients[0]?.id ?? '');
 
   const value = useMemo<PatientsContextValue>(() => {
-    const selectedPatient =
-      initialPatients.find((patient) => patient.id === selectedPatientId) ?? initialPatients[0];
+    // In production mode, hide all patients (return empty array)
+    // In test mode, use all patients with dummy data
+    const patients = isProductionMode ? [] : initialPatients;
+
+    // Find selected patient, fallback to first patient if not found
+    let selectedPatient = patients.find((patient) => patient.id === selectedPatientId);
+    if (!selectedPatient && patients.length > 0) {
+      selectedPatient = patients[0];
+    }
 
     return {
-      patients: initialPatients,
-      selectedPatientId: selectedPatient.id,
-      selectedPatient,
+      patients,
+      selectedPatientId: selectedPatient?.id ?? '',
+      selectedPatient: selectedPatient ?? {
+        id: '',
+        uuid: '',
+        firstName: '',
+        lastName: '',
+        sex: 'male',
+        age: 0,
+        avatarUrl: '',
+        isConnected: false,
+        data: null,
+      },
       setSelectedPatientId,
     };
-  }, [selectedPatientId]);
+  }, [selectedPatientId, isProductionMode]);
 
   return <PatientsContext.Provider value={value}>{children}</PatientsContext.Provider>;
 }

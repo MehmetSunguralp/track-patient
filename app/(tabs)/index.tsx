@@ -37,7 +37,7 @@ export default function OverallStatusScreen() {
   const { selectedPatient } = usePatients();
   const [isFullscreenMapVisible, setIsFullscreenMapVisible] = useState(false);
 
-  const latestSample = selectedPatient.data?.data.at(-1);
+  const latestSample = selectedPatient.data?.data?.at(-1);
   const samples = selectedPatient.data?.data ?? [];
 
   const locations = samples.map((item) => ({

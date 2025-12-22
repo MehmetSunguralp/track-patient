@@ -28,6 +28,14 @@ const MAPPING = {
   gauge: 'speed',
   'arrow.up.left.and.arrow.down.right': 'open-in-full',
   xmark: 'close',
+  'antenna.radiowaves.left.and.right': 'bluetooth',
+  'testtube.2': 'biotech',
+  'checkmark.circle.fill': 'check-circle',
+  'magnifyingglass': 'search',
+  'exclamationmark.triangle.fill': 'warning',
+  'bluetooth': 'bluetooth',
+  'bluetooth.slash': 'bluetooth-disabled',
+  'percent': 'percent',
 } as IconMapping;
 
 /**
@@ -47,5 +55,11 @@ export function IconSymbol({
   style?: StyleProp<TextStyle>;
   weight?: SymbolWeight;
 }) {
-  return <MaterialIcons color={color} size={size} name={MAPPING[name]} style={style} />;
+  const iconName = MAPPING[name];
+  if (!iconName) {
+    // Fallback to a default icon if mapping is missing
+    console.warn(`Icon mapping missing for: ${name}`);
+    return <MaterialIcons color={color} size={size} name="help-outline" style={style} />;
+  }
+  return <MaterialIcons color={color} size={size} name={iconName} style={style} />;
 }

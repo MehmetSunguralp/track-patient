@@ -3,6 +3,8 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
+import { AppModeProvider } from '@/hooks/AppModeContext';
+import { BLEProvider } from '@/hooks/BLEContext';
 import { PatientsProvider } from '@/hooks/PatientsContext';
 
 export const unstable_settings = {
@@ -12,14 +14,18 @@ export const unstable_settings = {
 export default function RootLayout() {
   return (
     <ThemeProvider value={DarkTheme}>
-      <PatientsProvider>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-        </Stack>
-        <StatusBar style="light" hidden />
-      </PatientsProvider>
+      <AppModeProvider>
+        <BLEProvider>
+          <PatientsProvider>
+            <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+            </Stack>
+            <StatusBar style="light" hidden />
+          </PatientsProvider>
+        </BLEProvider>
+      </AppModeProvider>
     </ThemeProvider>
   );
 }
