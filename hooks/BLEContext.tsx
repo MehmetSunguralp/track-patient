@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { PermissionsAndroid, Platform } from 'react-native';
@@ -102,9 +103,15 @@ export function BLEProvider({ children }: BLEProviderProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [receivedData, setReceivedData] = useState<string>('');
+  const [dataBuffer, setDataBuffer] = useState<string>('');
+  const dataBufferRef = useRef<string>('');
   const [nusService, setNusService] = useState<any | null>(null);
   const [nusTxCharacteristic, setNusTxCharacteristic] = useState<any | null>(null);
   const [nusRxCharacteristic, setNusRxCharacteristic] = useState<any | null>(null);
+  const [esp32Service, setEsp32Service] = useState<any | null>(null);
+  const [esp32TxCharacteristic, setEsp32TxCharacteristic] = useState<any | null>(null);
+  const [esp32RxCharacteristic, setEsp32RxCharacteristic] = useState<any | null>(null);
+  const [deviceType, setDeviceType] = useState<'nus' | 'esp32' | null>(null);
   const [error, setError] = useState<string | null>(() => {
     const available = checkBLEAvailability();
     // Only show error if BLE is not available, not on initial load
@@ -115,6 +122,11 @@ export function BLEProvider({ children }: BLEProviderProps) {
   const NUS_SERVICE_UUID = '6E400001-B5A3-F393-E0A9-E50E24DCCA9E';
   const NUS_TX_CHARACTERISTIC_UUID = '6E400002-B5A3-F393-E0A9-E50E24DCCA9E'; // Write/Command
   const NUS_RX_CHARACTERISTIC_UUID = '6E400003-B5A3-F393-E0A9-E50E24DCCA9E'; // Notify/Data
+
+  // ESP32 Custom Service UUIDs
+  const ESP32_SERVICE_UUID = '12345678-1234-1234-1234-1234567890ab';
+  const ESP32_TX_CHARACTERISTIC_UUID = '12345678-1234-1234-1234-1234567890ac'; // Write/Command (from app to ESP32)
+  const ESP32_RX_CHARACTERISTIC_UUID = '12345678-1234-1234-1234-1234567890ad'; // Notify/Data (from ESP32 to app)
 
   // Base64 helper functions for React Native
   const base64ToUtf8 = (base64: string): string => {
@@ -258,11 +270,11 @@ export function BLEProvider({ children }: BLEProviderProps) {
 
       setIsScanning(true);
       setDevices([]);
-      addLog('info', 'Starting scan for NUS (Nordic UART Service) devices...');
+      addLog('info', 'Starting scan for BLE devices (NUS and ESP32)...');
 
-      // Scan specifically for NUS service UUID
+      // Scan for both NUS and ESP32 service UUIDs
       manager.startDeviceScan(
-        [NUS_SERVICE_UUID],
+        [NUS_SERVICE_UUID, ESP32_SERVICE_UUID],
         { allowDuplicates: false },
         (scanError: any, device: any) => {
           if (scanError) {
@@ -290,7 +302,18 @@ export function BLEProvider({ children }: BLEProviderProps) {
                 return updated;
               }
               // Add new device
-              addLog('info', `Found NUS device: ${displayName || 'Unknown'} (${device.id})`);
+              // Determine device type from advertised services
+              const deviceType = device.serviceUUIDs?.some((uuid: string) =>
+                uuid.toUpperCase().includes(ESP32_SERVICE_UUID.replace(/-/g, '').substring(0, 8))
+              )
+                ? 'esp32'
+                : 'nus';
+              addLog(
+                'info',
+                `Found ${deviceType.toUpperCase()} device: ${displayName || 'Unknown'} (${
+                  device.id
+                })`
+              );
               return [
                 ...prevDevices,
                 {
@@ -345,37 +368,61 @@ export function BLEProvider({ children }: BLEProviderProps) {
         await device.discoverAllServicesAndCharacteristics();
         addLog('info', 'Services and characteristics discovered');
 
-        // Find Nordic UART Service (NUS) - Standard UUID: 6E400001-B5A3-F393-E0A9-E50E24DCCA9E
+        // Find service (NUS or ESP32)
         const services = await device.services();
         addLog('info', `Found ${services.length} service(s)`);
 
-        let foundNusService = null;
+        let foundService = null;
+        let detectedDeviceType: 'nus' | 'esp32' | null = null;
+
         for (const service of services) {
           if (!service) continue;
 
-          // Check if this is the NUS service (case-insensitive, also check short UUID)
           const serviceUuid = service.uuid.toUpperCase();
+
+          // Check for NUS service
           if (
             serviceUuid === NUS_SERVICE_UUID.toUpperCase() ||
             serviceUuid.includes('6E400001') ||
             serviceUuid.replace(/-/g, '').includes('6E400001')
           ) {
-            foundNusService = service;
+            foundService = service;
+            detectedDeviceType = 'nus';
             setNusService(service);
+            setDeviceType('nus');
             addLog('info', `Found NUS service: ${service.uuid}`);
+            break;
+          }
+
+          // Check for ESP32 service
+          if (
+            serviceUuid === ESP32_SERVICE_UUID.toUpperCase() ||
+            serviceUuid.includes('12345678') ||
+            serviceUuid.replace(/-/g, '').includes('12345678')
+          ) {
+            foundService = service;
+            detectedDeviceType = 'esp32';
+            setEsp32Service(service);
+            setDeviceType('esp32');
+            addLog('info', `Found ESP32 service: ${service.uuid}`);
             break;
           }
         }
 
-        if (!foundNusService) {
-          addLog('error', 'NUS service not found. Device may not support Nordic UART Service.');
+        if (!foundService || !detectedDeviceType) {
+          addLog('error', 'Supported service (NUS or ESP32) not found on device.');
           setIsConnecting(false);
           return;
         }
 
-        // Get characteristics from NUS service
-        const characteristics = await foundNusService.characteristics();
-        addLog('info', `NUS service: Found ${characteristics.length} characteristic(s)`);
+        // Get characteristics from the found service
+        const characteristics = await foundService.characteristics();
+        addLog(
+          'info',
+          `${detectedDeviceType.toUpperCase()} service: Found ${
+            characteristics.length
+          } characteristic(s)`
+        );
 
         let txChar = null;
         let rxChar = null;
@@ -385,31 +432,57 @@ export function BLEProvider({ children }: BLEProviderProps) {
 
           const charUuid = characteristic.uuid.toUpperCase();
 
-          // TX Characteristic (for writing commands) - UUID: 6E400002-B5A3-F393-E0A9-E50E24DCCA9E
-          if (
-            charUuid === NUS_TX_CHARACTERISTIC_UUID.toUpperCase() ||
-            charUuid.includes('6E400002') ||
-            charUuid.replace(/-/g, '').includes('6E400002')
-          ) {
-            txChar = characteristic;
-            setNusTxCharacteristic(characteristic);
-            addLog('info', `Found TX characteristic (write): ${characteristic.uuid}`);
-          }
+          if (detectedDeviceType === 'nus') {
+            // NUS TX Characteristic (for writing commands)
+            if (
+              charUuid === NUS_TX_CHARACTERISTIC_UUID.toUpperCase() ||
+              charUuid.includes('6E400002') ||
+              charUuid.replace(/-/g, '').includes('6E400002')
+            ) {
+              txChar = characteristic;
+              setNusTxCharacteristic(characteristic);
+              addLog('info', `Found NUS TX characteristic (write): ${characteristic.uuid}`);
+            }
 
-          // RX Characteristic (for receiving data) - UUID: 6E400003-B5A3-F393-E0A9-E50E24DCCA9E
-          if (
-            charUuid === NUS_RX_CHARACTERISTIC_UUID.toUpperCase() ||
-            charUuid.includes('6E400003') ||
-            charUuid.replace(/-/g, '').includes('6E400003')
-          ) {
-            rxChar = characteristic;
-            setNusRxCharacteristic(characteristic);
-            addLog('info', `Found RX characteristic (notify): ${characteristic.uuid}`);
+            // NUS RX Characteristic (for receiving data)
+            if (
+              charUuid === NUS_RX_CHARACTERISTIC_UUID.toUpperCase() ||
+              charUuid.includes('6E400003') ||
+              charUuid.replace(/-/g, '').includes('6E400003')
+            ) {
+              rxChar = characteristic;
+              setNusRxCharacteristic(characteristic);
+              addLog('info', `Found NUS RX characteristic (notify): ${characteristic.uuid}`);
+            }
+          } else if (detectedDeviceType === 'esp32') {
+            // ESP32 TX Characteristic (for writing commands from app to ESP32)
+            const txUuidUpper = ESP32_TX_CHARACTERISTIC_UUID.toUpperCase();
+            if (
+              charUuid === txUuidUpper ||
+              charUuid.includes('1234567890ac') ||
+              charUuid.replace(/-/g, '').includes('1234567890ac')
+            ) {
+              txChar = characteristic;
+              setEsp32TxCharacteristic(characteristic);
+              addLog('info', `Found ESP32 TX characteristic (write): ${characteristic.uuid}`);
+            }
+
+            // ESP32 RX Characteristic (for receiving data from ESP32)
+            const rxUuidUpper = ESP32_RX_CHARACTERISTIC_UUID.toUpperCase();
+            if (
+              charUuid === rxUuidUpper ||
+              charUuid.includes('1234567890ad') ||
+              charUuid.replace(/-/g, '').includes('1234567890ad')
+            ) {
+              rxChar = characteristic;
+              setEsp32RxCharacteristic(characteristic);
+              addLog('info', `Found ESP32 RX characteristic (notify): ${characteristic.uuid}`);
+            }
           }
         }
 
         if (!txChar || !rxChar) {
-          addLog('error', 'NUS TX or RX characteristics not found');
+          addLog('error', `${detectedDeviceType.toUpperCase()} TX or RX characteristics not found`);
           setIsConnecting(false);
           return;
         }
@@ -426,19 +499,66 @@ export function BLEProvider({ children }: BLEProviderProps) {
                 // Decode base64 to string (react-native-ble-plx returns base64)
                 const base64Value = char.value;
                 const decodedString = base64ToUtf8(base64Value);
+                console.log(
+                  `[BLE Monitor] Received chunk, length: ${
+                    decodedString.length
+                  }, preview: ${decodedString.substring(0, 50)}`
+                );
 
-                setReceivedData(decodedString);
-                addLog('data', 'Received data', {
-                  raw: decodedString,
-                  length: decodedString.length,
-                  preview: decodedString.substring(0, 100),
-                });
+                // Accumulate chunks in buffer and extract complete JSON messages
+                // Use ref for synchronous access to avoid race conditions with rapid chunks
+                dataBufferRef.current = dataBufferRef.current + decodedString;
+                let workingBuffer = dataBufferRef.current;
+
+                // Prevent buffer overflow (max 10KB)
+                if (workingBuffer.length > 10000) {
+                  addLog('error', 'Data buffer overflow, resetting');
+                  workingBuffer = '';
+                  dataBufferRef.current = '';
+                }
+
+                // Process all complete messages (delimited by \n)
+                let newlineIndex = -1;
+
+                // Extract all complete messages (ending with \n)
+                while ((newlineIndex = workingBuffer.indexOf('\n')) !== -1) {
+                  // Extract the message before the newline
+                  const completeMessage = workingBuffer.substring(0, newlineIndex).trim();
+
+                  // Remove processed message (including \n) from buffer
+                  workingBuffer = workingBuffer.substring(newlineIndex + 1);
+
+                  // Skip empty messages
+                  if (completeMessage.length === 0) {
+                    continue;
+                  }
+
+                  // Log the received message
+                  console.log(`[BLE] ✅ Received message: "${completeMessage}"`);
+
+                  // Log to UI
+                  addLog('data', `📨 Received: ${completeMessage}`, {
+                    message: completeMessage,
+                    length: completeMessage.length,
+                    timestamp: new Date().toISOString(),
+                  });
+
+                  // Update receivedData for any components that need it
+                  setReceivedData(`${completeMessage}|${Date.now()}`);
+                }
+
+                // Update ref with remaining buffer (incomplete message or empty)
+                dataBufferRef.current = workingBuffer;
+                setDataBuffer(workingBuffer);
               } catch (decodeError) {
                 addLog('error', 'Error decoding received data', String(decodeError));
               }
             }
           });
-          addLog('info', 'RX characteristic monitoring enabled - ready to receive data');
+          addLog(
+            'info',
+            `${detectedDeviceType?.toUpperCase()} RX characteristic monitoring enabled - ready to receive data`
+          );
         } catch (monitorError) {
           addLog('error', 'Failed to enable RX monitoring', String(monitorError));
         }
@@ -449,13 +569,20 @@ export function BLEProvider({ children }: BLEProviderProps) {
           setNusService(null);
           setNusTxCharacteristic(null);
           setNusRxCharacteristic(null);
+          setEsp32Service(null);
+          setEsp32TxCharacteristic(null);
+          setEsp32RxCharacteristic(null);
+          setDeviceType(null);
           setReceivedData('');
           setError('Device disconnected');
           addLog('info', 'Device disconnected');
         });
 
         setIsConnecting(false);
-        addLog('info', 'NUS connection established and ready for communication');
+        addLog(
+          'info',
+          `${detectedDeviceType.toUpperCase()} connection established and ready for communication`
+        );
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to connect to device';
         setError(errorMessage);
@@ -463,31 +590,97 @@ export function BLEProvider({ children }: BLEProviderProps) {
         setIsConnecting(false);
       }
     },
-    [manager, isScanning, stopScan, addLog]
+    [
+      manager,
+      isScanning,
+      stopScan,
+      addLog,
+      NUS_SERVICE_UUID,
+      ESP32_SERVICE_UUID,
+      NUS_TX_CHARACTERISTIC_UUID,
+      NUS_RX_CHARACTERISTIC_UUID,
+      ESP32_TX_CHARACTERISTIC_UUID,
+      ESP32_RX_CHARACTERISTIC_UUID,
+      base64ToUtf8,
+    ]
   );
 
   const disconnectDevice = useCallback(async () => {
     try {
-      if (connectedDevice) {
-        await connectedDevice.cancelConnection();
+      if (!connectedDevice) {
+        // Already disconnected, just clear state
         setConnectedDevice(null);
         setNusService(null);
         setNusTxCharacteristic(null);
         setNusRxCharacteristic(null);
+        setEsp32Service(null);
+        setEsp32TxCharacteristic(null);
+        setEsp32RxCharacteristic(null);
+        setDeviceType(null);
         setReceivedData('');
         setError(null);
-        addLog('info', 'Device disconnected');
+        return;
+      }
+
+      // Store device reference before clearing state
+      const deviceToDisconnect = connectedDevice;
+
+      // Clear state first to prevent race conditions and UI issues
+      setConnectedDevice(null);
+      setNusService(null);
+      setNusTxCharacteristic(null);
+      setNusRxCharacteristic(null);
+      setEsp32Service(null);
+      setEsp32TxCharacteristic(null);
+      setEsp32RxCharacteristic(null);
+      setDeviceType(null);
+      setReceivedData('');
+      setError(null);
+      setIsConnecting(false);
+
+      // Then cancel connection with timeout to prevent hanging
+      try {
+        await Promise.race([
+          deviceToDisconnect.cancelConnection(),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Disconnect timeout')), 3000)
+          ),
+        ]);
+        addLog('info', 'Device disconnected successfully');
+      } catch (cancelError) {
+        // Device might already be disconnected, that's okay
+        // Don't throw - we've already cleared state
+        addLog('info', 'Device disconnected (connection already closed)');
       }
     } catch (err) {
+      // Even if there's an error, ensure state is cleared
+      // Use setTimeout to avoid state updates during render
+      setTimeout(() => {
+        setConnectedDevice(null);
+        setNusService(null);
+        setNusTxCharacteristic(null);
+        setNusRxCharacteristic(null);
+        setEsp32Service(null);
+        setEsp32TxCharacteristic(null);
+        setEsp32RxCharacteristic(null);
+        setDeviceType(null);
+        setReceivedData('');
+        setDataBuffer('');
+        dataBufferRef.current = '';
+        setError(null);
+        setIsConnecting(false);
+      }, 0);
       const errorMessage = err instanceof Error ? err.message : 'Failed to disconnect device';
-      setError(errorMessage);
-      addLog('error', 'Disconnect error', errorMessage);
+      addLog('info', `Device disconnected: ${errorMessage}`);
     }
   }, [connectedDevice, addLog]);
 
   const sendData = useCallback(
     async (data: string) => {
-      if (!connectedDevice || !nusTxCharacteristic) {
+      // Determine which TX characteristic to use based on device type
+      const txChar = deviceType === 'esp32' ? esp32TxCharacteristic : nusTxCharacteristic;
+
+      if (!connectedDevice || !txChar) {
         addLog('error', 'Cannot send data: Not connected or TX characteristic not available');
         return;
       }
@@ -496,13 +689,13 @@ export function BLEProvider({ children }: BLEProviderProps) {
         // Convert string to base64 for BLE transmission
         const base64Data = utf8ToBase64(data);
 
-        // Write to TX characteristic (without response for better performance with NUS)
+        // Write to TX characteristic (without response for better performance)
         // Some devices prefer writeWithoutResponse, but we'll try with response first
         try {
-          await nusTxCharacteristic.writeWithResponse(base64Data);
+          await txChar.writeWithResponse(base64Data);
         } catch {
           // Fallback to write without response if with response fails
-          await nusTxCharacteristic.writeWithoutResponse(base64Data);
+          await txChar.writeWithoutResponse(base64Data);
         }
         addLog('info', `Sent: ${data}`);
       } catch (err) {
@@ -511,7 +704,7 @@ export function BLEProvider({ children }: BLEProviderProps) {
         setError(errorMessage);
       }
     },
-    [connectedDevice, nusTxCharacteristic, addLog]
+    [connectedDevice, deviceType, nusTxCharacteristic, esp32TxCharacteristic, addLog]
   );
 
   const clearDevices = useCallback(() => {

@@ -4,6 +4,7 @@ import { Animated, Image, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { usePatients } from '@/hooks/PatientsContext';
+import { useAppMode } from '@/hooks/AppModeContext';
 
 interface CustomStatusBarProps {
   readonly variant?: 'patients-list' | 'tabs';
@@ -101,6 +102,10 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
   }
 
   // Scenario 2: patient detail tabs – show patient info
+  const { isProductionMode } = useAppMode();
+  // Extract patient ID (e.g., "ble-p1" -> "p1")
+  const patientId = selectedPatient.id.replace('ble-', '');
+  
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.content}>
@@ -121,22 +126,35 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
           <Text style={styles.timeText}>Last Update: {formatTime(lastUpdateTime)}</Text>
         </View>
 
-        <View style={styles.topRow}>
-          {/* <Pressable style={styles.backButton} onPress={() => router.push('/')}>
-            <IconSymbol name="chevron.left" size={20} color="#ffffff" />
-          </Pressable> */}
-          <View style={styles.patientInfo}>
-            <Image source={{ uri: selectedPatient.avatarUrl }} style={styles.avatar} />
-            <View>
-              <Text style={styles.patientName}>
-                {selectedPatient.firstName} {selectedPatient.lastName}
-              </Text>
-              <Text style={styles.patientMeta}>
-                {selectedPatient.uuid} • {selectedPatient.age}y
-              </Text>
+        {isProductionMode ? (
+          // Production mode: show only patient ID
+          <View style={styles.topRow}>
+            <View style={styles.patientInfo}>
+              <View style={styles.patientIdBadge}>
+                <Text style={styles.patientIdText}>{patientId}</Text>
+              </View>
+              <View>
+                <Text style={styles.patientName}>{patientId}</Text>
+                <Text style={styles.patientMeta}>{selectedPatient.uuid}</Text>
+              </View>
             </View>
           </View>
-        </View>
+        ) : (
+          // Test mode: show full patient info
+          <View style={styles.topRow}>
+            <View style={styles.patientInfo}>
+              <Image source={{ uri: selectedPatient.avatarUrl }} style={styles.avatar} />
+              <View>
+                <Text style={styles.patientName}>
+                  {selectedPatient.firstName} {selectedPatient.lastName}
+                </Text>
+                <Text style={styles.patientMeta}>
+                  {selectedPatient.uuid} • {selectedPatient.age}y
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -186,6 +204,20 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 11,
     opacity: 0.75,
+  },
+  patientIdBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#3498DB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  patientIdText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
   },
   statusRow: {
     flexDirection: 'row',

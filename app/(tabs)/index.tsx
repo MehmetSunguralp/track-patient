@@ -3,7 +3,7 @@ import CustomMapView from '@/components/custom/MapView';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { usePatients } from '@/hooks/PatientsContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -39,6 +39,13 @@ export default function OverallStatusScreen() {
 
   const latestSample = selectedPatient.data?.data?.at(-1);
   const samples = selectedPatient.data?.data ?? [];
+
+  // Debug: log selected patient data (only log when patient or data changes)
+  useEffect(() => {
+    if (selectedPatient.id) {
+      console.log(`[OverallStatus] Patient: ${selectedPatient.id}, hasData: ${!!selectedPatient.data}, dataPoints: ${samples.length}, latestSample: ${!!latestSample}`);
+    }
+  }, [selectedPatient.id, selectedPatient.data?.data?.length, latestSample, samples.length]);
 
   const locations = samples.map((item) => ({
     lat: item.gps.lat,

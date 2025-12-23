@@ -1,6 +1,6 @@
 import { useBLE } from '@/hooks/BLEContext';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -20,6 +20,7 @@ interface LogEntry {
 export default function BLEDataLogs() {
   const { logs, clearLogs, connectedDevice, receivedData } = useBLE();
   const scrollViewRef = useRef<ScrollView>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Auto-scroll to bottom when new logs arrive
   useEffect(() => {
@@ -90,7 +91,10 @@ export default function BLEDataLogs() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <Pressable
+        style={styles.header}
+        onPress={() => setIsExpanded(!isExpanded)}
+      >
         <View style={styles.headerLeft}>
           <IconSymbol name="antenna.radiowaves.left.and.right" size={20} color="#3498DB" />
           <Text style={styles.headerTitle}>BLE Data Logs</Text>
@@ -98,51 +102,69 @@ export default function BLEDataLogs() {
             <Text style={styles.logCountText}>{logs.length}</Text>
           </View>
         </View>
-        {logs.length > 0 && (
-          <Pressable onPress={clearLogs} style={styles.clearButton}>
-            <IconSymbol name="xmark" size={16} color="#ffffff" />
-            <Text style={styles.clearButtonText}>Clear</Text>
-          </Pressable>
-        )}
-      </View>
-
-      {logs.length === 0 ? (
-        <View style={styles.emptyLogsContainer}>
-          <Text style={styles.emptyLogsText}>Waiting for data...</Text>
-          <Text style={styles.emptyLogsSubtext}>
-            Data from the connected device will appear here
-          </Text>
+        <View style={styles.headerRight}>
+          {logs.length > 0 && (
+            <Pressable
+              onPress={(e) => {
+                e.stopPropagation();
+                clearLogs();
+              }}
+              style={styles.clearButton}
+            >
+              <IconSymbol name="xmark" size={16} color="#ffffff" />
+              <Text style={styles.clearButtonText}>Clear</Text>
+            </Pressable>
+          )}
+          <IconSymbol
+            name={isExpanded ? 'chevron.up' : 'chevron.down'}
+            size={20}
+            color="#ffffff"
+            style={styles.chevron}
+          />
         </View>
-      ) : (
-        <ScrollView
-          ref={scrollViewRef}
-          style={styles.logsContainer}
-          contentContainerStyle={styles.logsContent}
-          showsVerticalScrollIndicator={true}
-        >
-          {logs.map((log) => (
-            <View key={log.id} style={[styles.logEntry, styles[`logEntry${log.type}`]]}>
-              <View style={styles.logHeader}>
-                <IconSymbol
-                  name={getLogIcon(log.type)}
-                  size={16}
-                  color={getLogColor(log.type)}
-                />
-                <Text style={[styles.logType, { color: getLogColor(log.type) }]}>
-                  {log.type.toUpperCase()}
-                </Text>
-                <Text style={styles.logTimestamp}>{formatTimestamp(log.timestamp)}</Text>
-              </View>
-              <Text style={styles.logMessage}>{log.message}</Text>
-              {log.data && (
-                <View style={styles.logDataContainer}>
-                  <Text style={styles.logDataLabel}>Data:</Text>
-                  <Text style={styles.logData}>{formatData(log.data)}</Text>
-                </View>
-              )}
+      </Pressable>
+
+      {isExpanded && (
+        <>
+          {logs.length === 0 ? (
+            <View style={styles.emptyLogsContainer}>
+              <Text style={styles.emptyLogsText}>Waiting for data...</Text>
+              <Text style={styles.emptyLogsSubtext}>
+                Data from the connected device will appear here
+              </Text>
             </View>
-          ))}
-        </ScrollView>
+          ) : (
+            <ScrollView
+              ref={scrollViewRef}
+              style={styles.logsContainer}
+              contentContainerStyle={styles.logsContent}
+              showsVerticalScrollIndicator={true}
+            >
+              {logs.map((log) => (
+                <View key={log.id} style={[styles.logEntry, styles[`logEntry${log.type}`]]}>
+                  <View style={styles.logHeader}>
+                    <IconSymbol
+                      name={getLogIcon(log.type)}
+                      size={16}
+                      color={getLogColor(log.type)}
+                    />
+                    <Text style={[styles.logType, { color: getLogColor(log.type) }]}>
+                      {log.type.toUpperCase()}
+                    </Text>
+                    <Text style={styles.logTimestamp}>{formatTimestamp(log.timestamp)}</Text>
+                  </View>
+                  <Text style={styles.logMessage}>{log.message}</Text>
+                  {log.data && (
+                    <View style={styles.logDataContainer}>
+                      <Text style={styles.logDataLabel}>Data:</Text>
+                      <Text style={styles.logData}>{formatData(log.data)}</Text>
+                    </View>
+                  )}
+                </View>
+              ))}
+            </ScrollView>
+          )}
+        </>
       )}
     </View>
   );
@@ -166,6 +188,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    flex: 1,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  chevron: {
+    marginLeft: 8,
   },
   headerTitle: {
     fontSize: 16,

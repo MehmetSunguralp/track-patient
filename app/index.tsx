@@ -52,6 +52,58 @@ export default function PatientsScreen() {
               />
               <Text style={styles.bleButtonTextCenter}>Scan for Devices</Text>
             </Pressable>
+          ) : patients.length > 0 ? (
+            <View style={styles.productionContent}>
+              <View style={styles.connectedHeader}>
+                <View style={styles.connectedStatus}>
+                  <IconSymbol name="checkmark.circle.fill" size={20} color="#27AE60" />
+                  <Text style={styles.connectedText}>
+                    Connected: {connectedDevice.name || connectedDevice.id}
+                  </Text>
+                </View>
+                <Pressable
+                  style={styles.scanButtonSmall}
+                  onPress={() => setIsScannerVisible(true)}
+                >
+                  <Text style={styles.scanButtonSmallText}>Change Device</Text>
+                </Pressable>
+              </View>
+              <BLEDataLogs />
+              <FlatList
+                data={patients}
+                numColumns={4}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.avatarGrid}
+                renderItem={({ item }) => {
+                  const isSelected = item.id === selectedPatientId;
+                  // Extract patient ID (e.g., "ble-p1" -> "p1")
+                  const patientId = item.id.replace('ble-', '');
+
+                  return (
+                    <Pressable
+                      style={styles.avatarItem}
+                      onPress={() => {
+                        setSelectedPatientId(item.id);
+                        router.push('/(tabs)');
+                      }}
+                    >
+                      <View
+                        style={[
+                          styles.avatarWrapper,
+                          item.isConnected && styles.avatarConnected,
+                          isSelected && styles.avatarSelected,
+                        ]}
+                      >
+                        <Text style={styles.patientIdText}>{patientId}</Text>
+                      </View>
+                      <Text style={styles.avatarName} numberOfLines={1}>
+                        {patientId}
+                      </Text>
+                    </Pressable>
+                  );
+                }}
+              />
+            </View>
           ) : (
             <View style={styles.productionContent}>
               <View style={styles.connectedHeader}>
@@ -69,6 +121,9 @@ export default function PatientsScreen() {
                 </Pressable>
               </View>
               <BLEDataLogs />
+              <View style={styles.waitingContainer}>
+                <Text style={styles.waitingText}>Waiting for patient data...</Text>
+              </View>
             </View>
           )}
         </View>
@@ -242,10 +297,26 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
   },
+  patientIdText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
   avatarName: {
     marginTop: 4,
     fontSize: 12,
     fontWeight: '500',
     color: '#ffffff',
+  },
+  waitingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  waitingText: {
+    fontSize: 16,
+    color: '#7f8c8d',
+    textAlign: 'center',
   },
 });

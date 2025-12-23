@@ -58,8 +58,23 @@ export default function BLEDeviceScanner({
   };
 
   const handleDisconnect = async () => {
-    await disconnectDevice();
-    setSelectedDeviceId(null);
+    try {
+      setSelectedDeviceId(null);
+      // Don't await - let it run in background to prevent blocking
+      disconnectDevice().catch((error) => {
+        // Error already handled in disconnectDevice, just log
+        console.error('Disconnect error:', error);
+      });
+      // Close modal immediately to prevent UI blocking
+      setTimeout(() => {
+        onClose();
+      }, 100);
+    } catch (error) {
+      // Error already handled in disconnectDevice
+      console.error('Disconnect error:', error);
+      // Still close modal even on error
+      onClose();
+    }
   };
 
   return (
