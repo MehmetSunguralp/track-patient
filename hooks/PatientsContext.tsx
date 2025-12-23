@@ -131,6 +131,7 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
   const { connectedDevice, receivedData } = useBLE();
   const [selectedPatientId, setSelectedPatientId] = useState<string>('');
   const [blePatients, setBlePatients] = useState<Map<string, Patient>>(new Map());
+  const [dataVersion, setDataVersion] = useState(0); // Increment when data actually changes
 
   // Update BLE patients when data is received
   useEffect(() => {
@@ -307,7 +308,10 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
       });
       
       // Force re-render by ensuring the map is new
-      return new Map(newMap);
+      const newMapInstance = new Map(newMap);
+      // Increment version to trigger useMemo updates
+      setDataVersion(prev => prev + 1);
+      return newMapInstance;
     });
   }, [receivedData, connectedDevice, isProductionMode]);
 
@@ -396,27 +400,23 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
     }
   }, [blePatients.size, isProductionMode, selectedPatientId, initialPatients.length]);
 
-  // Convert Map to array for stable reference tracking
-  const patientsArray = useMemo(() => 
-    isProductionMode ? Array.from(blePatients.values()) : initialPatients,
-    [blePatients, isProductionMode]
-  );
-
-  // Track latest data timestamp of selected patient to trigger updates
-  const selectedPatientDataTimestamp = useMemo(() => {
-    const patient = patientsArray.find((p) => p.id === selectedPatientId) || patientsArray[0];
-    return patient?.data?.data?.at(-1)?.timestamp || '';
-  }, [patientsArray, selectedPatientId]);
+  // Use dataVersion to track when data actually changes (incremented in setBlePatients)
 
   const value = useMemo<PatientsContextValue>(() => {
+    // In production mode, use BLE patients if connected, otherwise empty array
+    // In test mode, use all patients with dummy data
+    const patients = isProductionMode
+      ? Array.from(blePatients.values())
+      : initialPatients;
+
     // Find selected patient, fallback to first patient if not found
-    let selectedPatient = patientsArray.find((patient) => patient.id === selectedPatientId);
-    if (!selectedPatient && patientsArray.length > 0) {
-      selectedPatient = patientsArray[0];
+    let selectedPatient = patients.find((patient) => patient.id === selectedPatientId);
+    if (!selectedPatient && patients.length > 0) {
+      selectedPatient = patients[0];
     }
 
     return {
-      patients: patientsArray,
+      patients,
       selectedPatientId: selectedPatient?.id ?? '',
       selectedPatient: selectedPatient ?? {
         id: '',
@@ -431,7 +431,7 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
       },
       setSelectedPatientId,
     };
-  }, [selectedPatientId, patientsArray, selectedPatientDataTimestamp]);
+  }, [selectedPatientId, isProductionMode, dataVersion, blePatients.size]);
 
   return <PatientsContext.Provider value={value}>{children}</PatientsContext.Provider>;
 }

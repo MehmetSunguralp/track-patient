@@ -74,18 +74,19 @@ export default function OverallStatusScreen() {
   const [isFullscreenMapVisible, setIsFullscreenMapVisible] = useState(false);
 
   const samples = selectedPatient.data?.data ?? [];
-  
-  // Memoize derived values to prevent unnecessary re-renders
-  const latestSample = useMemo(() => samples.at(-1), [samples]);
-  const previousSample = useMemo(() => samples.at(-2), [samples]);
   const dataLength = samples.length;
+  const latestTimestamp = samples.at(-1)?.timestamp || '';
+  
+  // Memoize derived values using stable dependencies
+  const latestSample = useMemo(() => samples.at(-1), [dataLength, latestTimestamp, selectedPatient.id]);
+  const previousSample = useMemo(() => samples.at(-2), [dataLength, latestTimestamp, selectedPatient.id]);
 
   // Debug: log selected patient data (only log when patient or data changes)
   useEffect(() => {
     if (selectedPatient.id) {
       console.log(`[OverallStatus] Patient: ${selectedPatient.id}, hasData: ${!!selectedPatient.data}, dataPoints: ${dataLength}, latestSample: ${!!latestSample}`);
     }
-  }, [selectedPatient.id, dataLength, latestSample?.timestamp]);
+  }, [selectedPatient.id, dataLength, latestTimestamp]);
 
   const locations = useMemo(() => 
     samples
