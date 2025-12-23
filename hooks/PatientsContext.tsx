@@ -1,8 +1,9 @@
-import { ReactNode, createContext, useContext, useMemo, useState, useEffect, useCallback } from 'react';
+import { ReactNode, createContext, useContext, useMemo, useState, useEffect, useCallback, useRef } from 'react';
 
 import { Patient, patients as initialPatients, SessionData } from '@/data/patients';
 import { useAppMode } from './AppModeContext';
 import { useBLE } from './BLEContext';
+import { parsePacket, livePacketToPatientData, totalPacketToPatientData, PacketType } from '@/utils/packetParser';
 
 interface PatientsContextValue {
   readonly patients: Patient[];
@@ -32,63 +33,97 @@ function createPatientFromId(patientId: string, isOnline: boolean): Omit<Patient
   };
 }
 
-// Parse BLE JSON data and extract patient ID
-function parseBLEData(jsonString: string): { patientId: string; data: SessionData['data'][0] } | null {
+// Parse BLE data - supports both JSON and ASCII packet formats
+function parseBLEData(dataString: string): { patientId: string; data: SessionData['data'][0] } | null {
   // Validate input
-  if (!jsonString || typeof jsonString !== 'string' || jsonString.trim().length === 0) {
+  if (!dataString || typeof dataString !== 'string' || dataString.trim().length === 0) {
     return null;
   }
 
-  // Check if it looks like JSON (starts with { and ends with })
-  const trimmed = jsonString.trim();
-  if (!trimmed.startsWith('{') || !trimmed.endsWith('}')) {
-    return null;
-  }
-
-  try {
-    const data = JSON.parse(jsonString);
-    
-    // Validate that we have at least some data structure
-    if (!data || typeof data !== 'object') {
+  const trimmed = dataString.trim();
+  
+  // Check if it's an ASCII packet (starts with L, T, or S)
+  if (trimmed.match(/^[LTS]/)) {
+    try {
+      console.log(`[PatientsContext] Attempting to parse ASCII packet: ${trimmed.substring(0, 20)}...`);
+      const parsedPacket = parsePacket(trimmed);
+      if (!parsedPacket) {
+        console.log(`[PatientsContext] parsePacket returned null for: ${trimmed.substring(0, 30)}...`);
+        return null;
+      }
+      
+      console.log(`[PatientsContext] Parsed packet type: ${parsedPacket.type}, podId: ${parsedPacket.podId}`);
+      
+      // Convert packet to patient data format
+      if (parsedPacket.type === PacketType.LIVE) {
+        const result = livePacketToPatientData(parsedPacket);
+        console.log(`[PatientsContext] Converted Live packet: patientId=${result.patientId}, bpm=${result.data.heart.bpm}`);
+        return result;
+      } else if (parsedPacket.type === PacketType.TOTAL) {
+        const result = totalPacketToPatientData(parsedPacket);
+        console.log(`[PatientsContext] Converted Total packet: patientId=${result.patientId}`);
+        return result;
+      } else if (parsedPacket.type === PacketType.STATUS) {
+        // Status packets don't contain patient data, skip
+        console.log(`[PatientsContext] Status packet received, skipping`);
+        return null;
+      }
+    } catch (error) {
+      console.log('[PatientsContext] Error parsing ASCII packet:', error);
       return null;
     }
-    
-    // Extract patient ID (required)
-    const patientId = data.patientId || data.patient_id || null;
-    if (!patientId || typeof patientId !== 'string') {
+  }
+  
+  // Check if it's JSON (starts with { and ends with })
+  if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+    try {
+      const data = JSON.parse(dataString);
+      
+      // Validate that we have at least some data structure
+      if (!data || typeof data !== 'object') {
+        return null;
+      }
+      
+      // Extract patient ID (required)
+      const patientId = data.patientId || data.patient_id || null;
+      if (!patientId || typeof patientId !== 'string') {
+        return null;
+      }
+      
+      return {
+        patientId,
+        data: {
+          timestamp: data.timestamp ? new Date(Number(data.timestamp) * 1000).toISOString() : new Date().toISOString(),
+          gps: {
+            lat: data.gps?.lat ?? 0,
+            lon: data.gps?.lon ?? 0,
+            speedKmh: data.gps?.speedKmh ?? 0,
+            distanceTotalM: data.gps?.distanceTotalM ?? 0,
+          },
+          heart: {
+            bpm: data.heart?.bpm ?? 0,
+            rrMs: data.heart?.rrMs ?? 0,
+            maxBpmSession: data.heart?.maxBpmSession ?? 0,
+          },
+          movement: {
+            metabolicPowerWkg: data.movement?.metabolicPowerWkg ?? 0,
+            activityZone: data.movement?.activityZone ?? 'Z1',
+            stepBalanceSide: data.movement?.stepBalanceSide ?? 'left',
+            stepBalancePercent: data.movement?.stepBalancePercent ?? 0,
+          },
+          temperature: {
+            skinC: data.temperature?.skinC ?? 36.5,
+          },
+        },
+      };
+    } catch (error) {
+      // Silently fail - don't log errors for incomplete data
       return null;
     }
-    
-    return {
-      patientId,
-      data: {
-        timestamp: data.timestamp ? new Date(Number(data.timestamp) * 1000).toISOString() : new Date().toISOString(),
-        gps: {
-          lat: data.gps?.lat ?? 0,
-          lon: data.gps?.lon ?? 0,
-          speedKmh: data.gps?.speedKmh ?? 0,
-          distanceTotalM: data.gps?.distanceTotalM ?? 0,
-        },
-        heart: {
-          bpm: data.heart?.bpm ?? 0,
-          rrMs: data.heart?.rrMs ?? 0,
-          maxBpmSession: data.heart?.maxBpmSession ?? 0,
-        },
-        movement: {
-          metabolicPowerWkg: data.movement?.metabolicPowerWkg ?? 0,
-          activityZone: data.movement?.activityZone ?? 'Z1',
-          stepBalanceSide: data.movement?.stepBalanceSide ?? 'left',
-          stepBalancePercent: data.movement?.stepBalancePercent ?? 0,
-        },
-        temperature: {
-          skinC: data.temperature?.skinC ?? 36.5,
-        },
-      },
-    };
-  } catch (error) {
-    // Silently fail - don't log errors for incomplete data
-    return null;
   }
+  
+  // Unknown format
+  return null;
 }
 
 export function PatientsProvider({ children }: PatientsProviderProps) {
@@ -116,23 +151,29 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
       ? receivedData.split('|')[0] 
       : receivedData;
     
-    // Only process if it looks like JSON (starts with {)
-    // Skip simple text messages like "hello world"
-    if (!message.trim().startsWith('{')) {
-      // Not JSON, skip processing (this is expected for test messages)
+    // Process if it's an ASCII packet (L/T/S) or JSON
+    const trimmed = message.trim();
+    if (trimmed.length === 0) {
       return;
     }
     
-    console.log(`[PatientsContext] Processing JSON data (length: ${message.length}): ${message.substring(0, 150)}`);
+    // Skip if it's neither a packet nor JSON
+    if (!trimmed.match(/^[LTS]/) && !trimmed.startsWith('{')) {
+      // Unknown format, skip processing
+      return;
+    }
     
-    // Parse the received data (now includes patientId)
+    console.log(`[PatientsContext] Processing data (length: ${message.length}): ${message.substring(0, 150)}`);
+    
+    // Parse the received data (supports both ASCII packets and JSON)
     const parsed = parseBLEData(message);
     if (!parsed || !parsed.patientId) {
-      // Failed to parse - skip silently (might be malformed JSON)
+      // Failed to parse - log for debugging
+      console.log(`[PatientsContext] ❌ Failed to parse data. Message length: ${message.length}, starts with: ${message.substring(0, 5)}`);
       return;
     }
     
-    console.log(`[PatientsContext] Successfully parsed data for patient: ${parsed.patientId}`);
+    console.log(`[PatientsContext] ✅ Successfully parsed data for patient: ${parsed.patientId}, bpm: ${parsed.data.heart.bpm}, lat: ${parsed.data.gps.lat}, lon: ${parsed.data.gps.lon}`);
 
     const { patientId, data: parsedData } = parsed;
     
@@ -153,10 +194,66 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
       
       let patient: Patient;
       if (existingPatient) {
-        // Update existing patient's data - keep last 6 points for charts
+        // Update existing patient's data - keep last 100 points for charts
         const sessionData = existingPatient.data;
-        if (sessionData) {
-          const newDataArray = [...(sessionData.data || []), parsedData].slice(-6);
+        if (sessionData && sessionData.data && sessionData.data.length > 0) {
+          // Merge new data with the latest existing data point
+          const latestExisting = sessionData.data[sessionData.data.length - 1];
+          
+          // Smart merge: preserve non-zero values, prefer new values if they're non-zero
+          // For numbers: use incoming if non-zero, otherwise keep existing
+          // For strings: use incoming if non-empty, otherwise keep existing
+          const mergeValue = (existing: any, incoming: any) => {
+            if (typeof incoming === 'number') {
+              // For numbers, use incoming if it's non-zero, otherwise keep existing
+              return incoming !== 0 ? incoming : (existing !== 0 ? existing : incoming);
+            } else if (typeof incoming === 'string') {
+              // For strings, use incoming if it's non-empty and not default values
+              return incoming && incoming !== '' && incoming !== 'Z1' && incoming !== 'left' 
+                ? incoming 
+                : (existing && existing !== '' ? existing : incoming);
+            }
+            // For other types, prefer incoming if it exists
+            return incoming !== null && incoming !== undefined ? incoming : existing;
+          };
+          
+          const mergedData = {
+            timestamp: parsedData.timestamp || latestExisting.timestamp, // Use latest timestamp
+            gps: {
+              lat: mergeValue(latestExisting.gps.lat, parsedData.gps.lat),
+              lon: mergeValue(latestExisting.gps.lon, parsedData.gps.lon),
+              speedKmh: mergeValue(latestExisting.gps.speedKmh, parsedData.gps.speedKmh),
+              distanceTotalM: mergeValue(latestExisting.gps.distanceTotalM, parsedData.gps.distanceTotalM),
+            },
+            heart: {
+              bpm: mergeValue(latestExisting.heart.bpm, parsedData.heart.bpm),
+              rrMs: mergeValue(latestExisting.heart.rrMs, parsedData.heart.rrMs),
+              maxBpmSession: mergeValue(latestExisting.heart.maxBpmSession, parsedData.heart.maxBpmSession),
+            },
+            movement: {
+              metabolicPowerWkg: mergeValue(latestExisting.movement.metabolicPowerWkg, parsedData.movement.metabolicPowerWkg),
+              activityZone: parsedData.movement.activityZone || latestExisting.movement.activityZone || 'Z1',
+              stepBalanceSide: parsedData.movement.stepBalanceSide || latestExisting.movement.stepBalanceSide || 'left',
+              stepBalancePercent: mergeValue(latestExisting.movement.stepBalancePercent, parsedData.movement.stepBalancePercent),
+            },
+            temperature: {
+              skinC: mergeValue(latestExisting.temperature.skinC, parsedData.temperature.skinC),
+            },
+          };
+          
+          // Check if this is a new Live packet (different timestamp) or a Total packet (same timestamp, update in place)
+          const isNewLivePacket = parsedData.timestamp !== latestExisting.timestamp && 
+                                   parsedData.gps.lat !== 0 && parsedData.gps.lon !== 0;
+          
+          let newDataArray;
+          if (isNewLivePacket) {
+            // New Live packet - add as new data point
+            newDataArray = [...sessionData.data, mergedData].slice(-100);
+          } else {
+            // Total packet or same timestamp - update latest data point in place
+            newDataArray = [...sessionData.data.slice(0, -1), mergedData].slice(-100);
+          }
+          
           patient = {
             ...existingPatient,
             isConnected: true,
@@ -202,10 +299,11 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
         hasData: !!patient.data,
         dataId: patient.data?.id,
         dataLength: patient.data?.data?.length,
-        firstDataPoint: patient.data?.data?.[0] ? {
-          timestamp: patient.data?.data?.[0]?.timestamp,
-          bpm: patient.data?.data?.[0]?.heart?.bpm,
-          lat: patient.data?.data?.[0]?.gps?.lat,
+        latestDataPoint: patient.data?.data?.[patient.data.data.length - 1] ? {
+          timestamp: patient.data?.data?.[patient.data.data.length - 1]?.timestamp,
+          bpm: patient.data?.data?.[patient.data.data.length - 1]?.heart?.bpm,
+          lat: patient.data?.data?.[patient.data.data.length - 1]?.gps?.lat,
+          lon: patient.data?.data?.[patient.data.data.length - 1]?.gps?.lon,
         } : 'missing'
       });
       
@@ -214,9 +312,10 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
     });
   }, [receivedData, connectedDevice, isProductionMode]);
 
-  // Auto-select patient when first data arrives
+  // Auto-select patient when first data arrives (only once)
+  const hasAutoSelectedRef = useRef(false);
   useEffect(() => {
-    if (!isProductionMode || !connectedDevice) return;
+    if (!isProductionMode || !connectedDevice || hasAutoSelectedRef.current) return;
     
     const patients = Array.from(blePatients.values());
     const patientWithData = patients.find((p) => p.data && p.data.data && p.data.data.length > 0);
@@ -224,6 +323,7 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
     if (patientWithData && (!selectedPatientId || selectedPatientId === '')) {
       console.log(`[BLE] Auto-selecting patient ${patientWithData.id} with data`);
       setSelectedPatientId(patientWithData.id);
+      hasAutoSelectedRef.current = true;
     }
   }, [blePatients, isProductionMode, connectedDevice, selectedPatientId]);
 

@@ -610,41 +610,79 @@ export function BLEProvider({ children }: BLEProviderProps) {
                   dataBufferRef.current = '';
                 }
 
-                // Process all complete messages (delimited by \n)
-                let newlineIndex = -1;
+                // Process all complete messages
+                // Packets can be delimited by \n OR end with 'D' (ASCII packet terminator)
+                let processed = true;
 
-                // Extract all complete messages (ending with \n)
-                while ((newlineIndex = workingBuffer.indexOf('\n')) !== -1) {
-                  // Extract the message before the newline
-                  const completeMessage = workingBuffer.substring(0, newlineIndex).trim();
+                while (processed) {
+                  processed = false;
 
-                  // Remove processed message (including \n) from buffer
-                  workingBuffer = workingBuffer.substring(newlineIndex + 1);
+                  // First, try to find newline-delimited messages
+                  const newlineIndex = workingBuffer.indexOf('\n');
+                  if (newlineIndex !== -1) {
+                    const completeMessage = workingBuffer.substring(0, newlineIndex).trim();
+                    workingBuffer = workingBuffer.substring(newlineIndex + 1);
 
-                  // Skip empty messages
-                  if (completeMessage.length === 0) {
-                    continue;
+                    if (completeMessage.length > 0) {
+                      console.log(
+                        `[BLE] ✅ Received complete message (${
+                          completeMessage.length
+                        } chars): "${completeMessage.substring(0, 100)}${
+                          completeMessage.length > 100 ? '...' : ''
+                        }"`
+                      );
+
+                      // Determine message type
+                      const messageType = completeMessage.startsWith('{')
+                        ? 'JSON'
+                        : completeMessage.match(/^[LTS]/)
+                        ? 'ASCII_PACKET'
+                        : 'UNKNOWN';
+
+                      addLog(
+                        'data',
+                        `📨 Received ${messageType} (${completeMessage.length} chars)`,
+                        {
+                          message: completeMessage,
+                          length: completeMessage.length,
+                          timestamp: new Date().toISOString(),
+                          preview: completeMessage.substring(0, 100),
+                          type: messageType,
+                        }
+                      );
+
+                      setReceivedData(`${completeMessage}|${Date.now()}`);
+                      processed = true;
+                      continue;
+                    }
                   }
 
-                  // Log the received message
-                  console.log(
-                    `[BLE] ✅ Received complete message (${
-                      completeMessage.length
-                    } chars): "${completeMessage.substring(0, 100)}${
-                      completeMessage.length > 100 ? '...' : ''
-                    }"`
-                  );
+                  // If no newline, check for ASCII packet ending with 'D' (terminator)
+                  // Look for packets starting with L, T, or S and ending with 'D'
+                  const packetMatch = workingBuffer.match(/^([LTS].*?D)/);
+                  if (packetMatch) {
+                    const completePacket = packetMatch[1];
+                    workingBuffer = workingBuffer.substring(completePacket.length);
 
-                  // Log to UI
-                  addLog('data', `📨 Received JSON (${completeMessage.length} chars)`, {
-                    message: completeMessage,
-                    length: completeMessage.length,
-                    timestamp: new Date().toISOString(),
-                    preview: completeMessage.substring(0, 100),
-                  });
+                    console.log(
+                      `[BLE] ✅ Received complete ASCII packet (${
+                        completePacket.length
+                      } chars): "${completePacket.substring(0, 100)}${
+                        completePacket.length > 100 ? '...' : ''
+                      }"`
+                    );
 
-                  // Update receivedData for any components that need it
-                  setReceivedData(`${completeMessage}|${Date.now()}`);
+                    addLog('data', `📨 Received ASCII packet (${completePacket.length} chars)`, {
+                      message: completePacket,
+                      length: completePacket.length,
+                      timestamp: new Date().toISOString(),
+                      preview: completePacket.substring(0, 100),
+                      type: 'ASCII_PACKET',
+                    });
+
+                    setReceivedData(`${completePacket}|${Date.now()}`);
+                    processed = true;
+                  }
                 }
 
                 // Log if buffer has data but no newline yet

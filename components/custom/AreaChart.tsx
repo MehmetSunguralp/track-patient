@@ -34,12 +34,20 @@ export default function AreaChart({
   const prevFocusedRef = useRef(false);
   const opacity = useRef(new Animated.Value(1)).current;
   const isFirstRender = useRef(true);
+  const prevDataLengthRef = useRef(0);
 
   useEffect(() => {
     // Set initial opacity to 1 on first render
     if (isFirstRender.current) {
       isFirstRender.current = false;
+      prevDataLengthRef.current = data.length;
       return;
+    }
+
+    // Update chart when data changes
+    if (data.length !== prevDataLengthRef.current) {
+      setAnimationKey((prev) => prev + 1);
+      prevDataLengthRef.current = data.length;
     }
 
     // Only trigger animation when tab becomes focused (transitions from false to true)
@@ -56,7 +64,7 @@ export default function AreaChart({
       }).start();
     }
     prevFocusedRef.current = shouldAnimate;
-  }, [shouldAnimate, opacity]);
+  }, [shouldAnimate, opacity, data.length]);
 
   const rawMax = Math.max(...data.map((d) => d.value));
   const stepValue = Math.ceil(rawMax / 5);
@@ -64,7 +72,7 @@ export default function AreaChart({
   const yAxisMaxValue = stepValue * 6; // +1 step headroom
 
   return (
-    <View style={{ marginHorizontal: 12, marginVertical: 12 }}>
+    <View style={{ marginHorizontal: 12, marginVertical: 12, width: '100%', maxWidth: '100%' }}>
       <View
         style={{
           flexDirection: 'row',
