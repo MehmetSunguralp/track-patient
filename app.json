@@ -30,15 +30,14 @@
         "BLUETOOTH_SCAN",
         "BLUETOOTH_CONNECT",
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "BLUETOOTH",
-        "BLUETOOTH_ADMIN",
-        "BLUETOOTH_SCAN",
-        "BLUETOOTH_CONNECT",
-        "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION"
       ],
-      "package": "com.mehmetalp.TrackPatient"
+      "package": "com.mehmetalp.TrackPatient",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDummyKeyForDevelopmentOnly"
+        }
+      }
     },
     "web": {
       "output": "static",

@@ -1,5 +1,6 @@
 import CustomStatusBar from '@/components/custom/StatusBar';
 import BLEDeviceScanner from '@/components/custom/BLEDeviceScanner';
+import BLEDataLogs from '@/components/custom/BLEDataLogs';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAppMode } from '@/hooks/AppModeContext';
@@ -39,22 +40,37 @@ export default function PatientsScreen() {
       </View>
       {isProductionMode ? (
         <View style={styles.productionContainer}>
-          <Pressable
-            style={[
-              styles.bleButtonCenter,
-              connectedDevice && styles.bleButtonConnected,
-            ]}
-            onPress={() => setIsScannerVisible(true)}
-          >
-            <IconSymbol
-              name={connectedDevice ? 'checkmark.circle.fill' : 'antenna.radiowaves.left.and.right'}
-              size={24}
-              color="#ffffff"
-            />
-            <Text style={styles.bleButtonTextCenter}>
-              {connectedDevice ? 'Connected' : 'Scan for Devices'}
-            </Text>
-          </Pressable>
+          {!connectedDevice ? (
+            <Pressable
+              style={styles.bleButtonCenter}
+              onPress={() => setIsScannerVisible(true)}
+            >
+              <IconSymbol
+                name="antenna.radiowaves.left.and.right"
+                size={24}
+                color="#ffffff"
+              />
+              <Text style={styles.bleButtonTextCenter}>Scan for Devices</Text>
+            </Pressable>
+          ) : (
+            <View style={styles.productionContent}>
+              <View style={styles.connectedHeader}>
+                <View style={styles.connectedStatus}>
+                  <IconSymbol name="checkmark.circle.fill" size={20} color="#27AE60" />
+                  <Text style={styles.connectedText}>
+                    Connected: {connectedDevice.name || connectedDevice.id}
+                  </Text>
+                </View>
+                <Pressable
+                  style={styles.scanButtonSmall}
+                  onPress={() => setIsScannerVisible(true)}
+                >
+                  <Text style={styles.scanButtonSmallText}>Change Device</Text>
+                </Pressable>
+              </View>
+              <BLEDataLogs />
+            </View>
+          )}
         </View>
       ) : (
         <FlatList
@@ -139,9 +155,41 @@ const styles = StyleSheet.create({
   },
   productionContainer: {
     flex: 1,
-    justifyContent: 'center',
+  },
+  productionContent: {
+    flex: 1,
+    paddingTop: 16,
+  },
+  connectedHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#2c3e50',
+  },
+  connectedStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
+  connectedText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  scanButtonSmall: {
+    backgroundColor: '#3498DB',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  scanButtonSmallText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '600',
   },
   bleButtonCenter: {
     flexDirection: 'row',
@@ -153,9 +201,6 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     borderRadius: 16,
     minWidth: 200,
-  },
-  bleButtonConnected: {
-    backgroundColor: '#27AE60',
   },
   bleButtonTextCenter: {
     color: '#ffffff',

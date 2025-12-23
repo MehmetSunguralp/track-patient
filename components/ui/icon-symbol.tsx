@@ -37,6 +37,7 @@ const MAPPING = {
   'bluetooth.slash': 'bluetooth-disabled',
   'percent': 'percent',
   circle: 'radio-button-unchecked',
+  'info.circle': 'info',
 } as IconMapping;
 
 /**

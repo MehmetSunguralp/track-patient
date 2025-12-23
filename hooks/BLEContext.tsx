@@ -42,6 +42,14 @@ interface BLEDevice {
   device: any; // Device type from react-native-ble-plx
 }
 
+export interface LogEntry {
+  id: string;
+  timestamp: string;
+  type: 'data' | 'error' | 'info';
+  message: string;
+  data?: any;
+}
+
 interface BLEContextValue {
   readonly isScanning: boolean;
   readonly devices: BLEDevice[];
@@ -49,11 +57,13 @@ interface BLEContextValue {
   readonly isConnecting: boolean;
   readonly error: string | null;
   readonly isAvailable: boolean;
+  readonly logs: LogEntry[];
   readonly startScan: () => Promise<void>;
   readonly stopScan: () => void;
   readonly connectToDevice: (deviceId: string) => Promise<void>;
   readonly disconnectDevice: () => Promise<void>;
   readonly clearDevices: () => void;
+  readonly clearLogs: () => void;
 }
 
 const BLEContext = createContext<BLEContextValue | undefined>(undefined);
@@ -80,11 +90,24 @@ export function BLEProvider({ children }: BLEProviderProps) {
   const [devices, setDevices] = useState<BLEDevice[]>([]);
   const [connectedDevice, setConnectedDevice] = useState<any | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const [error, setError] = useState<string | null>(() => {
     const available = checkBLEAvailability();
     // Only show error if BLE is not available, not on initial load
     return null;
   });
+
+  // Helper function to add log entry
+  const addLog = useCallback((type: LogEntry['type'], message: string, data?: any) => {
+    const logEntry: LogEntry = {
+      id: `${Date.now()}-${Math.random()}`,
+      timestamp: new Date().toISOString(),
+      type,
+      message,
+      data,
+    };
+    setLogs((prev) => [...prev, logEntry]);
+  }, []);
 
   // Request permissions
   const requestPermissions = async (): Promise<boolean> => {
@@ -207,24 +230,77 @@ export function BLEProvider({ children }: BLEProviderProps) {
 
         const device = await manager.connectToDevice(deviceId);
         setConnectedDevice(device);
+        addLog('info', `Connected to device: ${device.name || deviceId}`);
 
         // Discover services and characteristics
         await device.discoverAllServicesAndCharacteristics();
+        addLog('info', 'Services and characteristics discovered');
+
+        // Get all services and characteristics for monitoring
+        const services = await device.services();
+        addLog('info', `Found ${services.length} service(s)`);
+
+        // Monitor all characteristics that support notifications
+        for (const service of services) {
+          try {
+            const characteristics = await service.characteristics();
+            addLog('info', `Service ${service.uuid}: Found ${characteristics.length} characteristic(s)`);
+
+            for (const characteristic of characteristics) {
+              // Check if characteristic supports notifications or indications
+              const properties = characteristic.properties;
+              if (properties.notify || properties.indicate) {
+                try {
+                  // Monitor this characteristic
+                  characteristic.monitor((error, char) => {
+                    if (error) {
+                      addLog('error', `Error monitoring characteristic ${characteristic.uuid}`, error.message);
+                      return;
+                    }
+                    if (char && char.value) {
+                      // Decode the value (assuming it's base64 encoded)
+                      try {
+                        const base64Value = char.value;
+                        // You can decode this based on your device's data format
+                        addLog('data', `Data from ${characteristic.uuid}`, {
+                          service: service.uuid,
+                          characteristic: characteristic.uuid,
+                          value: base64Value,
+                          base64Length: base64Value.length,
+                        });
+                      } catch (decodeError) {
+                        addLog('error', `Error decoding data from ${characteristic.uuid}`, String(decodeError));
+                      }
+                    }
+                  });
+                  addLog('info', `Monitoring characteristic ${characteristic.uuid}`);
+                } catch (monitorError) {
+                  addLog('error', `Failed to monitor ${characteristic.uuid}`, String(monitorError));
+                }
+              }
+            }
+          } catch (serviceError) {
+            addLog('error', `Error reading characteristics from service ${service.uuid}`, String(serviceError));
+          }
+        }
 
         // Monitor connection state
         device.onDisconnected(() => {
           setConnectedDevice(null);
           setError('Device disconnected');
+          addLog('info', 'Device disconnected');
         });
 
         setIsConnecting(false);
+        addLog('info', 'Connection established and monitoring started');
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to connect to device';
         setError(errorMessage);
+        addLog('error', 'Connection failed', errorMessage);
         setIsConnecting(false);
       }
     },
-    [manager, isScanning, stopScan]
+    [manager, isScanning, stopScan, addLog]
   );
 
   const disconnectDevice = useCallback(async () => {
@@ -242,6 +318,10 @@ export function BLEProvider({ children }: BLEProviderProps) {
 
   const clearDevices = useCallback(() => {
     setDevices([]);
+  }, []);
+
+  const clearLogs = useCallback(() => {
+    setLogs([]);
   }, []);
 
   // Cleanup on unmount
@@ -264,11 +344,13 @@ export function BLEProvider({ children }: BLEProviderProps) {
     isConnecting,
     error,
     isAvailable: checkBLEAvailability() && manager !== null,
+    logs,
     startScan,
     stopScan,
     connectToDevice,
     disconnectDevice,
     clearDevices,
+    clearLogs,
   };
 
   return <BLEContext.Provider value={value}>{children}</BLEContext.Provider>;
