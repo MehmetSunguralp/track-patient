@@ -12,6 +12,9 @@ export default function BloodPressureScreen() {
   const { selectedPatient } = usePatients();
 
   const samples = selectedPatient.data?.data ?? [];
+  const dataLength = samples.length;
+  const latestTimestamp = samples.at(-1)?.timestamp || '';
+  const latestBpm = samples.at(-1)?.heart.bpm || 0;
 
   const chartData = useMemo(() => 
     samples.slice(-6).map((item) => {
@@ -26,7 +29,7 @@ export default function BloodPressureScreen() {
         label: item.timestamp.slice(11, 19),
       };
     }),
-    [samples]
+    [dataLength, latestTimestamp, latestBpm, selectedPatient.id]
   );
 
   return (

@@ -402,36 +402,40 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
 
   // Use dataVersion to track when data actually changes (incremented in setBlePatients)
 
-  const value = useMemo<PatientsContextValue>(() => {
-    // In production mode, use BLE patients if connected, otherwise empty array
-    // In test mode, use all patients with dummy data
-    const patients = isProductionMode
+  // Memoize patients array separately to prevent unnecessary re-creation
+  const patientsArray = useMemo(() => {
+    return isProductionMode
       ? Array.from(blePatients.values())
       : initialPatients;
+  }, [isProductionMode, dataVersion, blePatients.size]);
 
-    // Find selected patient, fallback to first patient if not found
-    let selectedPatient = patients.find((patient) => patient.id === selectedPatientId);
-    if (!selectedPatient && patients.length > 0) {
-      selectedPatient = patients[0];
-    }
-
+  // Memoize selected patient separately
+  const selectedPatientMemo = useMemo(() => {
+    const found = patientsArray.find((patient) => patient.id === selectedPatientId);
+    if (found) return found;
+    if (patientsArray.length > 0) return patientsArray[0];
     return {
-      patients,
-      selectedPatientId: selectedPatient?.id ?? '',
-      selectedPatient: selectedPatient ?? {
-        id: '',
-        uuid: '',
-        firstName: '',
-        lastName: '',
-        sex: 'male',
-        age: 0,
-        avatarUrl: '',
-        isConnected: false,
-        data: null,
-      },
+      id: '',
+      uuid: '',
+      firstName: '',
+      lastName: '',
+      sex: 'male' as const,
+      age: 0,
+      avatarUrl: '',
+      isConnected: false,
+      data: null,
+    };
+  }, [patientsArray, selectedPatientId]);
+
+  // setSelectedPatientId is stable (from useState), so we can include it safely
+  const value = useMemo<PatientsContextValue>(() => {
+    return {
+      patients: patientsArray,
+      selectedPatientId: selectedPatientMemo.id,
+      selectedPatient: selectedPatientMemo,
       setSelectedPatientId,
     };
-  }, [selectedPatientId, isProductionMode, dataVersion, blePatients.size]);
+  }, [patientsArray, selectedPatientMemo, setSelectedPatientId]);
 
   return <PatientsContext.Provider value={value}>{children}</PatientsContext.Provider>;
 }

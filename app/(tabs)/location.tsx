@@ -20,6 +20,13 @@ export default function LocationScreen() {
   const scrollViewRef = useRef<ScrollView | null>(null);
 
   const samples = selectedPatient.data?.data ?? [];
+  
+  // Use stable dependencies to prevent infinite re-renders
+  const dataLength = samples.length;
+  const latestTimestamp = samples.at(-1)?.timestamp || '';
+  const latestLat = samples.at(-1)?.gps.lat || 0;
+  const latestLon = samples.at(-1)?.gps.lon || 0;
+  const latestSpeed = samples.at(-1)?.gps.speedKmh || 0;
 
   const locations = useMemo(() => 
     samples
@@ -28,7 +35,7 @@ export default function LocationScreen() {
         lat: item.gps.lat,
         lon: item.gps.lon,
       })),
-    [samples]
+    [dataLength, latestLat, latestLon, selectedPatient.id]
   );
 
   const chartData = useMemo(() => 
@@ -38,34 +45,34 @@ export default function LocationScreen() {
       lon: item.gps.lon,
       speed: item.gps.speedKmh,
     })),
-    [samples]
+    [dataLength, latestTimestamp, latestLat, latestLon, latestSpeed, selectedPatient.id]
   );
 
-  // Prepare data for latitude chart
+  // Prepare data for latitude chart (keep full precision for coordinates)
   const latData = useMemo(() => 
     chartData.map((item) => ({
       value: item.lat,
       label: item.timestamp,
     })),
-    [chartData]
+    [dataLength, latestTimestamp, latestLat, selectedPatient.id]
   );
 
-  // Prepare data for longitude chart
+  // Prepare data for longitude chart (keep full precision for coordinates)
   const lonData = useMemo(() => 
     chartData.map((item) => ({
       value: item.lon,
       label: item.timestamp,
     })),
-    [chartData]
+    [dataLength, latestTimestamp, latestLon, selectedPatient.id]
   );
 
-  // Prepare data for speed chart
+  // Prepare data for speed chart (format to 1 decimal place)
   const speedData = useMemo(() => 
     chartData.map((item) => ({
-      value: item.speed,
+      value: Math.round(item.speed * 10) / 10, // Round to 1 decimal place
       label: item.timestamp,
     })),
-    [chartData]
+    [dataLength, latestTimestamp, latestSpeed, selectedPatient.id]
   );
 
   useEffect(() => {

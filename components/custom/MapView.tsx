@@ -50,6 +50,12 @@ export default function CustomMapView({
     };
   };
 
+  // Use stable dependencies for locations
+  const locationsLength = locations.length;
+  const locationsHash = locations.length > 0 
+    ? `${locations[0].lat},${locations[0].lon},${locations[locations.length - 1].lat},${locations[locations.length - 1].lon}`
+    : '';
+
   useEffect(() => {
     // Set initial opacity to 1 on first render
     if (isFirstRender.current) {
@@ -82,7 +88,8 @@ export default function CustomMapView({
       }).start();
     }
     prevFocusedRef.current = shouldAnimate;
-  }, [shouldAnimate, opacity, locations]);
+    // Note: opacity is a ref, so it doesn't need to be in dependencies
+  }, [shouldAnimate, locationsLength, locationsHash]);
 
   useEffect(() => {
     // Fit map to show all locations on initial load

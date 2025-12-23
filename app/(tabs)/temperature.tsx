@@ -12,12 +12,16 @@ export default function TemperatureScreen() {
   const { selectedPatient } = usePatients();
 
   const samples = selectedPatient.data?.data ?? [];
+  const dataLength = samples.length;
+  const latestTimestamp = samples.at(-1)?.timestamp || '';
+  const latestTemp = samples.at(-1)?.temperature.skinC || 0;
+  
   const chartData = useMemo(() => 
     samples.slice(-6).map((item) => ({
-      value: item.temperature.skinC,
+      value: Math.round(item.temperature.skinC * 10) / 10, // Round to 1 decimal place
       label: item.timestamp.slice(11, 19),
     })),
-    [samples]
+    [dataLength, latestTimestamp, latestTemp, selectedPatient.id]
   );
 
   return (
