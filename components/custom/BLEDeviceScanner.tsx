@@ -47,9 +47,13 @@ export default function BLEDeviceScanner({
 
   const handleConnect = async (deviceId: string) => {
     setSelectedDeviceId(deviceId);
-    await connectToDevice(deviceId);
-    if (onDeviceSelected) {
-      onDeviceSelected(deviceId);
+    try {
+      await connectToDevice(deviceId);
+      if (onDeviceSelected) {
+        onDeviceSelected(deviceId);
+      }
+    } catch {
+      // Errors are already handled inside connectToDevice via context error state.
     }
   };
 
@@ -128,6 +132,8 @@ export default function BLEDeviceScanner({
           renderItem={({ item }) => {
             const isConnected = connectedDevice?.id === item.id;
             const isConnectingToThis = isConnecting && selectedDeviceId === item.id;
+            const displayName =
+              item.name ?? (item.device as any)?.localName ?? (item.device as any)?.name ?? 'Unknown Device';
 
             return (
               <Pressable
@@ -142,7 +148,7 @@ export default function BLEDeviceScanner({
                     color={isConnected ? '#27AE60' : '#ffffff'}
                   />
                   <View style={styles.deviceDetails}>
-                    <Text style={styles.deviceName}>{item.name || 'Unknown Device'}</Text>
+                    <Text style={styles.deviceName}>{displayName}</Text>
                     <Text style={styles.deviceId}>{item.id}</Text>
                     {item.rssi !== null && (
                       <Text style={styles.deviceRssi}>RSSI: {item.rssi} dBm</Text>

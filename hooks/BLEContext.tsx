@@ -146,12 +146,14 @@ export function BLEProvider({ children }: BLEProviderProps) {
           setDevices((prevDevices) => {
             // Avoid duplicates
             const existingIndex = prevDevices.findIndex((d) => d.id === device.id);
+            // Prefer advertised local name if available, then device name
+            const displayName = (device as any).localName ?? device.name ?? null;
             if (existingIndex >= 0) {
               // Update existing device
               const updated = [...prevDevices];
               updated[existingIndex] = {
                 id: device.id,
-                name: device.name,
+                name: displayName,
                 rssi: device.rssi,
                 device,
               };
@@ -162,7 +164,7 @@ export function BLEProvider({ children }: BLEProviderProps) {
               ...prevDevices,
               {
                 id: device.id,
-                name: device.name,
+                name: displayName,
                 rssi: device.rssi,
                 device,
               },

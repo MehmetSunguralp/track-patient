@@ -36,6 +36,7 @@ const MAPPING = {
   'bluetooth': 'bluetooth',
   'bluetooth.slash': 'bluetooth-disabled',
   'percent': 'percent',
+  circle: 'radio-button-unchecked',
 } as IconMapping;
 
 /**
@@ -58,7 +59,6 @@ export function IconSymbol({
   const iconName = MAPPING[name];
   if (!iconName) {
     // Fallback to a default icon if mapping is missing
-    console.warn(`Icon mapping missing for: ${name}`);
     return <MaterialIcons color={color} size={size} name="help-outline" style={style} />;
   }
   return <MaterialIcons color={color} size={size} name={iconName} style={style} />;
