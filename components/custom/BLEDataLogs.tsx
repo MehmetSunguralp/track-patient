@@ -18,7 +18,7 @@ interface LogEntry {
 }
 
 export default function BLEDataLogs() {
-  const { logs, clearLogs, connectedDevice } = useBLE();
+  const { logs, clearLogs, connectedDevice, receivedData } = useBLE();
   const scrollViewRef = useRef<ScrollView>(null);
 
   // Auto-scroll to bottom when new logs arrive
