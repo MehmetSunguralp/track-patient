@@ -3,7 +3,7 @@ import CustomMapView from '@/components/custom/MapView';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { usePatients } from '@/hooks/PatientsContext';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -73,23 +73,29 @@ export default function OverallStatusScreen() {
   const { selectedPatient } = usePatients();
   const [isFullscreenMapVisible, setIsFullscreenMapVisible] = useState(false);
 
-  const latestSample = selectedPatient.data?.data?.at(-1);
-  const previousSample = selectedPatient.data?.data?.at(-2);
   const samples = selectedPatient.data?.data ?? [];
+  
+  // Memoize derived values to prevent unnecessary re-renders
+  const latestSample = useMemo(() => samples.at(-1), [samples]);
+  const previousSample = useMemo(() => samples.at(-2), [samples]);
+  const dataLength = samples.length;
 
   // Debug: log selected patient data (only log when patient or data changes)
   useEffect(() => {
     if (selectedPatient.id) {
-      console.log(`[OverallStatus] Patient: ${selectedPatient.id}, hasData: ${!!selectedPatient.data}, dataPoints: ${samples.length}, latestSample: ${!!latestSample}`);
+      console.log(`[OverallStatus] Patient: ${selectedPatient.id}, hasData: ${!!selectedPatient.data}, dataPoints: ${dataLength}, latestSample: ${!!latestSample}`);
     }
-  }, [selectedPatient.id, selectedPatient.data?.data?.length, latestSample, samples.length]);
+  }, [selectedPatient.id, dataLength, latestSample?.timestamp]);
 
-  const locations = samples
-    .filter((item) => item.gps.lat !== 0 && item.gps.lon !== 0)
-    .map((item) => ({
-      lat: item.gps.lat,
-      lon: item.gps.lon,
-    }));
+  const locations = useMemo(() => 
+    samples
+      .filter((item) => item.gps.lat !== 0 && item.gps.lon !== 0)
+      .map((item) => ({
+        lat: item.gps.lat,
+        lon: item.gps.lon,
+      })),
+    [samples]
+  );
 
   // Show data if we have at least one sample
   const hasData = latestSample && samples.length > 0;

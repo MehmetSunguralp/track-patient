@@ -241,17 +241,16 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
             },
           };
           
-          // Check if this is a new Live packet (different timestamp) or a Total packet (same timestamp, update in place)
-          const isNewLivePacket = parsedData.timestamp !== latestExisting.timestamp && 
-                                   parsedData.gps.lat !== 0 && parsedData.gps.lon !== 0;
+          // Check if this is a new Live packet (has GPS coordinates) or a Total packet (no GPS, update in place)
+          const isNewLivePacket = parsedData.gps.lat !== 0 && parsedData.gps.lon !== 0;
           
           let newDataArray;
           if (isNewLivePacket) {
-            // New Live packet - add as new data point
-            newDataArray = [...sessionData.data, mergedData].slice(-100);
+            // New Live packet - use parsed data directly (don't merge), add as new data point
+            newDataArray = [...sessionData.data, parsedData].slice(-6);
           } else {
-            // Total packet or same timestamp - update latest data point in place
-            newDataArray = [...sessionData.data.slice(0, -1), mergedData].slice(-100);
+            // Total packet - merge with latest data point in place
+            newDataArray = [...sessionData.data.slice(0, -1), mergedData].slice(-6);
           }
           
           patient = {
@@ -314,8 +313,14 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
 
   // Auto-select patient when first data arrives (only once)
   const hasAutoSelectedRef = useRef(false);
+  const prevPatientsSizeRef = useRef(0);
   useEffect(() => {
     if (!isProductionMode || !connectedDevice || hasAutoSelectedRef.current) return;
+    
+    // Only check when patient count changes (new data added)
+    const currentSize = blePatients.size;
+    if (currentSize === prevPatientsSizeRef.current) return;
+    prevPatientsSizeRef.current = currentSize;
     
     const patients = Array.from(blePatients.values());
     const patientWithData = patients.find((p) => p.data && p.data.data && p.data.data.length > 0);
@@ -325,7 +330,7 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
       setSelectedPatientId(patientWithData.id);
       hasAutoSelectedRef.current = true;
     }
-  }, [blePatients, isProductionMode, connectedDevice, selectedPatientId]);
+  }, [blePatients.size, isProductionMode, connectedDevice, selectedPatientId]);
 
   // Create patient when device connects (before data arrives)
   useEffect(() => {
@@ -360,10 +365,16 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
   }, [connectedDevice, isProductionMode]);
 
   // Auto-select first patient when patients list changes
+  const prevPatientsSizeRef2 = useRef(0);
   useEffect(() => {
     const patients = isProductionMode
       ? Array.from(blePatients.values())
       : initialPatients;
+    
+    // Only check when patient count changes or in test mode
+    const currentSize = isProductionMode ? blePatients.size : initialPatients.length;
+    if (isProductionMode && currentSize === prevPatientsSizeRef2.current) return;
+    prevPatientsSizeRef2.current = currentSize;
     
     // Only auto-select if:
     // 1. We have patients
@@ -383,23 +394,29 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
       // No patients in production mode, clear selection
       setSelectedPatientId('');
     }
-  }, [blePatients, isProductionMode, selectedPatientId]);
+  }, [blePatients.size, isProductionMode, selectedPatientId, initialPatients.length]);
+
+  // Convert Map to array for stable reference tracking
+  const patientsArray = useMemo(() => 
+    isProductionMode ? Array.from(blePatients.values()) : initialPatients,
+    [blePatients, isProductionMode]
+  );
+
+  // Track latest data timestamp of selected patient to trigger updates
+  const selectedPatientDataTimestamp = useMemo(() => {
+    const patient = patientsArray.find((p) => p.id === selectedPatientId) || patientsArray[0];
+    return patient?.data?.data?.at(-1)?.timestamp || '';
+  }, [patientsArray, selectedPatientId]);
 
   const value = useMemo<PatientsContextValue>(() => {
-    // In production mode, use BLE patients if connected, otherwise empty array
-    // In test mode, use all patients with dummy data
-    const patients = isProductionMode
-      ? Array.from(blePatients.values())
-      : initialPatients;
-
     // Find selected patient, fallback to first patient if not found
-    let selectedPatient = patients.find((patient) => patient.id === selectedPatientId);
-    if (!selectedPatient && patients.length > 0) {
-      selectedPatient = patients[0];
+    let selectedPatient = patientsArray.find((patient) => patient.id === selectedPatientId);
+    if (!selectedPatient && patientsArray.length > 0) {
+      selectedPatient = patientsArray[0];
     }
 
     return {
-      patients,
+      patients: patientsArray,
       selectedPatientId: selectedPatient?.id ?? '',
       selectedPatient: selectedPatient ?? {
         id: '',
@@ -414,7 +431,7 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
       },
       setSelectedPatientId,
     };
-  }, [selectedPatientId, isProductionMode, blePatients]);
+  }, [selectedPatientId, patientsArray, selectedPatientDataTimestamp]);
 
   return <PatientsContext.Provider value={value}>{children}</PatientsContext.Provider>;
 }

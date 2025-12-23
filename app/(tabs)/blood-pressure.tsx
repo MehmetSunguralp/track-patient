@@ -2,6 +2,7 @@ import AreaChart from '@/components/custom/AreaChart';
 import { ThemedView } from '@/components/themed-view';
 import { usePatients } from '@/hooks/PatientsContext';
 import { useIsFocused } from '@react-navigation/native';
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -12,18 +13,21 @@ export default function BloodPressureScreen() {
 
   const samples = selectedPatient.data?.data ?? [];
 
-  const chartData = samples.map((item) => {
-    const baseSystolic = 110;
-    const baseDiastolic = 70;
-    const heartRateFactor = (item.heart.bpm - 70) * 0.3;
-    const systolic = baseSystolic + heartRateFactor;
-    const diastolic = baseDiastolic + heartRateFactor * 0.6;
-    const map = (2 * diastolic + systolic) / 3;
-    return {
-      value: Math.round(map),
-      label: item.timestamp.slice(11, 19),
-    };
-  });
+  const chartData = useMemo(() => 
+    samples.slice(-6).map((item) => {
+      const baseSystolic = 110;
+      const baseDiastolic = 70;
+      const heartRateFactor = (item.heart.bpm - 70) * 0.3;
+      const systolic = baseSystolic + heartRateFactor;
+      const diastolic = baseDiastolic + heartRateFactor * 0.6;
+      const map = (2 * diastolic + systolic) / 3;
+      return {
+        value: Math.round(map),
+        label: item.timestamp.slice(11, 19),
+      };
+    }),
+    [samples]
+  );
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + 110 }]}>

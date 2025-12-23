@@ -2,6 +2,7 @@ import AreaChart from '@/components/custom/AreaChart';
 import { ThemedView } from '@/components/themed-view';
 import { usePatients } from '@/hooks/PatientsContext';
 import { useIsFocused } from '@react-navigation/native';
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -11,10 +12,13 @@ export default function HeartRateScreen() {
   const { selectedPatient } = usePatients();
 
   const samples = selectedPatient.data?.data ?? [];
-  const chartData = samples.map((item) => ({
-    value: item.heart.bpm,
-    label: item.timestamp.slice(11, 19),
-  }));
+  const chartData = useMemo(() => 
+    samples.slice(-6).map((item) => ({
+      value: item.heart.bpm,
+      label: item.timestamp.slice(11, 19),
+    })),
+    [samples]
+  );
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + 110 }]}>

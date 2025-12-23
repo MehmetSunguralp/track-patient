@@ -5,7 +5,7 @@ import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { usePatients } from '@/hooks/PatientsContext';
 import { useIsFocused } from '@react-navigation/native';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -21,35 +21,52 @@ export default function LocationScreen() {
 
   const samples = selectedPatient.data?.data ?? [];
 
-  const locations = samples.map((item) => ({
-    lat: item.gps.lat,
-    lon: item.gps.lon,
-  }));
+  const locations = useMemo(() => 
+    samples
+      .filter((item) => item.gps.lat !== 0 && item.gps.lon !== 0)
+      .map((item) => ({
+        lat: item.gps.lat,
+        lon: item.gps.lon,
+      })),
+    [samples]
+  );
 
-  const chartData = samples.map((item) => ({
-    timestamp: item.timestamp.slice(11, 19),
-    lat: item.gps.lat,
-    lon: item.gps.lon,
-    speed: item.gps.speedKmh,
-  }));
+  const chartData = useMemo(() => 
+    samples.slice(-6).map((item) => ({
+      timestamp: item.timestamp.slice(11, 19),
+      lat: item.gps.lat,
+      lon: item.gps.lon,
+      speed: item.gps.speedKmh,
+    })),
+    [samples]
+  );
 
   // Prepare data for latitude chart
-  const latData = chartData.map((item) => ({
-    value: item.lat,
-    label: item.timestamp,
-  }));
+  const latData = useMemo(() => 
+    chartData.map((item) => ({
+      value: item.lat,
+      label: item.timestamp,
+    })),
+    [chartData]
+  );
 
   // Prepare data for longitude chart
-  const lonData = chartData.map((item) => ({
-    value: item.lon,
-    label: item.timestamp,
-  }));
+  const lonData = useMemo(() => 
+    chartData.map((item) => ({
+      value: item.lon,
+      label: item.timestamp,
+    })),
+    [chartData]
+  );
 
   // Prepare data for speed chart
-  const speedData = chartData.map((item) => ({
-    value: item.speed,
-    label: item.timestamp,
-  }));
+  const speedData = useMemo(() => 
+    chartData.map((item) => ({
+      value: item.speed,
+      label: item.timestamp,
+    })),
+    [chartData]
+  );
 
   useEffect(() => {
     if (showDetails && pendingScrollToDetails && latLayout && scrollViewRef.current) {

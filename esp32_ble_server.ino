@@ -36,7 +36,7 @@ unsigned long lastTotalTime = 0;
 unsigned long lastStatusTime = 0;
 const unsigned long LIVE_INTERVAL = 1000;   // Send every 1 second
 const unsigned long TOTAL_INTERVAL = 2000;  // Send every 2 seconds
-const unsigned long STATUS_INTERVAL = 10000; // Send every 10 seconds (reduced from 60 for testing)
+const unsigned long STATUS_INTERVAL = 60000; // Send every 60 seconds
 
 // ================= CRC-8 Calculation =================
 uint8_t calculateCRC8(const String& data) {
