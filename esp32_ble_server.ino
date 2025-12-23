@@ -37,7 +37,7 @@ struct PatientData {
 
 PatientData currentData;
 unsigned long lastSendTime = 0;
-const unsigned long SEND_INTERVAL = 5000;
+const unsigned long SEND_INTERVAL = 1000; // Send every 1 second for testing
 
 // ================= Dummy Data =================
 PatientData generateDummyData() {
@@ -175,14 +175,43 @@ void loop() {
 
   if (deviceConnected) {
     unsigned long now = millis();
-    if (now - lastSendTime >= 1000) { // Send every 1 second
-      String message = "hello world\n";
+    if (now - lastSendTime >= SEND_INTERVAL) { // Send every 5 seconds (or 1 second for testing)
+      // Generate random patient data
+      currentData = generateDummyData();
       
-      pRxCharacteristic->setValue(message);
-      pRxCharacteristic->notify();
-
-      Serial.print("Sent: ");
-      Serial.print(message);
+      // Convert to JSON format expected by the app
+      String json = dataToJson(currentData);
+      json += "\n"; // Add newline for message delimiter
+      
+      // BLE has a maximum payload size (~20 bytes per notification)
+      // We need to send the JSON in chunks
+      const int chunkSize = 20; // BLE MTU is typically 20-23 bytes
+      int jsonLength = json.length();
+      
+      Serial.println("=== Sending Patient Data ===");
+      Serial.print("JSON length: ");
+      Serial.println(jsonLength);
+      Serial.println(json);
+      
+      // Send JSON in chunks
+      for (int i = 0; i < jsonLength; i += chunkSize) {
+        int endPos = min(i + chunkSize, jsonLength);
+        String chunk = json.substring(i, endPos);
+        
+        pRxCharacteristic->setValue(chunk);
+        pRxCharacteristic->notify();
+        
+        Serial.print("Sent chunk ");
+        Serial.print(i / chunkSize + 1);
+        Serial.print(": ");
+        Serial.println(chunk);
+        
+        // Small delay between chunks to ensure they're received in order
+        delay(10);
+      }
+      
+      Serial.println("============================");
+      
       lastSendTime = now;
     }
   }

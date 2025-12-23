@@ -510,9 +510,102 @@ export function BLEProvider({ children }: BLEProviderProps) {
                 dataBufferRef.current = dataBufferRef.current + decodedString;
                 let workingBuffer = dataBufferRef.current;
 
+                // Debug: log buffer state
+                const hasNewline = workingBuffer.includes('\n');
+                const lastChars =
+                  workingBuffer.length > 0
+                    ? workingBuffer.substring(Math.max(0, workingBuffer.length - 10))
+                    : '';
+
+                console.log(
+                  `[BLE Buffer] Buffer length: ${
+                    workingBuffer.length
+                  }, has newline: ${hasNewline}, last 10 chars: "${lastChars.replace(
+                    /\n/g,
+                    '\\n'
+                  )}"`
+                );
+
+                // If buffer is getting large but no newline, check for complete JSON
+                // BLE might split the message, so we need to detect complete JSON objects
+                if (workingBuffer.length > 50 && !hasNewline) {
+                  // Debug: Check if we're receiving duplicate chunks
+                  const first20 = workingBuffer.substring(0, 20);
+                  const second20 = workingBuffer.substring(20, 40);
+                  if (first20 === second20 && workingBuffer.length >= 40) {
+                    console.log(
+                      `[BLE Buffer] ⚠️ WARNING: Receiving duplicate chunks! First 20 chars repeated.`
+                    );
+                    console.log(`[BLE Buffer] First chunk: "${first20}"`);
+                    console.log(
+                      `[BLE Buffer] This suggests ESP32 is sending the same data repeatedly.`
+                    );
+                    // Clear buffer to prevent infinite growth
+                    workingBuffer = first20; // Keep only one copy
+                    dataBufferRef.current = first20;
+                    console.log(`[BLE Buffer] Reset buffer to single chunk to prevent overflow`);
+                  }
+
+                  // Try to find a complete JSON object in the buffer
+                  // Look for matching braces to find complete JSON
+                  let braceCount = 0;
+                  let jsonStart = -1;
+                  let jsonEnd = -1;
+
+                  for (let i = 0; i < workingBuffer.length; i++) {
+                    if (workingBuffer[i] === '{') {
+                      if (braceCount === 0) jsonStart = i;
+                      braceCount++;
+                    } else if (workingBuffer[i] === '}') {
+                      braceCount--;
+                      if (braceCount === 0 && jsonStart !== -1) {
+                        jsonEnd = i;
+                        // Found a complete JSON object!
+                        const completeJson = workingBuffer.substring(jsonStart, jsonEnd + 1);
+                        console.log(
+                          `[BLE Buffer] ✅ Found complete JSON (${completeJson.length} chars) without newline, processing...`
+                        );
+                        console.log(
+                          `[BLE Buffer] JSON: "${completeJson.substring(0, 150)}${
+                            completeJson.length > 150 ? '...' : ''
+                          }"`
+                        );
+
+                        // Process this JSON
+                        const completeMessage = completeJson.trim();
+                        if (completeMessage.length > 0) {
+                          console.log(
+                            `[BLE] ✅ Received complete message (${
+                              completeMessage.length
+                            } chars): "${completeMessage.substring(0, 100)}${
+                              completeMessage.length > 100 ? '...' : ''
+                            }"`
+                          );
+
+                          addLog('data', `📨 Received JSON (${completeMessage.length} chars)`, {
+                            message: completeMessage,
+                            length: completeMessage.length,
+                            timestamp: new Date().toISOString(),
+                            preview: completeMessage.substring(0, 100),
+                          });
+
+                          setReceivedData(`${completeMessage}|${Date.now()}`);
+                        }
+
+                        // Remove processed JSON from buffer
+                        workingBuffer = workingBuffer.substring(jsonEnd + 1);
+                        break; // Process one JSON at a time
+                      }
+                    }
+                  }
+                }
+
                 // Prevent buffer overflow (max 10KB)
                 if (workingBuffer.length > 10000) {
                   addLog('error', 'Data buffer overflow, resetting');
+                  console.log(
+                    `[BLE Buffer] Overflow! Buffer content: ${workingBuffer.substring(0, 200)}`
+                  );
                   workingBuffer = '';
                   dataBufferRef.current = '';
                 }
@@ -534,17 +627,33 @@ export function BLEProvider({ children }: BLEProviderProps) {
                   }
 
                   // Log the received message
-                  console.log(`[BLE] ✅ Received message: "${completeMessage}"`);
+                  console.log(
+                    `[BLE] ✅ Received complete message (${
+                      completeMessage.length
+                    } chars): "${completeMessage.substring(0, 100)}${
+                      completeMessage.length > 100 ? '...' : ''
+                    }"`
+                  );
 
                   // Log to UI
-                  addLog('data', `📨 Received: ${completeMessage}`, {
+                  addLog('data', `📨 Received JSON (${completeMessage.length} chars)`, {
                     message: completeMessage,
                     length: completeMessage.length,
                     timestamp: new Date().toISOString(),
+                    preview: completeMessage.substring(0, 100),
                   });
 
                   // Update receivedData for any components that need it
                   setReceivedData(`${completeMessage}|${Date.now()}`);
+                }
+
+                // Log if buffer has data but no newline yet
+                if (workingBuffer.length > 0 && !workingBuffer.includes('\n')) {
+                  console.log(
+                    `[BLE Buffer] Waiting for more data... buffer has ${
+                      workingBuffer.length
+                    } chars, preview: "${workingBuffer.substring(0, 50)}..."`
+                  );
                 }
 
                 // Update ref with remaining buffer (incomplete message or empty)
