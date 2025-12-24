@@ -1,6 +1,6 @@
 import { useBLE } from '@/hooks/BLEContext';
 import { ThemedView } from '@/components/themed-view';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -36,6 +36,16 @@ export default function BLEDeviceScanner({
     disconnectDevice,
   } = useBLE();
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+
+  // Close modal 1 second after device connection
+  useEffect(() => {
+    if (connectedDevice && visible) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [connectedDevice, visible, onClose]);
 
   const handleStartScan = async () => {
     await startScan();

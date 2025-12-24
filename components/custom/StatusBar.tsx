@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { usePatients } from '@/hooks/PatientsContext';
 import { useAppMode } from '@/hooks/AppModeContext';
+import { useBLE } from '@/hooks/BLEContext';
 
 interface CustomStatusBarProps {
   readonly variant?: 'patients-list' | 'tabs';
@@ -15,6 +16,7 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const { selectedPatient, selectedPatientId } = usePatients();
+  const { connectedDevice } = useBLE();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -81,18 +83,26 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
 
   if (isPatientsScreen) {
     // Scenario 1: patients list – generic connection + last update
+    const isSystemConnected = !!connectedDevice;
+    const systemStatusColor = isSystemConnected ? '#27AE60' : '#687076';
+    const systemStatusText = isSystemConnected ? 'System Connected' : 'Disconnected';
+    
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.content}>
           <View style={styles.statusRow}>
             <View style={styles.statusIndicator}>
-              <Animated.View
-                style={[
-                  styles.greenDot,
-                  { backgroundColor: '#27AE60', transform: [{ scale: scaleAnim }] },
-                ]}
-              />
-              <Text style={styles.statusText}>System Connected</Text>
+              {isSystemConnected ? (
+                <Animated.View
+                  style={[
+                    styles.greenDot,
+                    { backgroundColor: systemStatusColor, transform: [{ scale: scaleAnim }] },
+                  ]}
+                />
+              ) : (
+                <View style={[styles.greenDot, { backgroundColor: systemStatusColor }]} />
+              )}
+              <Text style={styles.statusText}>{systemStatusText}</Text>
             </View>
             <Text style={styles.timeText}>Last Update: {formatTime(lastUpdateTime)}</Text>
           </View>

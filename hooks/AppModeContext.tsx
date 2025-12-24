@@ -16,7 +16,7 @@ interface AppModeProviderProps {
 }
 
 export function AppModeProvider({ children }: AppModeProviderProps) {
-  const [mode, setModeState] = useState<AppMode>('test');
+  const [mode, setModeState] = useState<AppMode>('production');
 
   const toggleMode = useCallback(() => {
     setModeState((prev) => (prev === 'test' ? 'production' : 'test'));

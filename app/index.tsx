@@ -1,6 +1,6 @@
 import CustomStatusBar from '@/components/custom/StatusBar';
 import BLEDeviceScanner from '@/components/custom/BLEDeviceScanner';
-import BLEDataLogs from '@/components/custom/BLEDataLogs';
+// import BLEDataLogs from '@/components/custom/BLEDataLogs';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAppMode } from '@/hooks/AppModeContext';
@@ -41,17 +41,19 @@ export default function PatientsScreen() {
       {isProductionMode ? (
         <View style={styles.productionContainer}>
           {!connectedDevice ? (
-            <Pressable
-              style={styles.bleButtonCenter}
-              onPress={() => setIsScannerVisible(true)}
-            >
-              <IconSymbol
-                name="antenna.radiowaves.left.and.right"
-                size={24}
-                color="#ffffff"
-              />
-              <Text style={styles.bleButtonTextCenter}>Scan for Devices</Text>
-            </Pressable>
+            <View style={styles.centeredContainer}>
+              <Pressable
+                style={styles.bleButtonCenter}
+                onPress={() => setIsScannerVisible(true)}
+              >
+                <IconSymbol
+                  name="antenna.radiowaves.left.and.right"
+                  size={24}
+                  color="#ffffff"
+                />
+                <Text style={styles.bleButtonTextCenter}>Scan for Devices</Text>
+              </Pressable>
+            </View>
           ) : patients.length > 0 ? (
             <View style={styles.productionContent}>
               <View style={styles.connectedHeader}>
@@ -68,7 +70,7 @@ export default function PatientsScreen() {
                   <Text style={styles.scanButtonSmallText}>Change Device</Text>
                 </Pressable>
               </View>
-              <BLEDataLogs />
+              {/* <BLEDataLogs /> */}
               <FlatList
                 data={patients}
                 numColumns={4}
@@ -120,7 +122,7 @@ export default function PatientsScreen() {
                   <Text style={styles.scanButtonSmallText}>Change Device</Text>
                 </Pressable>
               </View>
-              <BLEDataLogs />
+              {/* <BLEDataLogs /> */}
               <View style={styles.waitingContainer}>
                 <Text style={styles.waitingText}>Waiting for patient data...</Text>
               </View>
@@ -210,6 +212,11 @@ const styles = StyleSheet.create({
   },
   productionContainer: {
     flex: 1,
+  },
+  centeredContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   productionContent: {
     flex: 1,
