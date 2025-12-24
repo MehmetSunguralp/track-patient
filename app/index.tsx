@@ -1,5 +1,4 @@
 import CustomStatusBar from '@/components/custom/StatusBar';
-import BLEDeviceScanner from '@/components/custom/BLEDeviceScanner';
 // import BLEDataLogs from '@/components/custom/BLEDataLogs';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -7,17 +6,29 @@ import { useAppMode } from '@/hooks/AppModeContext';
 import { useBLE } from '@/hooks/BLEContext';
 import { usePatients } from '@/hooks/PatientsContext';
 import { useRouter } from 'expo-router';
-import { FlatList, Image, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function PatientsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { patients, selectedPatientId, setSelectedPatientId } = usePatients();
   const { isProductionMode, toggleMode } = useAppMode();
-  const { connectedDevice } = useBLE();
-  const [isScannerVisible, setIsScannerVisible] = useState(false);
+  const { connectedDevice, devices, isScanning, isConnecting, startScan, stopScan, connectToDevice, isAvailable } = useBLE();
+  const [connectingDeviceId, setConnectingDeviceId] = useState<string | null>(null);
+
+  // Stop scanning when connected and reset connecting state
+  useEffect(() => {
+    if (connectedDevice && isScanning) {
+      stopScan();
+      setConnectingDeviceId(null);
+    }
+    // Reset connecting state when not connecting
+    if (!isConnecting) {
+      setConnectingDeviceId(null);
+    }
+  }, [connectedDevice, isScanning, isConnecting, stopScan]);
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + 72 }]}>
@@ -41,18 +52,85 @@ export default function PatientsScreen() {
       {isProductionMode ? (
         <View style={styles.productionContainer}>
           {!connectedDevice ? (
-            <View style={styles.centeredContainer}>
-              <Pressable
-                style={styles.bleButtonCenter}
-                onPress={() => setIsScannerVisible(true)}
-              >
-                <IconSymbol
-                  name="antenna.radiowaves.left.and.right"
-                  size={24}
-                  color="#ffffff"
+            <View style={styles.deviceListContainer}>
+              <View style={styles.scanHeader}>
+                <Text style={styles.scanHeaderText}>Available Devices</Text>
+                {isScanning && (
+                  <View style={styles.scanningIndicator}>
+                    <ActivityIndicator size="small" color="#3498DB" />
+                    <Text style={styles.scanningText}>Scanning...</Text>
+                  </View>
+                )}
+              </View>
+              {!isAvailable && (
+                <View style={styles.warningContainer}>
+                  <IconSymbol name="exclamationmark.triangle.fill" size={24} color="#F39C12" />
+                  <Text style={styles.warningText}>
+                    Bluetooth Low Energy is not available. Please use a development build.
+                  </Text>
+                </View>
+              )}
+              {isAvailable && devices.length === 0 && (
+                <View style={styles.centeredContainer}>
+                  {!isScanning ? (
+                    <Pressable style={styles.scanButton} onPress={() => startScan()}>
+                      <IconSymbol name="antenna.radiowaves.left.and.right" size={24} color="#ffffff" />
+                      <Text style={styles.scanButtonText}>Scan for Devices</Text>
+                    </Pressable>
+                  ) : (
+                    <View style={styles.scanningContainer}>
+                      <ActivityIndicator size="large" color="#3498DB" />
+                      <Text style={styles.scanningText}>Scanning for devices...</Text>
+                    </View>
+                  )}
+                </View>
+              )}
+              {isAvailable && devices.length > 0 && (
+                <FlatList
+                  data={devices}
+                  keyExtractor={(item) => item.id}
+                  contentContainerStyle={styles.deviceList}
+                  renderItem={({ item }) => {
+                    const isConnectingToThis = connectingDeviceId === item.id || (isConnecting && connectedDevice?.id === item.id);
+                    const displayName = item.name ?? (item.device as any)?.localName ?? (item.device as any)?.name ?? 'Unknown Device';
+
+                    return (
+                      <Pressable
+                        style={[styles.deviceItem, isConnectingToThis && styles.deviceItemConnecting]}
+                        onPress={() => {
+                          if (!isConnectingToThis && !isConnecting) {
+                            setConnectingDeviceId(item.id);
+                            connectToDevice(item.id).catch(() => {
+                              setConnectingDeviceId(null);
+                            });
+                          }
+                        }}
+                        disabled={isConnectingToThis || isConnecting}
+                      >
+                        <View style={styles.deviceInfo}>
+                          <IconSymbol
+                            name={isConnectingToThis ? 'bluetooth' : 'circle'}
+                            size={24}
+                            color={isConnectingToThis ? '#3498DB' : '#687076'}
+                          />
+                          <View style={styles.deviceDetails}>
+                            <Text style={styles.deviceName}>{displayName}</Text>
+                            <Text style={styles.deviceId}>{item.id}</Text>
+                            {item.rssi !== null && (
+                              <Text style={styles.deviceRssi}>RSSI: {item.rssi} dBm</Text>
+                            )}
+                          </View>
+                        </View>
+                        {isConnectingToThis ? (
+                          <ActivityIndicator size="small" color="#3498DB" />
+                        ) : (
+                          <IconSymbol name="chevron.right" size={20} color="#687076" />
+                        )}
+                      </Pressable>
+                    );
+                  }}
                 />
-                <Text style={styles.bleButtonTextCenter}>Scan for Devices</Text>
-              </Pressable>
+              )}
             </View>
           ) : patients.length > 0 ? (
             <View style={styles.productionContent}>
@@ -63,12 +141,6 @@ export default function PatientsScreen() {
                     Connected: {connectedDevice.name || connectedDevice.id}
                   </Text>
                 </View>
-                <Pressable
-                  style={styles.scanButtonSmall}
-                  onPress={() => setIsScannerVisible(true)}
-                >
-                  <Text style={styles.scanButtonSmallText}>Change Device</Text>
-                </Pressable>
               </View>
               {/* <BLEDataLogs /> */}
               <FlatList
@@ -115,12 +187,6 @@ export default function PatientsScreen() {
                     Connected: {connectedDevice.name || connectedDevice.id}
                   </Text>
                 </View>
-                <Pressable
-                  style={styles.scanButtonSmall}
-                  onPress={() => setIsScannerVisible(true)}
-                >
-                  <Text style={styles.scanButtonSmallText}>Change Device</Text>
-                </Pressable>
               </View>
               {/* <BLEDataLogs /> */}
               <View style={styles.waitingContainer}>
@@ -163,10 +229,6 @@ export default function PatientsScreen() {
           }}
         />
       )}
-      <BLEDeviceScanner
-        visible={isScannerVisible}
-        onClose={() => setIsScannerVisible(false)}
-      />
     </ThemedView>
   );
 }
@@ -217,6 +279,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 32,
   },
   productionContent: {
     flex: 1,
@@ -253,7 +316,48 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  bleButtonCenter: {
+  deviceListContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
+  scanHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  scanHeaderText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#11181C',
+  },
+  scanningIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  scanningText: {
+    fontSize: 14,
+    color: '#3498DB',
+    fontWeight: '500',
+  },
+  warningContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#FFF3CD',
+    padding: 16,
+    borderRadius: 8,
+    gap: 12,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  warningText: {
+    color: '#11181C',
+    fontSize: 14,
+    flex: 1,
+    lineHeight: 20,
+  },
+  scanButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -264,10 +368,58 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     minWidth: 200,
   },
-  bleButtonTextCenter: {
+  scanningContainer: {
+    alignItems: 'center',
+    gap: 16,
+  },
+  scanButtonText: {
     color: '#ffffff',
     fontSize: 18,
     fontWeight: '600',
+  },
+  deviceList: {
+    paddingBottom: 16,
+  },
+  deviceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f5f5f5',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  deviceItemConnecting: {
+    borderColor: '#3498DB',
+    borderWidth: 2,
+  },
+  deviceInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 12,
+  },
+  deviceDetails: {
+    flex: 1,
+  },
+  deviceName: {
+    color: '#11181C',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  deviceId: {
+    color: '#11181C',
+    fontSize: 12,
+    opacity: 0.6,
+    marginBottom: 2,
+  },
+  deviceRssi: {
+    color: '#11181C',
+    fontSize: 12,
+    opacity: 0.5,
   },
   avatarGrid: {
     paddingHorizontal: 8,

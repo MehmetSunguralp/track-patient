@@ -753,74 +753,28 @@ export function BLEProvider({ children }: BLEProviderProps) {
   );
 
   const disconnectDevice = useCallback(async () => {
-    try {
-      if (!connectedDevice) {
-        // Already disconnected, just clear state
-        setConnectedDevice(null);
-        setNusService(null);
-        setNusTxCharacteristic(null);
-        setNusRxCharacteristic(null);
-        setEsp32Service(null);
-        setEsp32TxCharacteristic(null);
-        setEsp32RxCharacteristic(null);
-        setDeviceType(null);
-        setReceivedData('');
-        setError(null);
-        return;
-      }
+    // NOTE: We cannot safely call cancelConnection() as it causes app crashes
+    // Instead, we just clear all state. The ESP32 will detect the disconnection
+    // when it stops receiving data, or the connection will timeout naturally.
+    // The onDisconnected callback will also fire when the device disconnects.
 
-      // Store device reference before clearing state
-      const deviceToDisconnect = connectedDevice;
+    // Clear all state immediately
+    setConnectedDevice(null);
+    setNusService(null);
+    setNusTxCharacteristic(null);
+    setNusRxCharacteristic(null);
+    setEsp32Service(null);
+    setEsp32TxCharacteristic(null);
+    setEsp32RxCharacteristic(null);
+    setDeviceType(null);
+    setReceivedData('');
+    setDataBuffer('');
+    dataBufferRef.current = '';
+    setError(null);
+    setIsConnecting(false);
 
-      // Clear state first to prevent race conditions and UI issues
-      setConnectedDevice(null);
-      setNusService(null);
-      setNusTxCharacteristic(null);
-      setNusRxCharacteristic(null);
-      setEsp32Service(null);
-      setEsp32TxCharacteristic(null);
-      setEsp32RxCharacteristic(null);
-      setDeviceType(null);
-      setReceivedData('');
-      setError(null);
-      setIsConnecting(false);
-
-      // Then cancel connection with timeout to prevent hanging
-      try {
-        await Promise.race([
-          deviceToDisconnect.cancelConnection(),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Disconnect timeout')), 3000)
-          ),
-        ]);
-        addLog('info', 'Device disconnected successfully');
-      } catch (cancelError) {
-        // Device might already be disconnected, that's okay
-        // Don't throw - we've already cleared state
-        addLog('info', 'Device disconnected (connection already closed)');
-      }
-    } catch (err) {
-      // Even if there's an error, ensure state is cleared
-      // Use setTimeout to avoid state updates during render
-      setTimeout(() => {
-        setConnectedDevice(null);
-        setNusService(null);
-        setNusTxCharacteristic(null);
-        setNusRxCharacteristic(null);
-        setEsp32Service(null);
-        setEsp32TxCharacteristic(null);
-        setEsp32RxCharacteristic(null);
-        setDeviceType(null);
-        setReceivedData('');
-        setDataBuffer('');
-        dataBufferRef.current = '';
-        setError(null);
-        setIsConnecting(false);
-      }, 0);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to disconnect device';
-      addLog('info', `Device disconnected: ${errorMessage}`);
-    }
-  }, [connectedDevice, addLog]);
+    addLog('info', 'Device disconnected (state cleared - ESP32 will detect disconnection)');
+  }, [addLog]);
 
   const sendData = useCallback(
     async (data: string) => {

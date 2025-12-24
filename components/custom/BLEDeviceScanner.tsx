@@ -1,6 +1,6 @@
 import { useBLE } from '@/hooks/BLEContext';
 import { ThemedView } from '@/components/themed-view';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -36,14 +36,23 @@ export default function BLEDeviceScanner({
     disconnectDevice,
   } = useBLE();
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+  const previousDeviceIdRef = useRef<string | null>(null);
 
-  // Close modal 1 second after device connection
+  // Close modal 500ms after NEW device connection (not if already connected)
   useEffect(() => {
     if (connectedDevice && visible) {
-      const timer = setTimeout(() => {
-        onClose();
-      }, 1000);
-      return () => clearTimeout(timer);
+      const currentDeviceId = connectedDevice.id;
+      // Only auto-close if this is a NEW connection (device ID changed)
+      if (previousDeviceIdRef.current !== currentDeviceId) {
+        previousDeviceIdRef.current = currentDeviceId;
+        const timer = setTimeout(() => {
+          onClose();
+        }, 500);
+        return () => clearTimeout(timer);
+      }
+    } else if (!connectedDevice) {
+      // Reset when disconnected
+      previousDeviceIdRef.current = null;
     }
   }, [connectedDevice, visible, onClose]);
 
@@ -70,15 +79,14 @@ export default function BLEDeviceScanner({
   const handleDisconnect = async () => {
     try {
       setSelectedDeviceId(null);
-      // Don't await - let it run in background to prevent blocking
+      previousDeviceIdRef.current = null;
+      // Close modal first to prevent UI blocking
+      onClose();
+      // Then disconnect in background
       disconnectDevice().catch((error) => {
         // Error already handled in disconnectDevice, just log
         console.error('Disconnect error:', error);
       });
-      // Close modal immediately to prevent UI blocking
-      setTimeout(() => {
-        onClose();
-      }, 100);
     } catch (error) {
       // Error already handled in disconnectDevice
       console.error('Disconnect error:', error);
