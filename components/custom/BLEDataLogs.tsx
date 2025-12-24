@@ -82,7 +82,7 @@ export default function BLEDataLogs() {
   if (!connectedDevice) {
     return (
       <View style={styles.emptyContainer}>
-        <IconSymbol name="antenna.radiowaves.left.and.right" size={48} color="#7f8c8d" />
+        <IconSymbol name="antenna.radiowaves.left.and.right" size={48} color="#687076" />
         <Text style={styles.emptyText}>No device connected</Text>
         <Text style={styles.emptySubtext}>Connect to a BLE device to see data logs</Text>
       </View>
@@ -173,7 +173,7 @@ export default function BLEDataLogs() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#010D13',
+    backgroundColor: '#ffffff',
   },
   header: {
     flexDirection: 'row',
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#2c3e50',
+    borderBottomColor: '#e0e0e0',
   },
   headerLeft: {
     flexDirection: 'row',
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#ffffff',
+    color: '#11181C',
   },
   logCountBadge: {
     backgroundColor: '#3498DB',
@@ -238,11 +238,13 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   logEntry: {
-    backgroundColor: '#1c2833',
+    backgroundColor: '#f5f5f5',
     borderRadius: 8,
     padding: 12,
     marginBottom: 12,
     borderLeftWidth: 3,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   logEntrydata: {
     borderLeftColor: '#3498DB',
@@ -266,29 +268,31 @@ const styles = StyleSheet.create({
   },
   logTimestamp: {
     fontSize: 11,
-    color: '#7f8c8d',
+    color: '#687076',
     marginLeft: 'auto',
   },
   logMessage: {
     fontSize: 14,
-    color: '#ffffff',
+    color: '#11181C',
     marginBottom: 4,
   },
   logDataContainer: {
     marginTop: 8,
     padding: 8,
-    backgroundColor: '#010D13',
+    backgroundColor: '#ffffff',
     borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   logDataLabel: {
     fontSize: 11,
-    color: '#7f8c8d',
+    color: '#687076',
     marginBottom: 4,
     fontWeight: '600',
   },
   logData: {
     fontSize: 12,
-    color: '#ecf0f1',
+    color: '#11181C',
     fontFamily: 'monospace',
   },
   emptyContainer: {
@@ -300,13 +304,13 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#ffffff',
+    color: '#11181C',
     marginTop: 16,
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#7f8c8d',
+    color: '#687076',
     textAlign: 'center',
   },
   emptyLogsContainer: {
@@ -318,12 +322,12 @@ const styles = StyleSheet.create({
   emptyLogsText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#ffffff',
+    color: '#11181C',
     marginBottom: 8,
   },
   emptyLogsSubtext: {
     fontSize: 14,
-    color: '#7f8c8d',
+    color: '#687076',
     textAlign: 'center',
   },
 });

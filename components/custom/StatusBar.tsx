@@ -55,7 +55,7 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
   };
 
   const statusLabel = selectedPatient.isConnected ? 'Live' : 'Disconnected';
-  const statusColor = selectedPatient.isConnected ? '#27AE60' : '#7f8c8d';
+  const statusColor = selectedPatient.isConnected ? '#27AE60' : '#687076';
 
   // Determine which variant to show based on prop or pathname
   // If variant prop is provided, use it; otherwise detect from pathname
@@ -167,9 +167,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1000,
-    backgroundColor: '#010D13',
+    backgroundColor: '#ffffff',
     paddingHorizontal: 16,
     paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
   content: {
     paddingTop: 4,
@@ -196,12 +198,12 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   patientName: {
-    color: '#ffffff',
+    color: '#11181C',
     fontSize: 14,
     fontWeight: '600',
   },
   patientMeta: {
-    color: '#ffffff',
+    color: '#11181C',
     fontSize: 11,
     opacity: 0.75,
   },
@@ -237,12 +239,12 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   statusText: {
-    color: '#fff',
+    color: '#11181C',
     fontSize: 12,
     fontWeight: '500',
   },
   timeText: {
-    color: '#fff',
+    color: '#11181C',
     fontSize: 12,
     opacity: 0.8,
   },

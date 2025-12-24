@@ -30,9 +30,9 @@ export default function PatientsScreen() {
             <Switch
               value={isProductionMode}
               onValueChange={toggleMode}
-              trackColor={{ false: '#2c3e50', true: '#27AE60' }}
+              trackColor={{ false: '#e0e0e0', true: '#27AE60' }}
               thumbColor="#ffffff"
-              ios_backgroundColor="#2c3e50"
+              ios_backgroundColor="#e0e0e0"
             />
             <Text style={styles.modeLabel}>Prod</Text>
           </View>
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#ffffff',
+    color: '#11181C',
     flex: 1,
   },
   headerControls: {
@@ -196,15 +196,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#1c2833',
+    backgroundColor: '#f5f5f5',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#2c3e50',
+    borderColor: '#e0e0e0',
   },
   modeLabel: {
-    color: '#ffffff',
+    color: '#11181C',
     fontSize: 12,
     fontWeight: '600',
   },
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#2c3e50',
+    borderBottomColor: '#e0e0e0',
   },
   connectedStatus: {
     flexDirection: 'row',
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   connectedText: {
-    color: '#ffffff',
+    color: '#11181C',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -277,10 +277,10 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     overflow: 'hidden',
     borderWidth: 2,
-    borderColor: '#2c3e50',
+    borderColor: '#e0e0e0',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1c2833',
+    backgroundColor: '#f5f5f5',
   },
   avatarConnected: {
     borderColor: '#27AE60',
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
   },
   patientIdText: {
-    color: '#ffffff',
+    color: '#11181C',
     fontSize: 18,
     fontWeight: '700',
   },
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 12,
     fontWeight: '500',
-    color: '#ffffff',
+    color: '#11181C',
   },
   waitingContainer: {
     flex: 1,
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
   },
   waitingText: {
     fontSize: 16,
-    color: '#7f8c8d',
+    color: '#687076',
     textAlign: 'center',
   },
 });

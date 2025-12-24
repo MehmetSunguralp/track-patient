@@ -1,3 +1,4 @@
+import { LightTheme } from '@react-navigation/native';
 import { Tabs } from 'expo-router';
 import React from 'react';
 
@@ -10,6 +11,7 @@ export default function TabLayout() {
     <>
       <CustomStatusBar variant="tabs" />
       <Tabs
+        theme={LightTheme}
         screenOptions={{
           headerShown: false,
         }}

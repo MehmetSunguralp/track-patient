@@ -143,7 +143,7 @@ export default function LocationScreen() {
                 <IconSymbol
                   name="chevron.right"
                   size={20}
-                  color="#ffffff"
+                  color="#687076"
                   style={styles.detailsButtonIcon}
                 />
                 <Text style={styles.detailsButtonText}>
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   detailsButtonText: {
-    color: '#7f8c8d',
+    color: '#687076',
     fontSize: 16,
     fontWeight: '500',
   },

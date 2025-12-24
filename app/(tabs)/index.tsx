@@ -266,10 +266,12 @@ const styles = StyleSheet.create({
   },
   statusCard: {
     width: '48%',
-    backgroundColor: '#010D13',
+    backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   statusCardHeader: {
     flexDirection: 'row',
@@ -278,7 +280,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   statusLabel: {
-    color: '#ffffff',
+    color: '#11181C',
     fontSize: 12,
     fontWeight: '500',
     marginLeft: 8,
@@ -292,7 +294,7 @@ const styles = StyleSheet.create({
   statusValue: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#ffffff',
+    color: '#11181C',
     textAlign: 'center',
   },
   statusUnit: {
@@ -309,7 +311,7 @@ const styles = StyleSheet.create({
   noDataText: {
     textAlign: 'center',
     fontSize: 14,
-    color: '#ffffff',
+    color: '#11181C',
     opacity: 0.8,
   },
 });

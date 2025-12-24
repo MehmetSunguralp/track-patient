@@ -88,7 +88,7 @@ export default function BLEDeviceScanner({
         <View style={styles.header}>
           <Text style={styles.title}>Scan for Bluetooth Devices</Text>
           <Pressable onPress={onClose} style={styles.closeButton}>
-            <IconSymbol name="xmark" size={24} color="#ffffff" />
+            <IconSymbol name="xmark" size={24} color="#11181C" />
           </Pressable>
         </View>
 
@@ -160,7 +160,7 @@ export default function BLEDeviceScanner({
                   <IconSymbol
                     name={isConnected ? 'bluetooth' : 'circle'}
                     size={24}
-                    color={isConnected ? '#27AE60' : '#ffffff'}
+                    color={isConnected ? '#27AE60' : '#687076'}
                   />
                   <View style={styles.deviceDetails}>
                     <Text style={styles.deviceName}>{displayName}</Text>
@@ -171,11 +171,11 @@ export default function BLEDeviceScanner({
                   </View>
                 </View>
                 {isConnectingToThis ? (
-                  <ActivityIndicator size="small" color="#ffffff" />
+                  <ActivityIndicator size="small" color="#687076" />
                 ) : isConnected ? (
                   <IconSymbol name="checkmark.circle.fill" size={24} color="#27AE60" />
                 ) : (
-                  <IconSymbol name="chevron.right" size={20} color="#ffffff" />
+                  <IconSymbol name="chevron.right" size={20} color="#687076" />
                 )}
               </Pressable>
             );
@@ -209,12 +209,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#2c3e50',
+    borderBottomColor: '#e0e0e0',
   },
   title: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#ffffff',
+    color: '#11181C',
   },
   closeButton: {
     padding: 8,
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   warningText: {
-    color: '#ffffff',
+    color: '#11181C',
     fontSize: 14,
     flex: 1,
     lineHeight: 20,
@@ -264,10 +264,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   connectedContainer: {
-    backgroundColor: '#1c2833',
+    backgroundColor: '#f5f5f5',
     padding: 16,
     borderRadius: 12,
     gap: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   connectedInfo: {
     flexDirection: 'row',
@@ -275,7 +277,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   connectedText: {
-    color: '#ffffff',
+    color: '#11181C',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -298,13 +300,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#1c2833',
+    backgroundColor: '#f5f5f5',
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   deviceItemConnected: {
-    backgroundColor: '#1e3a2e',
+    backgroundColor: '#e8f5e9',
     borderWidth: 2,
     borderColor: '#27AE60',
   },
@@ -318,19 +322,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   deviceName: {
-    color: '#ffffff',
+    color: '#11181C',
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
   },
   deviceId: {
-    color: '#ffffff',
+    color: '#11181C',
     fontSize: 12,
     opacity: 0.6,
     marginBottom: 2,
   },
   deviceRssi: {
-    color: '#ffffff',
+    color: '#11181C',
     fontSize: 12,
     opacity: 0.5,
   },
@@ -339,7 +343,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    color: '#ffffff',
+    color: '#11181C',
     fontSize: 14,
     opacity: 0.6,
     textAlign: 'center',
