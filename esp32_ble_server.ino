@@ -56,70 +56,63 @@ uint8_t calculateCRC8(const String& data) {
 
 // ================= Format Helpers =================
 String formatLatitude(float lat) {
-  // Format: "4901.5232N" (10 chars) - no space, direction at end
-  // Convert decimal degrees to DDMM.MMMMM format
+  // Format: "050.67506" (8 chars) - NO direction letter, DDMM.MMM format
+  // Convert decimal degrees to DDMM.MMM format
   int degrees = (int)abs(lat);
   float minutes = (abs(lat) - degrees) * 60.0;
-  String dir = lat >= 0 ? "N" : "S";
   
-  // Format: DDMM.MMMMM + direction (no space)
-  String result = "";
-  if (degrees < 10) result += "0";
-  result += String(degrees);
-  
+  // Format: DDMM.MMM (no direction) - exactly 8 chars
+  char result[9]; // 8 chars + null terminator
   int minInt = (int)minutes;
-  if (minInt < 10) result += "0";
-  result += String(minInt);
-  result += ".";
+  int minFrac = (int)((minutes - minInt) * 1000 + 0.5); // Round to nearest
   
-  // 5 decimal places for fractional minutes
-  int minFrac = (int)((minutes - minInt) * 100000);
-  if (minFrac < 10000) result += "0";
-  if (minFrac < 1000) result += "0";
-  if (minFrac < 100) result += "0";
-  if (minFrac < 10) result += "0";
-  result += String(minFrac);
-  result += dir; // No space before direction
+  // Handle overflow
+  if (minFrac >= 1000) {
+    minFrac = 0;
+    minInt++;
+    if (minInt >= 60) {
+      minInt = 0;
+      degrees++;
+    }
+  }
   
-  return result;
+  sprintf(result, "%02d%02d.%03d", degrees, minInt, minFrac);
+  return String(result);
 }
 
 String formatLongitude(float lon) {
-  // Format: "12305.823W" (11 chars) - no space, direction at end
+  // Format: "60120.3698" (10 chars) - NO direction letter, DDDMM.MMMM format
   int degrees = (int)abs(lon);
   float minutes = (abs(lon) - degrees) * 60.0;
-  String dir = lon >= 0 ? "E" : "W";
   
-  String result = "";
-  if (degrees < 100) result += "0";
-  if (degrees < 10) result += "0";
-  result += String(degrees);
-  
+  char result[11]; // 10 chars + null terminator
   int minInt = (int)minutes;
-  if (minInt < 10) result += "0";
-  result += String(minInt);
-  result += ".";
+  int minFrac = (int)((minutes - minInt) * 10000 + 0.5); // Round to nearest
   
-  // 3 decimal places for fractional minutes
-  int minFrac = (int)((minutes - minInt) * 1000);
-  if (minFrac < 100) result += "0";
-  if (minFrac < 10) result += "0";
-  result += String(minFrac);
-  result += dir; // No space before direction
+  // Handle overflow
+  if (minFrac >= 10000) {
+    minFrac = 0;
+    minInt++;
+    if (minInt >= 60) {
+      minInt = 0;
+      degrees++;
+    }
+  }
   
-  return result;
+  sprintf(result, "%03d%02d.%04d", degrees, minInt, minFrac);
+  return String(result);
 }
 
 String getLast4Digits(String value) {
   // Extract last 4 numeric digits from a formatted coordinate
-  // For "4901.5232N", we want "5232" (last 4 digits before direction)
+  // For "050.67506", we want "7506" (last 4 digits)
   String digits = "";
-  for (int i = value.length() - 2; i >= 0 && digits.length() < 4; i--) { // Skip last char (direction)
+  for (int i = value.length() - 1; i >= 0 && digits.length() < 4; i--) {
     char c = value.charAt(i);
     if (c >= '0' && c <= '9') {
       digits = String(c) + digits;
     } else {
-      break;
+      break; // Skip non-digit characters like '.'
     }
   }
   
@@ -167,7 +160,7 @@ String generateLivePacket() {
   // 4. GPS Fix (1 char: '0' or '1')
   packet += "1"; // Always fixed for simulation
   
-  // 5. Latitude (10 chars)
+  // 5. Latitude (8 chars: DDMM.MMM)
   String latStr = formatLatitude(lat);
   packet += latStr;
   
@@ -177,7 +170,7 @@ String generateLivePacket() {
   // 7. Previous Latitude t-2 (4 chars)
   packet += prevData.lat4_2;
   
-  // 8. Longitude (11 chars)
+  // 8. Longitude (10 chars: DDDMM.MMMM)
   String lonStr = formatLongitude(lon);
   packet += lonStr;
   
@@ -187,9 +180,17 @@ String generateLivePacket() {
   // 10. Previous Longitude t-2 (4 chars)
   packet += prevData.lon4_2;
   
-  // 11. Velocity knots (5 chars)
-  String velStr = String((int)(speedKnots * 10));
-  while (velStr.length() < 5) velStr = "0" + velStr;
+  // 11. Velocity knots (5 chars: XXX.X format with decimal point)
+  // Format: exactly 5 chars with decimal point (e.g., "940.6", "052.3", "000.0")
+  // Convert to integer (multiply by 10 to get 1 decimal place), pad to 4 digits, insert decimal
+  int velInt = (int)(speedKnots * 10);
+  String velStr = String(velInt);
+  // Pad to 4 digits
+  while (velStr.length() < 4) {
+    velStr = "0" + velStr;
+  }
+  // Insert decimal point before last digit: "9406" -> "940.6"
+  velStr = velStr.substring(0, 3) + "." + velStr.substring(3);
   packet += velStr;
   
   // 12. Previous Velocity t-1 (5 chars)
@@ -216,8 +217,8 @@ String generateLivePacket() {
   sprintf(crcHex, "%02X", crc);
   packet += String(crcHex);
   
-  // 17. Terminator
-  packet += "D";
+  // 17. Terminator (double D for Live packets)
+  packet += "DD";
   
   // Update previous values for next packet
   prevData.lat4_2 = prevData.lat4;
@@ -225,7 +226,7 @@ String generateLivePacket() {
   prevData.lon4_2 = prevData.lon4;
   prevData.lon4 = getLast4Digits(lonStr);
   prevData.vel5_2 = prevData.vel5;
-  prevData.vel5 = velStr;
+  prevData.vel5 = velStr; // Store in XXX.X format (5 chars)
   
   return packet;
 }
@@ -515,8 +516,8 @@ void setup() {
   prevData.lat4_2 = "0000";
   prevData.lon4 = "0000";
   prevData.lon4_2 = "0000";
-  prevData.vel5 = "00000";
-  prevData.vel5_2 = "00000";
+  prevData.vel5 = "000.0"; // Format: XXX.X (5 chars with decimal)
+  prevData.vel5_2 = "000.0";
 
   Serial.println("BLE Started");
 }
@@ -539,33 +540,21 @@ void loop() {
     // Send Live packet (L) every 1 second
     if (now - lastLiveTime >= LIVE_INTERVAL) {
       String packet = generateLivePacket();
-      Serial.println("=== Sending Live Packet (L) ===");
-      Serial.print("Packet: ");
-      Serial.println(packet);
       sendPacket(packet);
-      Serial.println("============================");
       lastLiveTime = now;
     }
     
     // Send Total packet (T) every 2 seconds
     if (now - lastTotalTime >= TOTAL_INTERVAL) {
       String packet = generateTotalPacket();
-      Serial.println("=== Sending Total Packet (T) ===");
-      Serial.print("Packet: ");
-      Serial.println(packet);
       sendPacket(packet);
-      Serial.println("============================");
       lastTotalTime = now;
     }
     
-    // Send Status packet (S) every 10 seconds (or immediately on first connection)
+    // Send Status packet (S) every 60 seconds (or immediately on first connection)
     if (now - lastStatusTime >= STATUS_INTERVAL || lastStatusTime == 0) {
       String packet = generateStatusPacket();
-      Serial.println("=== Sending Status Packet (S) ===");
-      Serial.print("Packet: ");
-      Serial.println(packet);
       sendPacket(packet);
-      Serial.println("============================");
       lastStatusTime = now;
     }
   }

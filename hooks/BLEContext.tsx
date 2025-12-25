@@ -657,9 +657,10 @@ export function BLEProvider({ children }: BLEProviderProps) {
                     }
                   }
 
-                  // If no newline, check for ASCII packet ending with 'D' (terminator)
-                  // Look for packets starting with L, T, or S and ending with 'D'
-                  const packetMatch = workingBuffer.match(/^([LTS].*?D)/);
+                  // If no newline, check for ASCII packet ending with 'D' or 'DD' (terminator)
+                  // Live packets (L) end with 'DD', Total/Status packets (T/S) end with 'D'
+                  // Match: L packets ending with DD, or T/S packets ending with D
+                  const packetMatch = workingBuffer.match(/^(L.*?DD|[TS].*?D)/);
                   if (packetMatch) {
                     const completePacket = packetMatch[1];
                     workingBuffer = workingBuffer.substring(completePacket.length);

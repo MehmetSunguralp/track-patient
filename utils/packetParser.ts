@@ -74,43 +74,77 @@ export interface ParsedStatusPacket {
 export type ParsedPacket = ParsedLivePacket | ParsedTotalPacket | ParsedStatusPacket;
 
 /**
- * Convert DDMM.MMMMMN format to decimal degrees (no space before direction)
+ * Convert latitude to decimal degrees
+ * Supports two formats:
+ * 1. Old format: "4901.5232N" (10 chars) - with direction letter
+ * 2. New format: "050.67506" (8 chars) - without direction letter (assumed North/positive)
  */
 function parseLatitude(latStr: string): number {
-  // Format: "4901.5232N" (10 chars) - no space before direction
-  const match = latStr.match(/(\d{2})(\d{2})\.(\d{5})([NS])/);
-  if (!match) return 0;
+  // Try old format first: DDMM.MMMMMN or DDMM.MMMN
+  let match = latStr.match(/(\d{2})(\d{2})\.(\d{5})([NS])/);
+  if (match) {
+    const degrees = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10) + parseInt(match[3], 10) / 100000;
+    const sign = match[4] === 'N' ? 1 : -1;
+    return sign * (degrees + minutes / 60);
+  }
   
-  const degrees = parseInt(match[1], 10);
-  const minutes = parseInt(match[2], 10) + parseInt(match[3], 10) / 100000;
-  const sign = match[4] === 'N' ? 1 : -1;
+  // Try old format with 4 decimal places: DDMM.MMMN
+  match = latStr.match(/(\d{2})(\d{2})\.(\d{4})([NS])/);
+  if (match) {
+    const degrees = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10) + parseInt(match[3], 10) / 10000;
+    const sign = match[4] === 'N' ? 1 : -1;
+    return sign * (degrees + minutes / 60);
+  }
   
-  return sign * (degrees + minutes / 60);
+  // New format: DDMM.MMM (8 chars, no direction) - assume North/positive
+  match = latStr.match(/(\d{2})(\d{2})\.(\d{3})/);
+  if (match) {
+    const degrees = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10) + parseInt(match[3], 10) / 1000;
+    return degrees + minutes / 60; // Assume North (positive)
+  }
+  
+  return 0;
 }
 
 /**
- * Convert DDDMM.MMME format to decimal degrees (no space before direction)
+ * Convert longitude to decimal degrees
+ * Supports two formats:
+ * 1. Old format: "12305.823W" (11 chars) - with direction letter
+ * 2. New format: "60120.3698" (10 chars) - without direction letter (assumed East/positive)
  */
 function parseLongitude(lonStr: string): number {
-  // Format: "12305.823W" (11 chars) - no space before direction
-  const match = lonStr.match(/(\d{3})(\d{2})\.(\d{3})([EW])/);
-  if (!match) return 0;
+  // Try old format first: DDDMM.MMME or DDDMM.MMMW
+  let match = lonStr.match(/(\d{3})(\d{2})\.(\d{3})([EW])/);
+  if (match) {
+    const degrees = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10) + parseInt(match[3], 10) / 1000;
+    const sign = match[4] === 'E' ? 1 : -1;
+    return sign * (degrees + minutes / 60);
+  }
   
-  const degrees = parseInt(match[1], 10);
-  const minutes = parseInt(match[2], 10) + parseInt(match[3], 10) / 1000;
-  const sign = match[4] === 'E' ? 1 : -1;
+  // New format: DDDMM.MMMM (10 chars, no direction) - assume East/positive
+  match = lonStr.match(/(\d{3})(\d{2})\.(\d{4})/);
+  if (match) {
+    const degrees = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10) + parseInt(match[3], 10) / 10000;
+    return degrees + minutes / 60; // Assume East (positive)
+  }
   
-  return sign * (degrees + minutes / 60);
+  return 0;
 }
 
 /**
  * Parse Live (L) packet
- * Format: L + PodID(2) + GPSTime(6) + GPSFix(1) + Lat(10) + PrevLat1(4) + PrevLat2(4) + Lon(11) + PrevLon1(4) + PrevLon2(4) + Vel(5) + PrevVel1(5) + PrevVel2(5) + HR(3) + Power(5) + CRC(2) + D
+ * Format: L + PodID(2) + GPSTime(6) + GPSFix(1) + Lat(8) + PrevLat1(4) + PrevLat2(4) + Lon(10) + PrevLon1(4) + PrevLon2(4) + Vel(5) + PrevVel1(5) + PrevVel2(5) + HR(3) + Power(5) + CRC(2) + DD
+ * Note: Coordinates are numeric only (no N/S/E/W direction letters) based on test data format
  */
 function parseLivePacket(packet: string): ParsedLivePacket | null {
-  // Minimum length: 1 + 2 + 6 + 1 + 10 + 4 + 4 + 11 + 4 + 4 + 5 + 5 + 5 + 3 + 5 + 2 + 1 = 77
-  // But actual packets might be slightly different, so allow 73+
-  if (packet.length < 73) {
+  // Minimum length: 1 + 2 + 6 + 1 + 8 + 4 + 4 + 10 + 4 + 4 + 5 + 5 + 5 + 3 + 5 + 2 + 2 = 71
+  // But allow some flexibility
+  if (packet.length < 70) {
     console.log(`[PacketParser] Live packet too short: ${packet.length} chars`);
     return null;
   }
@@ -126,18 +160,28 @@ function parseLivePacket(packet: string): ParsedLivePacket | null {
   const gpsFix = packet.substring(pos, pos + 1);
   pos += 1;
   
-  // Latitude might be 10 or 11 chars - try to detect
-  // Look for pattern: digits.digitsN or digits.digitsS
+  // Try to parse latitude - first check if it has direction letter (old format) or is fixed-width (new format)
+  // Look for N/S direction letter first (backward compatibility)
   let latEnd = pos;
-  while (latEnd < packet.length && packet[latEnd] !== 'N' && packet[latEnd] !== 'S') {
+  let hasDirection = false;
+  while (latEnd < packet.length && latEnd < pos + 12) {
+    if (packet[latEnd] === 'N' || packet[latEnd] === 'S') {
+      hasDirection = true;
+      break;
+    }
     latEnd++;
   }
-  if (latEnd >= packet.length) {
-    console.log(`[PacketParser] Could not find latitude direction (N/S) at pos ${pos}`);
-    return null;
+  
+  let latitude: string;
+  if (hasDirection) {
+    // Old format: includes direction letter (10 or 11 chars)
+    latitude = packet.substring(pos, latEnd + 1);
+    pos = latEnd + 1;
+  } else {
+    // New format: fixed 8 chars, no direction (e.g., "050.67506")
+    latitude = packet.substring(pos, pos + 8);
+    pos += 8;
   }
-  const latitude = packet.substring(pos, latEnd + 1); // Include N/S
-  pos = latEnd + 1;
   
   const prevLat1 = packet.substring(pos, pos + 4);
   pos += 4;
@@ -145,17 +189,27 @@ function parseLivePacket(packet: string): ParsedLivePacket | null {
   const prevLat2 = packet.substring(pos, pos + 4);
   pos += 4;
   
-  // Longitude - look for E or W
+  // Try to parse longitude - check for E/W direction letter first
   let lonEnd = pos;
-  while (lonEnd < packet.length && packet[lonEnd] !== 'E' && packet[lonEnd] !== 'W') {
+  hasDirection = false;
+  while (lonEnd < packet.length && lonEnd < pos + 12) {
+    if (packet[lonEnd] === 'E' || packet[lonEnd] === 'W') {
+      hasDirection = true;
+      break;
+    }
     lonEnd++;
   }
-  if (lonEnd >= packet.length) {
-    console.log(`[PacketParser] Could not find longitude direction (E/W) at pos ${pos}`);
-    return null;
+  
+  let longitude: string;
+  if (hasDirection) {
+    // Old format: includes direction letter (11 chars)
+    longitude = packet.substring(pos, lonEnd + 1);
+    pos = lonEnd + 1;
+  } else {
+    // New format: fixed 10 chars, no direction (e.g., "60120.3698")
+    longitude = packet.substring(pos, pos + 10);
+    pos += 10;
   }
-  const longitude = packet.substring(pos, lonEnd + 1); // Include E/W
-  pos = lonEnd + 1;
   
   const prevLon1 = packet.substring(pos, pos + 4);
   pos += 4;
@@ -178,22 +232,33 @@ function parseLivePacket(packet: string): ParsedLivePacket | null {
   const metabolicPower = parseInt(packet.substring(pos, pos + 5), 10) / 10.0;
   pos += 5;
   
-  // CRC might be 2 or 4 hex chars - look for 'D' terminator
+  // CRC is 2 hex chars, then terminator 'D' or 'DD'
+  // Look for terminator - could be single 'D' or double 'DD' for Live packets
   let crcEnd = pos;
-  while (crcEnd < packet.length && packet[crcEnd] !== 'D') {
+  while (crcEnd < packet.length && crcEnd < pos + 4) {
+    if (packet[crcEnd] === 'D') {
+      break;
+    }
     crcEnd++;
   }
-  if (crcEnd >= packet.length) {
+  if (crcEnd >= packet.length || crcEnd === pos) {
     console.log(`[PacketParser] Could not find terminator 'D' at pos ${pos}`);
     return null;
   }
+  
+  // CRC is 2 hex chars before the 'D'
   const crc = packet.substring(pos, crcEnd);
   pos = crcEnd;
   
-  // Should end with 'D'
+  // Should end with 'D' or 'DD' (Live packets use 'DD' based on test data)
   if (packet[pos] !== 'D') {
     console.log(`[PacketParser] Expected 'D' at pos ${pos}, got '${packet[pos]}'`);
     return null;
+  }
+  
+  // Check if there's a second 'D' (Live packets end with 'DD')
+  if (pos + 1 < packet.length && packet[pos + 1] === 'D') {
+    pos++; // Skip second 'D'
   }
   
   return {
@@ -434,7 +499,15 @@ export function livePacketToPatientData(packet: ParsedLivePacket, timestamp?: st
 } {
   const lat = parseLatitude(packet.latitude);
   const lon = parseLongitude(packet.longitude);
-  const speedKnots = parseInt(packet.velocityKnots, 10) / 10.0;
+  // Velocity format: "940.6" (5 chars with decimal point) or "9406" (4 digits representing 940.6)
+  let speedKnots: number;
+  if (packet.velocityKnots.includes('.')) {
+    // New format with decimal point
+    speedKnots = parseFloat(packet.velocityKnots);
+  } else {
+    // Old format: integer representing value * 10
+    speedKnots = parseInt(packet.velocityKnots, 10) / 10.0;
+  }
   const speedKmh = speedKnots * 1.852; // Convert knots to km/h
   
   // Convert pod ID to patient ID (e.g., "01" -> "p1")
