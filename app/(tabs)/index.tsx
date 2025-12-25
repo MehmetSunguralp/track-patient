@@ -84,15 +84,17 @@ function StatusItem({ icon, label, value, color, unit, previousValue }: StatusIt
   return (
     <Animated.View style={[styles.statusCard, { backgroundColor }]}>
       <View style={styles.statusCardContent}>
-        <View style={styles.statusIconContainer}>
-          <IconSymbol name={icon as any} size={48} color={color} />
-        </View>
-        <View style={styles.statusTextContainer}>
-          <Text style={styles.statusLabel}>{label}</Text>
-          <Text style={[styles.statusValue, { color: displayValue === '-' ? '#999' : color }]}>
-            {displayValue}
-            {unit && displayValue !== '-' && <Text style={styles.statusUnit}> {unit}</Text>}
-          </Text>
+        <Text style={styles.statusLabel}>{label}</Text>
+        <View style={styles.statusBottomRow}>
+          <View style={styles.statusIconContainer}>
+            <IconSymbol name={icon as any} size={48} color={color} />
+          </View>
+          <View style={styles.statusValueContainer}>
+            <Text style={[styles.statusValue, { color: displayValue === '-' ? '#999' : color }]}>
+              {displayValue}
+              {unit && displayValue !== '-' && <Text style={styles.statusUnit}> {unit}</Text>}
+            </Text>
+          </View>
         </View>
       </View>
     </Animated.View>
@@ -294,31 +296,39 @@ const styles = StyleSheet.create({
     borderColor: '#e0e0e0',
   },
   statusCardContent: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     gap: 12,
   },
+  statusBottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
   statusIconContainer: {
-    width: 64,
+    flex: 1,
     height: 64,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  statusTextContainer: {
+  statusValueContainer: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   statusLabel: {
     color: '#11181C',
     fontSize: 12,
     fontWeight: '500',
-    marginBottom: 4,
     opacity: 0.8,
+    textAlign: 'center',
   },
   statusValue: {
     fontSize: 24,
     fontWeight: '700',
     color: '#11181C',
+    textAlign: 'center',
   },
   statusUnit: {
     fontSize: 14,
