@@ -120,7 +120,7 @@ export default function PatientsScreen() {
   return (
     <LinearGradient
       colors={['#F0F8FF', '#FFFFFF']}
-      style={[styles.container, { paddingTop: insets.top + 60 }]}
+      style={[styles.container, { paddingTop: insets.top + 40 }]}
     >
       <CustomStatusBar variant="patients-list" />
       {patients.length > 0 && (
@@ -450,6 +450,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     gap: 24,
     paddingTop: 0,
+    paddingBottom: 40,
   },
   scanButtonContainer: {
     paddingHorizontal: 16,

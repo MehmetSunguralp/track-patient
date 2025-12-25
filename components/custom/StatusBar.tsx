@@ -1,6 +1,6 @@
 import { usePathname } from 'expo-router';
 import { useEffect, useRef } from 'react';
-import { Animated, Image, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppMode } from '@/hooks/AppModeContext';
@@ -146,7 +146,7 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
           )}
         </View>
 
-        {hasPatientData && (
+        {/* {hasPatientData && (
           <>
             {isProductionMode ? (
               // Production mode: show only patient ID
@@ -178,7 +178,7 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
               </View>
             )}
           </>
-        )}
+        )} */}
       </View>
     </View>
   );
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 6,
+    marginBottom: 0,
     minHeight: 24,
   },
   statusIndicator: {
@@ -264,12 +264,13 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: '#11181C',
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '500',
+    opacity: 0.6,
   },
   timeText: {
     color: '#11181C',
-    fontSize: 12,
-    opacity: 0.8,
+    fontSize: 14,
+    opacity: 0.6,
   },
 });

@@ -153,7 +153,7 @@ export default function OverallStatusScreen() {
   return (
     <LinearGradient
       colors={['#D6E4F0', '#FFFFFF']}
-      style={[styles.container, { paddingTop: insets.top + 70 }]}
+      style={[styles.container, { paddingTop: insets.top + 37 }]}
     >
       {hasData ? (
         <ScrollView

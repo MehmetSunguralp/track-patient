@@ -92,7 +92,7 @@ export default function LocationScreen() {
   const hasData = samples.length > 0;
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top + 70 }]}>
+    <ThemedView style={[styles.container, { paddingTop: insets.top + 37 }]}>
       {hasData ? (
         <>
           <ScrollView
