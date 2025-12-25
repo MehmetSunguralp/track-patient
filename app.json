@@ -13,7 +13,8 @@
       "infoPlist": {
         "NSBluetoothAlwaysUsageDescription": "This app needs Bluetooth access to connect to patient monitoring devices.",
         "NSBluetoothPeripheralUsageDescription": "This app needs Bluetooth access to connect to patient monitoring devices."
-      }
+      },
+      "bundleIdentifier": "com.mehmetalp.TrackPatient"
     },
     "android": {
       "adaptiveIcon": {
