@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "TrackPatient",
-    "slug": "TrackPatient",
+    "name": "Track Patients",
+    "slug": "track-patients",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
