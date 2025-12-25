@@ -6,6 +6,7 @@ import { usePatients } from '@/hooks/PatientsContext';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface StatusItemProps {
   readonly icon: string;
@@ -134,7 +135,10 @@ export default function OverallStatusScreen() {
   const hasData = latestSample && samples.length > 0;
   
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top + 70 }]}>
+    <LinearGradient
+      colors={['#F0F8FF', '#FFFFFF']}
+      style={[styles.container, { paddingTop: insets.top + 70 }]}
+    >
       {hasData ? (
         <ScrollView
           style={styles.scrollView}
@@ -243,7 +247,7 @@ export default function OverallStatusScreen() {
         onClose={() => setIsFullscreenMapVisible(false)}
         locations={locations}
       />
-    </ThemedView>
+    </LinearGradient>
   );
 }
 

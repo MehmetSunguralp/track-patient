@@ -51,9 +51,13 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
     }
 
     const date = new Date(timestamp);
-    const hours = date.getHours().toString().padStart(2, '0');
+    let hours = date.getHours();
     const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    const hoursStr = hours.toString().padStart(2, '0');
+    return `${hoursStr}:${minutes} ${ampm}`;
   };
 
   const statusLabel = selectedPatient.isConnected ? 'Live' : 'Disconnected';
@@ -186,7 +190,7 @@ const styles = StyleSheet.create({
   content: {
     paddingTop: 4,
     flexDirection: 'column',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'stretch',
   },
   topRow: {
@@ -236,6 +240,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 6,
+    minHeight: 24,
   },
   statusIndicator: {
     flexDirection: 'row',
