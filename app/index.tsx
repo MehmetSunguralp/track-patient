@@ -26,7 +26,7 @@ export default function PatientsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const screenWidth = Dimensions.get('window').width;
-  const watchIconSize = screenWidth * 0.6;
+  const watchIconSize = screenWidth * 0.75;
   const { patients, selectedPatientId, setSelectedPatientId } = usePatients();
   const { isProductionMode, toggleMode } = useAppMode();
   const {
@@ -120,13 +120,13 @@ export default function PatientsScreen() {
   return (
     <LinearGradient
       colors={['#F0F8FF', '#FFFFFF']}
-      style={[styles.container, { paddingTop: insets.top + 72 }]}
+      style={[styles.container, { paddingTop: insets.top + 60 }]}
     >
       <CustomStatusBar variant="patients-list" />
       {patients.length > 0 && (
         <View style={styles.header}>
           <View style={styles.headerTitleContainer}>
-            <IconSymbol name="cross.case" size={20} color="#11181C" />
+            <IconSymbol name="cross.case" size={28} color="#11181C" />
             <Text style={styles.heading}>Patients</Text>
           </View>
         </View>
@@ -155,40 +155,60 @@ export default function PatientsScreen() {
                   </Text>
                 </View>
               )}
-              {isAvailable && devices.length === 0 && (
+              {isAvailable && devices.length === 0 && !isScanning && (
                 <View style={styles.centeredContainer}>
-                  {!isScanning ? (
-                    <>
-                      <Text style={styles.trackPatientsTitle}>Track Patients</Text>
-                      <Animated.View
-                        style={[
-                          styles.watchIconContainer,
+                  <Text style={styles.trackPatientsTitle}>Track Patients</Text>
+                  <Animated.View
+                    style={[
+                      styles.watchIconContainer,
+                      {
+                        transform: [
                           {
-                            transform: [
-                              {
-                                rotate: shakeAnim.interpolate({
-                                  inputRange: [-1, 0, 1],
-                                  outputRange: ['-3deg', '0deg', '3deg'],
-                                }),
-                              },
-                            ],
+                            rotate: shakeAnim.interpolate({
+                              inputRange: [-1, 0, 1],
+                              outputRange: ['-3deg', '0deg', '3deg'],
+                            }),
                           },
-                        ]}
-                      >
-                        <Svg width={watchIconSize} height={watchIconSize} viewBox="0 0 24 24">
-                          <G>
-                            <Path
-                              d="M17,3V5a1,1,0,0,1-1,1H8A1,1,0,0,1,7,5V3A1,1,0,0,1,8,2h8A1,1,0,0,1,17,3ZM16,18H8a1,1,0,0,0-1,1v2a1,1,0,0,0,1,1h8a1,1,0,0,0,1-1V19A1,1,0,0,0,16,18Z"
-                              fill="#3498DB"
-                            />
-                            <Rect x="5" y="4" width="14" height="16" rx="2" fill="#000000" />
-                            <Path
-                              d="M12,14.34a1,1,0,0,1-.71-.3L10,12.77a1.83,1.83,0,0,1,0-2.55l0,0a1.79,1.79,0,0,1,1.28-.53,1.59,1.59,0,0,1,.7.14,1.84,1.84,0,0,1,2,.41h0a1.84,1.84,0,0,1,0,2.57L12.72,14A1,1,0,0,1,12,14.34Zm-.82-2.73Z"
-                              fill="#3498DB"
-                            />
-                          </G>
-                        </Svg>
-                      </Animated.View>
+                        ],
+                      },
+                    ]}
+                  >
+                    <Svg width={watchIconSize} height={watchIconSize} viewBox="0 0 24 24">
+                      <G>
+                        <Path
+                          d="M17,3V5a1,1,0,0,1-1,1H8A1,1,0,0,1,7,5V3A1,1,0,0,1,8,2h8A1,1,0,0,1,17,3ZM16,18H8a1,1,0,0,0-1,1v2a1,1,0,0,0,1,1h8a1,1,0,0,0,1-1V19A1,1,0,0,0,16,18Z"
+                          fill="#3498DB"
+                        />
+                        <Rect x="5" y="4" width="14" height="16" rx="2" fill="#000000" />
+                        <Path
+                          d="M12,14.34a1,1,0,0,1-.71-.3L10,12.77a1.83,1.83,0,0,1,0-2.55l0,0a1.79,1.79,0,0,1,1.28-.53,1.59,1.59,0,0,1,.7.14,1.84,1.84,0,0,1,2,.41h0a1.84,1.84,0,0,1,0,2.57L12.72,14A1,1,0,0,1,12,14.34Zm-.82-2.73Z"
+                          fill="#3498DB"
+                        />
+                      </G>
+                    </Svg>
+                  </Animated.View>
+                  <Pressable style={styles.scanButton} onPress={() => startScan()}>
+                    <IconSymbol
+                      name="antenna.radiowaves.left.and.right"
+                      size={24}
+                      color="#ffffff"
+                    />
+                    <Text style={styles.scanButtonText}>Scan for Devices</Text>
+                  </Pressable>
+                </View>
+              )}
+              {isAvailable && devices.length === 0 && isScanning && (
+                <View style={styles.centeredContainer}>
+                  <View style={styles.scanningContainer}>
+                    <ActivityIndicator size="large" color="#3498DB" />
+                    <Text style={styles.scanningText}>Scanning for devices...</Text>
+                  </View>
+                </View>
+              )}
+              {isAvailable && devices.length > 0 && (
+                <View>
+                  {!isScanning && (
+                    <View style={styles.scanButtonContainer}>
                       <Pressable style={styles.scanButton} onPress={() => startScan()}>
                         <IconSymbol
                           name="antenna.radiowaves.left.and.right"
@@ -197,62 +217,55 @@ export default function PatientsScreen() {
                         />
                         <Text style={styles.scanButtonText}>Scan for Devices</Text>
                       </Pressable>
-                    </>
-                  ) : (
-                    <View style={styles.scanningContainer}>
-                      <ActivityIndicator size="large" color="#3498DB" />
-                      <Text style={styles.scanningText}>Scanning for devices...</Text>
                     </View>
                   )}
-                </View>
-              )}
-              {isAvailable && devices.length > 0 && (
-                <FlatList
-                  data={devices}
-                  keyExtractor={(item) => item.id}
-                  contentContainerStyle={styles.deviceList}
-                  renderItem={({ item }) => {
-                    const isConnectingToThis =
-                      connectingDeviceId === item.id ||
-                      (isConnecting && connectedDevice?.id === item.id);
-                    const displayName =
-                      item.name ??
-                      (item.device as any)?.localName ??
-                      (item.device as any)?.name ??
-                      'Unknown Device';
-                    const signalColor = getSignalColor(item.rssi);
+                  <FlatList
+                    data={devices}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={styles.deviceList}
+                    renderItem={({ item }) => {
+                      const isConnectingToThis =
+                        connectingDeviceId === item.id ||
+                        (isConnecting && connectedDevice?.id === item.id);
+                      const displayName =
+                        item.name ??
+                        (item.device as any)?.localName ??
+                        (item.device as any)?.name ??
+                        'Unknown Device';
+                      const signalColor = getSignalColor(item.rssi);
 
-                    return (
-                      <Pressable
-                        style={[
-                          styles.deviceItem,
-                          isConnectingToThis && styles.deviceItemConnecting,
-                        ]}
-                        onPress={() => {
-                          if (!isConnectingToThis && !isConnecting) {
-                            setConnectingDeviceId(item.id);
-                            connectToDevice(item.id).catch(() => {
-                              setConnectingDeviceId(null);
-                            });
-                          }
-                        }}
-                        disabled={isConnectingToThis || isConnecting}
-                      >
-                        <View style={styles.deviceInfo}>
-                          <SignalIcon rssi={item.rssi} />
-                          <View style={styles.deviceDetails}>
-                            <Text style={styles.deviceName}>{displayName}</Text>
+                      return (
+                        <Pressable
+                          style={[
+                            styles.deviceItem,
+                            isConnectingToThis && styles.deviceItemConnecting,
+                          ]}
+                          onPress={() => {
+                            if (!isConnectingToThis && !isConnecting) {
+                              setConnectingDeviceId(item.id);
+                              connectToDevice(item.id).catch(() => {
+                                setConnectingDeviceId(null);
+                              });
+                            }
+                          }}
+                          disabled={isConnectingToThis || isConnecting}
+                        >
+                          <View style={styles.deviceInfo}>
+                            <SignalIcon rssi={item.rssi} />
+                            <View style={styles.deviceDetails}>
+                              <Text style={styles.deviceName}>{displayName}</Text>
+                            </View>
                           </View>
-                        </View>
-                        {isConnectingToThis ? (
-                          <ActivityIndicator size="small" color="#3498DB" />
-                        ) : (
-                          <IconSymbol name="chevron.right" size={20} color="#687076" />
-                        )}
-                      </Pressable>
-                    );
-                  }}
-                />
+                          {isConnectingToThis ? (
+                            <ActivityIndicator size="small" color="#3498DB" />
+                          ) : (
+                            <IconSymbol name="chevron.right" size={20} color="#687076" />
+                          )}
+                        </Pressable>
+                      );
+                    }}
+                  />
+                </View>
               )}
             </View>
           ) : patients.length > 0 ? (
@@ -287,8 +300,8 @@ export default function PatientsScreen() {
                       >
                         <IconSymbol
                           name="applewatch"
-                          size={24}
-                          color={item.isConnected ? '#27AE60' : '#687076'}
+                          size={32}
+                          color={item.isConnected ? '#3498DB' : '#687076'}
                         />
                         <View style={styles.patientNumberBadge}>
                           <Text style={styles.patientNumberText}>{patientNumber}</Text>
@@ -388,7 +401,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   heading: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: '600',
     color: '#11181C',
   },
@@ -436,6 +449,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 32,
     gap: 24,
+    paddingTop: 0,
+  },
+  scanButtonContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+    alignItems: 'center',
   },
   trackPatientsTitle: {
     fontSize: 32,
@@ -650,11 +670,11 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   avatarConnected: {
-    borderColor: '#27AE60',
+    borderColor: '#3498DB',
   },
   avatarSelected: {
     borderWidth: 3,
-    shadowColor: '#27AE60',
+    shadowColor: '#3498DB',
     shadowOpacity: 0.7,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 0 },

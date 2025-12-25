@@ -4,6 +4,7 @@ import { Animated, Image, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppMode } from '@/hooks/AppModeContext';
+import { useBLE } from '@/hooks/BLEContext';
 import { usePatients } from '@/hooks/PatientsContext';
 
 interface CustomStatusBarProps {
@@ -15,6 +16,7 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const { selectedPatient } = usePatients();
+  const { connectedDevice } = useBLE();
   const pathname = usePathname();
   const { isProductionMode } = useAppMode();
 
@@ -58,9 +60,6 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
     return `${hoursStr}:${minutes} ${ampm}`;
   };
 
-  const statusLabel = selectedPatient.isConnected ? 'Live' : 'Disconnected';
-  const statusColor = selectedPatient.isConnected ? '#27AE60' : '#687076';
-
   // Determine which variant to show based on prop or pathname
   // If variant prop is provided, use it; otherwise detect from pathname
   let isPatientsScreen: boolean;
@@ -83,13 +82,32 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
     isPatientsScreen = pathname === '/' && !isInTabs;
   }
 
+  // Determine connection status - use BLE device connection for home page, patient connection for detail pages
+  const isConnected = isPatientsScreen
+    ? !!connectedDevice
+    : selectedPatient.isConnected || !!connectedDevice;
+  const statusLabel = isConnected ? 'Connected' : 'Disconnected';
+  const statusColor = isConnected ? '#27AE60' : '#687076';
+
   if (isPatientsScreen) {
-    // Scenario 1: patients list – show only last update
+    // Scenario 1: patients list – show connection status and last update
     return (
-      <View style={[styles.container, { paddingTop: insets.top, paddingVertical: 8 }]}>
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: 8 }]}>
         <View style={styles.content}>
           <View style={styles.statusRow}>
-            <View style={styles.statusIndicator} />
+            {isConnected ? (
+              <View style={styles.statusIndicator}>
+                <Animated.View
+                  style={[
+                    styles.greenDot,
+                    { backgroundColor: statusColor, transform: [{ scale: scaleAnim }] },
+                  ]}
+                />
+                <Text style={styles.statusText}>{statusLabel}</Text>
+              </View>
+            ) : (
+              <View style={styles.statusIndicator} />
+            )}
             <Text style={styles.timeText}>Last Update: {formatTime(lastUpdateTime)}</Text>
           </View>
         </View>
@@ -100,55 +118,62 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
   // Scenario 2: patient detail tabs – show patient info
   // Extract patient ID (e.g., "ble-p1" -> "p1")
   const patientId = selectedPatient.id.replace('ble-', '');
+  const hasPatientData = selectedPatient.id && selectedPatient.id !== '';
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingVertical: 8 }]}>
+    <View
+      style={[styles.container, { paddingTop: insets.top, paddingBottom: hasPatientData ? 8 : 4 }]}
+    >
       <View style={styles.content}>
         <View style={styles.statusRow}>
-          <View style={styles.statusIndicator}>
-            {selectedPatient.isConnected ? (
+          {isConnected ? (
+            <View style={styles.statusIndicator}>
               <Animated.View
                 style={[
                   styles.greenDot,
                   { backgroundColor: statusColor, transform: [{ scale: scaleAnim }] },
                 ]}
               />
-            ) : (
-              <View style={[styles.greenDot, { backgroundColor: statusColor }]} />
-            )}
-            <Text style={styles.statusText}>{statusLabel}</Text>
-          </View>
+              <Text style={styles.statusText}>{statusLabel}</Text>
+            </View>
+          ) : (
+            <View style={styles.statusIndicator} />
+          )}
           <Text style={styles.timeText}>Last Update: {formatTime(lastUpdateTime)}</Text>
         </View>
 
-        {isProductionMode ? (
-          // Production mode: show only patient ID
-          <View style={styles.topRow}>
-            <View style={styles.patientInfo}>
-              <View style={styles.patientIdBadge}>
-                <Text style={styles.patientIdText}>{patientId}</Text>
+        {hasPatientData && (
+          <>
+            {isProductionMode ? (
+              // Production mode: show only patient ID
+              <View style={styles.topRow}>
+                <View style={styles.patientInfo}>
+                  <View style={styles.patientIdBadge}>
+                    <Text style={styles.patientIdText}>{patientId}</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.patientName}>{patientId}</Text>
+                    <Text style={styles.patientMeta}>{selectedPatient.uuid}</Text>
+                  </View>
+                </View>
               </View>
-              <View>
-                <Text style={styles.patientName}>{patientId}</Text>
-                <Text style={styles.patientMeta}>{selectedPatient.uuid}</Text>
+            ) : (
+              // Test mode: show full patient info
+              <View style={styles.topRow}>
+                <View style={styles.patientInfo}>
+                  <Image source={{ uri: selectedPatient.avatarUrl }} style={styles.avatar} />
+                  <View>
+                    <Text style={styles.patientName}>
+                      {selectedPatient.firstName} {selectedPatient.lastName}
+                    </Text>
+                    <Text style={styles.patientMeta}>
+                      {selectedPatient.uuid} • {selectedPatient.age}y
+                    </Text>
+                  </View>
+                </View>
               </View>
-            </View>
-          </View>
-        ) : (
-          // Test mode: show full patient info
-          <View style={styles.topRow}>
-            <View style={styles.patientInfo}>
-              <Image source={{ uri: selectedPatient.avatarUrl }} style={styles.avatar} />
-              <View>
-                <Text style={styles.patientName}>
-                  {selectedPatient.firstName} {selectedPatient.lastName}
-                </Text>
-                <Text style={styles.patientMeta}>
-                  {selectedPatient.uuid} • {selectedPatient.age}y
-                </Text>
-              </View>
-            </View>
-          </View>
+            )}
+          </>
         )}
       </View>
     </View>
