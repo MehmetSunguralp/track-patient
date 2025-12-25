@@ -108,7 +108,9 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
             ) : (
               <View style={styles.statusIndicator} />
             )}
-            <Text style={styles.timeText}>Last Update: {formatTime(lastUpdateTime)}</Text>
+            {isConnected && (
+              <Text style={styles.timeText}>Last Update: {formatTime(lastUpdateTime)}</Text>
+            )}
           </View>
         </View>
       </View>
@@ -139,7 +141,9 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
           ) : (
             <View style={styles.statusIndicator} />
           )}
-          <Text style={styles.timeText}>Last Update: {formatTime(lastUpdateTime)}</Text>
+          {isConnected && (
+            <Text style={styles.timeText}>Last Update: {formatTime(lastUpdateTime)}</Text>
+          )}
         </View>
 
         {hasPatientData && (

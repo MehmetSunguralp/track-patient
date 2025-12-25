@@ -1,50 +1,51 @@
 import FullscreenMapView from '@/components/custom/FullscreenMapView';
 import CustomMapView from '@/components/custom/MapView';
-import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { usePatients } from '@/hooks/PatientsContext';
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View, Animated } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Animated, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+type StatusValue = string | number | null | undefined;
 
 interface StatusItemProps {
   readonly icon: string;
   readonly label: string;
-  readonly value: string | number | null | undefined;
+  readonly value: StatusValue;
   readonly color: string;
   readonly unit?: string;
-  readonly previousValue?: string | number | null | undefined;
+  readonly previousValue?: StatusValue;
 }
 
 function StatusItem({ icon, label, value, color, unit, previousValue }: StatusItemProps) {
   const flashAnim = useRef(new Animated.Value(0)).current;
   const lastKnownValueRef = useRef<string | number | null>(null);
   const hasEverReceivedDataRef = useRef(false);
-  
+
   // Format number to 1 decimal place (except for integers and strings)
   // Show "-" for 0, null, undefined
-  const formatValue = (val: string | number | null | undefined): string => {
+  const formatValue = (val: StatusValue): string => {
     if (val === null || val === undefined || val === '-' || val === 0) return '-';
     if (typeof val === 'string') return val;
     if (Number.isInteger(val)) return String(val);
     return val.toFixed(1);
   };
-  
+
   // Update last known value only if a real value comes in (not null/undefined/false/0)
   useEffect(() => {
     // Check if this is a real value (not null, undefined, false, 0, or empty string)
-    const isRealValue = (val: string | number | null | undefined): boolean => {
-      if (val === null || val === undefined || val === false) return false;
+    const isRealValue = (val: StatusValue): val is string | number => {
+      if (val === null || val === undefined) return false;
       if (typeof val === 'string') return val.trim() !== '';
-      if (typeof val === 'number') return !isNaN(val) && val !== 0; // 0 is not valid, show "-"
+      if (typeof val === 'number') return !Number.isNaN(val) && val !== 0; // 0 is not valid, show "-"
       return false;
     };
-    
+
     if (isRealValue(value)) {
-      const valToStore = value;
+      const valToStore: string | number = value;
       const prevVal = lastKnownValueRef.current;
-      
+
       // Real value received - update and mark as having received data
       if (prevVal !== valToStore) {
         // Value changed - trigger flash
@@ -67,29 +68,32 @@ function StatusItem({ icon, label, value, color, unit, previousValue }: StatusIt
     // If value is null/undefined/false/0, don't update - keep last known value
     // Note: flashAnim is a ref, so it doesn't need to be in dependencies
   }, [value]);
-  
+
   // Determine display value: use last known value if we've received data, otherwise "-"
   // Also show "-" if the stored value is 0
-  const displayValue = hasEverReceivedDataRef.current && lastKnownValueRef.current !== 0
-    ? formatValue(lastKnownValueRef.current)
-    : '-';
-  
+  const displayValue =
+    hasEverReceivedDataRef.current && lastKnownValueRef.current !== 0
+      ? formatValue(lastKnownValueRef.current)
+      : '-';
+
   const backgroundColor = flashAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['transparent', color + '20'], // 20 = ~12% opacity
   });
-  
+
   return (
     <Animated.View style={[styles.statusCard, { backgroundColor }]}>
-      <View style={styles.statusCardHeader}>
-        <IconSymbol name={icon as any} size={20} color={color} />
-        <Text style={styles.statusLabel}>{label}</Text>
-      </View>
-      <View style={styles.statusCardValue}>
-        <Text style={[styles.statusValue, { color: displayValue === '-' ? '#999' : color }]}>
-          {displayValue}
-          {unit && displayValue !== '-' && <Text style={styles.statusUnit}> {unit}</Text>}
-        </Text>
+      <View style={styles.statusCardContent}>
+        <View style={styles.statusIconContainer}>
+          <IconSymbol name={icon as any} size={48} color={color} />
+        </View>
+        <View style={styles.statusTextContainer}>
+          <Text style={styles.statusLabel}>{label}</Text>
+          <Text style={[styles.statusValue, { color: displayValue === '-' ? '#999' : color }]}>
+            {displayValue}
+            {unit && displayValue !== '-' && <Text style={styles.statusUnit}> {unit}</Text>}
+          </Text>
+        </View>
       </View>
     </Animated.View>
   );
@@ -103,40 +107,52 @@ export default function OverallStatusScreen() {
   const samples = selectedPatient.data?.data ?? [];
   const dataLength = samples.length;
   const latestTimestamp = samples.at(-1)?.timestamp || '';
-  
+
   // Memoize derived values using stable dependencies
-  const latestSample = useMemo(() => samples.at(-1), [dataLength, latestTimestamp, selectedPatient.id]);
-  const previousSample = useMemo(() => samples.at(-2), [dataLength, latestTimestamp, selectedPatient.id]);
+  const latestSample = useMemo(
+    () => samples.at(-1),
+    [dataLength, latestTimestamp, selectedPatient.id]
+  );
+  const previousSample = useMemo(
+    () => samples.at(-2),
+    [dataLength, latestTimestamp, selectedPatient.id]
+  );
 
   // Debug: log selected patient data (only log when patient or data changes)
   useEffect(() => {
     if (selectedPatient.id) {
-      console.log(`[OverallStatus] Patient: ${selectedPatient.id}, hasData: ${!!selectedPatient.data}, dataPoints: ${dataLength}, latestSample: ${!!latestSample}`);
+      console.log(
+        `[OverallStatus] Patient: ${
+          selectedPatient.id
+        }, hasData: ${!!selectedPatient.data}, dataPoints: ${dataLength}, latestSample: ${!!latestSample}`
+      );
     }
   }, [selectedPatient.id, dataLength, latestTimestamp]);
 
   // Use stable dependencies to prevent infinite re-renders
   const locationsLength = samples.filter((item) => item.gps.lat !== 0 && item.gps.lon !== 0).length;
-  const lastLocationHash = samples.length > 0 && samples.at(-1)?.gps.lat && samples.at(-1)?.gps.lon
-    ? `${samples.at(-1)?.gps.lat},${samples.at(-1)?.gps.lon}`
-    : '';
-  
-  const locations = useMemo(() => 
-    samples
-      .filter((item) => item.gps.lat !== 0 && item.gps.lon !== 0)
-      .map((item) => ({
-        lat: item.gps.lat,
-        lon: item.gps.lon,
-      })),
+  const lastLocationHash =
+    samples.length > 0 && samples.at(-1)?.gps.lat && samples.at(-1)?.gps.lon
+      ? `${samples.at(-1)?.gps.lat},${samples.at(-1)?.gps.lon}`
+      : '';
+
+  const locations = useMemo(
+    () =>
+      samples
+        .filter((item) => item.gps.lat !== 0 && item.gps.lon !== 0)
+        .map((item) => ({
+          lat: item.gps.lat,
+          lon: item.gps.lon,
+        })),
     [dataLength, locationsLength, lastLocationHash, selectedPatient.id]
   );
 
   // Show data if we have at least one sample
   const hasData = latestSample && samples.length > 0;
-  
+
   return (
     <LinearGradient
-      colors={['#F0F8FF', '#FFFFFF']}
+      colors={['#D6E4F0', '#FFFFFF']}
       style={[styles.container, { paddingTop: insets.top + 70 }]}
     >
       {hasData ? (
@@ -277,29 +293,32 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e0e0e0',
   },
-  statusCardHeader: {
+  statusCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
+  },
+  statusIconContainer: {
+    width: 64,
+    height: 64,
     justifyContent: 'center',
-    marginBottom: 8,
+    alignItems: 'center',
+  },
+  statusTextContainer: {
+    flex: 1,
+    justifyContent: 'center',
   },
   statusLabel: {
     color: '#11181C',
     fontSize: 12,
     fontWeight: '500',
-    marginLeft: 8,
+    marginBottom: 4,
     opacity: 0.8,
-  },
-  statusCardValue: {
-    marginTop: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   statusValue: {
     fontSize: 24,
     fontWeight: '700',
     color: '#11181C',
-    textAlign: 'center',
   },
   statusUnit: {
     fontSize: 14,

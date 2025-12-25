@@ -52,9 +52,12 @@ export default function CustomMapView({
 
   // Use stable dependencies for locations
   const locationsLength = locations.length;
-  const locationsHash = locations.length > 0 
-    ? `${locations[0].lat},${locations[0].lon},${locations[locations.length - 1].lat},${locations[locations.length - 1].lon}`
-    : '';
+  const locationsHash =
+    locations.length > 0
+      ? `${locations[0].lat},${locations[0].lon},${locations[locations.length - 1].lat},${
+          locations[locations.length - 1].lon
+        }`
+      : '';
 
   useEffect(() => {
     // Set initial opacity to 1 on first render

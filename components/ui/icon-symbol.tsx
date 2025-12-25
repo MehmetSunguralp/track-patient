@@ -43,6 +43,7 @@ const MAPPING = {
   'applewatch': 'watch',
   'cross.case': 'medical-services',
   'cross.fill': 'medical-services',
+  'bolt.fill': 'bolt',
 } as IconMapping;
 
 /**
