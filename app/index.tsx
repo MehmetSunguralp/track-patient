@@ -1,23 +1,46 @@
 import CustomStatusBar from '@/components/custom/StatusBar';
 // import BLEDataLogs from '@/components/custom/BLEDataLogs';
-import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAppMode } from '@/hooks/AppModeContext';
 import { useBLE } from '@/hooks/BLEContext';
 import { usePatients } from '@/hooks/PatientsContext';
-import { useRouter } from 'expo-router';
-import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useEffect, useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Animated,
+  Dimensions,
+  FlatList,
+  Image,
+  Pressable,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { G, Path, Rect } from 'react-native-svg';
 
 export default function PatientsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const screenWidth = Dimensions.get('window').width;
+  const watchIconSize = screenWidth * 0.6;
   const { patients, selectedPatientId, setSelectedPatientId } = usePatients();
   const { isProductionMode, toggleMode } = useAppMode();
-  const { connectedDevice, devices, isScanning, isConnecting, startScan, stopScan, connectToDevice, isAvailable } = useBLE();
+  const {
+    connectedDevice,
+    devices,
+    isScanning,
+    isConnecting,
+    startScan,
+    stopScan,
+    connectToDevice,
+    isAvailable,
+  } = useBLE();
   const [connectingDeviceId, setConnectingDeviceId] = useState<string | null>(null);
+  const shakeAnim = useRef(new Animated.Value(0)).current;
 
   // Stop scanning when connected and reset connecting state
   useEffect(() => {
@@ -30,6 +53,31 @@ export default function PatientsScreen() {
       setConnectingDeviceId(null);
     }
   }, [connectedDevice, isScanning, isConnecting, stopScan]);
+
+  // Infinite slow shaking animation for watch icon
+  useEffect(() => {
+    const shakeAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shakeAnim, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shakeAnim, {
+          toValue: -1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shakeAnim, {
+          toValue: 0,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    shakeAnimation.start();
+    return () => shakeAnimation.stop();
+  }, [shakeAnim]);
 
   // Helper function to get signal level color and bars
   const getSignalColor = (rssi: number | null): string => {
@@ -50,17 +98,21 @@ export default function PatientsScreen() {
   const SignalIcon = ({ rssi }: { rssi: number | null }) => {
     const bars = getSignalBars(rssi);
     const color = getSignalColor(rssi);
-    
+
     return (
       <View style={styles.signalIconContainer}>
         <View style={styles.signalBars}>
-          <View style={[styles.signalBar, styles.signalBar1, bars >= 1 && { backgroundColor: color }]} />
-          <View style={[styles.signalBar, styles.signalBar2, bars >= 2 && { backgroundColor: color }]} />
-          <View style={[styles.signalBar, styles.signalBar3, bars >= 3 && { backgroundColor: color }]} />
+          <View
+            style={[styles.signalBar, styles.signalBar1, bars >= 1 && { backgroundColor: color }]}
+          />
+          <View
+            style={[styles.signalBar, styles.signalBar2, bars >= 2 && { backgroundColor: color }]}
+          />
+          <View
+            style={[styles.signalBar, styles.signalBar3, bars >= 3 && { backgroundColor: color }]}
+          />
         </View>
-        {rssi !== null && (
-          <Text style={styles.signalRssiText}>{rssi} dBm</Text>
-        )}
+        {rssi !== null && <Text style={styles.signalRssiText}>{rssi} dBm</Text>}
       </View>
     );
   };
@@ -73,16 +125,19 @@ export default function PatientsScreen() {
       <CustomStatusBar variant="patients-list" />
       {patients.length > 0 && (
         <View style={styles.header}>
-          <Text style={styles.heading}>Patients</Text>
+          <View style={styles.headerTitleContainer}>
+            <IconSymbol name="cross.case" size={20} color="#11181C" />
+            <Text style={styles.heading}>Patients</Text>
+          </View>
         </View>
       )}
       {isProductionMode ? (
         <View style={styles.productionContainer}>
           {!connectedDevice ? (
             <View style={styles.deviceListContainer}>
-              <View style={styles.scanHeader}>
-                <Text style={styles.scanHeaderText}>Available Devices</Text>
-                {isScanning ? (
+              {isScanning && (
+                <View style={styles.scanHeader}>
+                  <Text style={styles.scanHeaderText}>Available Devices</Text>
                   <View style={styles.scanningIndicator}>
                     <ActivityIndicator size="small" color="#3498DB" />
                     <Text style={styles.scanningText}>Scanning...</Text>
@@ -90,13 +145,8 @@ export default function PatientsScreen() {
                       <Text style={styles.stopButtonText}>Stop</Text>
                     </Pressable>
                   </View>
-                ) : (
-                  <Pressable style={styles.scanHeaderButton} onPress={() => startScan()}>
-                    <IconSymbol name="antenna.radiowaves.left.and.right" size={16} color="#ffffff" />
-                    <Text style={styles.scanHeaderButtonText}>Scan Devices</Text>
-                  </Pressable>
-                )}
-              </View>
+                </View>
+              )}
               {!isAvailable && (
                 <View style={styles.warningContainer}>
                   <IconSymbol name="exclamationmark.triangle.fill" size={24} color="#F39C12" />
@@ -108,10 +158,46 @@ export default function PatientsScreen() {
               {isAvailable && devices.length === 0 && (
                 <View style={styles.centeredContainer}>
                   {!isScanning ? (
-                    <Pressable style={styles.scanButton} onPress={() => startScan()}>
-                      <IconSymbol name="antenna.radiowaves.left.and.right" size={24} color="#ffffff" />
-                      <Text style={styles.scanButtonText}>Scan for Devices</Text>
-                    </Pressable>
+                    <>
+                      <Text style={styles.trackPatientsTitle}>Track Patients</Text>
+                      <Animated.View
+                        style={[
+                          styles.watchIconContainer,
+                          {
+                            transform: [
+                              {
+                                rotate: shakeAnim.interpolate({
+                                  inputRange: [-1, 0, 1],
+                                  outputRange: ['-3deg', '0deg', '3deg'],
+                                }),
+                              },
+                            ],
+                          },
+                        ]}
+                      >
+                        <Svg width={watchIconSize} height={watchIconSize} viewBox="0 0 24 24">
+                          <G>
+                            <Path
+                              d="M17,3V5a1,1,0,0,1-1,1H8A1,1,0,0,1,7,5V3A1,1,0,0,1,8,2h8A1,1,0,0,1,17,3ZM16,18H8a1,1,0,0,0-1,1v2a1,1,0,0,0,1,1h8a1,1,0,0,0,1-1V19A1,1,0,0,0,16,18Z"
+                              fill="#3498DB"
+                            />
+                            <Rect x="5" y="4" width="14" height="16" rx="2" fill="#000000" />
+                            <Path
+                              d="M12,14.34a1,1,0,0,1-.71-.3L10,12.77a1.83,1.83,0,0,1,0-2.55l0,0a1.79,1.79,0,0,1,1.28-.53,1.59,1.59,0,0,1,.7.14,1.84,1.84,0,0,1,2,.41h0a1.84,1.84,0,0,1,0,2.57L12.72,14A1,1,0,0,1,12,14.34Zm-.82-2.73Z"
+                              fill="#3498DB"
+                            />
+                          </G>
+                        </Svg>
+                      </Animated.View>
+                      <Pressable style={styles.scanButton} onPress={() => startScan()}>
+                        <IconSymbol
+                          name="antenna.radiowaves.left.and.right"
+                          size={24}
+                          color="#ffffff"
+                        />
+                        <Text style={styles.scanButtonText}>Scan for Devices</Text>
+                      </Pressable>
+                    </>
                   ) : (
                     <View style={styles.scanningContainer}>
                       <ActivityIndicator size="large" color="#3498DB" />
@@ -126,13 +212,22 @@ export default function PatientsScreen() {
                   keyExtractor={(item) => item.id}
                   contentContainerStyle={styles.deviceList}
                   renderItem={({ item }) => {
-                    const isConnectingToThis = connectingDeviceId === item.id || (isConnecting && connectedDevice?.id === item.id);
-                    const displayName = item.name ?? (item.device as any)?.localName ?? (item.device as any)?.name ?? 'Unknown Device';
+                    const isConnectingToThis =
+                      connectingDeviceId === item.id ||
+                      (isConnecting && connectedDevice?.id === item.id);
+                    const displayName =
+                      item.name ??
+                      (item.device as any)?.localName ??
+                      (item.device as any)?.name ??
+                      'Unknown Device';
                     const signalColor = getSignalColor(item.rssi);
 
                     return (
                       <Pressable
-                        style={[styles.deviceItem, isConnectingToThis && styles.deviceItemConnecting]}
+                        style={[
+                          styles.deviceItem,
+                          isConnectingToThis && styles.deviceItemConnecting,
+                        ]}
                         onPress={() => {
                           if (!isConnectingToThis && !isConnecting) {
                             setConnectingDeviceId(item.id);
@@ -162,14 +257,6 @@ export default function PatientsScreen() {
             </View>
           ) : patients.length > 0 ? (
             <View style={styles.productionContent}>
-              <View style={styles.connectedHeader}>
-                <View style={styles.connectedStatus}>
-                  <IconSymbol name="checkmark.circle.fill" size={20} color="#27AE60" />
-                  <Text style={styles.connectedText}>
-                    Connected: {connectedDevice.name || connectedDevice.id}
-                  </Text>
-                </View>
-              </View>
               {/* <BLEDataLogs /> */}
               <FlatList
                 data={patients}
@@ -198,11 +285,18 @@ export default function PatientsScreen() {
                           isSelected && styles.avatarSelected,
                         ]}
                       >
-                        <Text style={styles.patientIdText}>{patientNumber}</Text>
+                        <IconSymbol
+                          name="applewatch"
+                          size={24}
+                          color={item.isConnected ? '#27AE60' : '#687076'}
+                        />
+                        <View style={styles.patientNumberBadge}>
+                          <Text style={styles.patientNumberText}>{patientNumber}</Text>
+                        </View>
                       </View>
-                      <Text style={styles.avatarName} numberOfLines={1}>
+                      {/* <Text style={styles.avatarName} numberOfLines={1}>
                         {patientNumber}
-                      </Text>
+                      </Text> */}
                     </Pressable>
                   );
                 }}
@@ -210,14 +304,6 @@ export default function PatientsScreen() {
             </View>
           ) : (
             <View style={styles.productionContent}>
-              <View style={styles.connectedHeader}>
-                <View style={styles.connectedStatus}>
-                  <IconSymbol name="checkmark.circle.fill" size={20} color="#27AE60" />
-                  <Text style={styles.connectedText}>
-                    Connected: {connectedDevice.name || connectedDevice.id}
-                  </Text>
-                </View>
-              </View>
               {/* <BLEDataLogs /> */}
               <View style={styles.waitingContainer}>
                 <Text style={styles.waitingText}>Waiting for patient data...</Text>
@@ -290,17 +376,21 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 16,
     marginBottom: 8,
     marginTop: 4,
   },
+  headerTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   heading: {
     fontSize: 20,
     fontWeight: '600',
     color: '#11181C',
-    flex: 1,
   },
   headerControls: {
     flexDirection: 'row',
@@ -345,30 +435,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,
+    gap: 24,
+  },
+  trackPatientsTitle: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#11181C',
+    marginBottom: 8,
+  },
+  watchIconContainer: {
+    marginBottom: 16,
   },
   productionContent: {
     flex: 1,
     paddingTop: 16,
-  },
-  connectedHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  connectedStatus: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flex: 1,
-  },
-  connectedText: {
-    color: '#11181C',
-    fontSize: 14,
-    fontWeight: '500',
   },
   scanButtonSmall: {
     backgroundColor: '#3498DB',
@@ -562,12 +642,12 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    overflow: 'hidden',
     borderWidth: 2,
     borderColor: '#e0e0e0',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
+    position: 'relative',
   },
   avatarConnected: {
     borderColor: '#27AE60',

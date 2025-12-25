@@ -1,11 +1,10 @@
-import { usePathname, useRouter } from 'expo-router';
+import { usePathname } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Animated, Image, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { usePatients } from '@/hooks/PatientsContext';
 import { useAppMode } from '@/hooks/AppModeContext';
-import { useBLE } from '@/hooks/BLEContext';
+import { usePatients } from '@/hooks/PatientsContext';
 
 interface CustomStatusBarProps {
   readonly variant?: 'patients-list' | 'tabs';
@@ -15,10 +14,9 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
   const insets = useSafeAreaInsets();
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  const { selectedPatient, selectedPatientId } = usePatients();
-  const { connectedDevice } = useBLE();
+  const { selectedPatient } = usePatients();
   const pathname = usePathname();
-  const router = useRouter();
+  const { isProductionMode } = useAppMode();
 
   useEffect(() => {
     const pulseAnimation = Animated.loop(
@@ -55,7 +53,7 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
     const minutes = date.getMinutes().toString().padStart(2, '0');
     const ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
+    hours = hours || 12; // the hour '0' should be '12'
     const hoursStr = hours.toString().padStart(2, '0');
     return `${hoursStr}:${minutes} ${ampm}`;
   };
@@ -86,28 +84,12 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
   }
 
   if (isPatientsScreen) {
-    // Scenario 1: patients list – generic connection + last update
-    const isSystemConnected = !!connectedDevice;
-    const systemStatusColor = isSystemConnected ? '#27AE60' : '#687076';
-    const systemStatusText = isSystemConnected ? 'System Connected' : 'Disconnected';
-    
+    // Scenario 1: patients list – show only last update
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={[styles.container, { paddingTop: insets.top, paddingVertical: 8 }]}>
         <View style={styles.content}>
           <View style={styles.statusRow}>
-            <View style={styles.statusIndicator}>
-              {isSystemConnected ? (
-                <Animated.View
-                  style={[
-                    styles.greenDot,
-                    { backgroundColor: systemStatusColor, transform: [{ scale: scaleAnim }] },
-                  ]}
-                />
-              ) : (
-                <View style={[styles.greenDot, { backgroundColor: systemStatusColor }]} />
-              )}
-              <Text style={styles.statusText}>{systemStatusText}</Text>
-            </View>
+            <View style={styles.statusIndicator} />
             <Text style={styles.timeText}>Last Update: {formatTime(lastUpdateTime)}</Text>
           </View>
         </View>
@@ -116,12 +98,11 @@ export default function CustomStatusBar({ variant }: CustomStatusBarProps = {}) 
   }
 
   // Scenario 2: patient detail tabs – show patient info
-  const { isProductionMode } = useAppMode();
   // Extract patient ID (e.g., "ble-p1" -> "p1")
   const patientId = selectedPatient.id.replace('ble-', '');
-  
+
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingVertical: 8 }]}>
       <View style={styles.content}>
         <View style={styles.statusRow}>
           <View style={styles.statusIndicator}>
@@ -183,7 +164,6 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     backgroundColor: '#ffffff',
     paddingHorizontal: 16,
-    paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },

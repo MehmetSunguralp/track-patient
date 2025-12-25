@@ -1,0 +1,11 @@
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
+<svg fill="#000000" width="256px" height="256px" viewBox="0 0 24 24" id="smart-watch-heart" data-name="Flat Color" xmlns="http://www.w3.org/2000/svg" class="icon flat-color">
+<g id="SVGRepo_bgCarrier" stroke-width="0"/>
+<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+<g id="SVGRepo_iconCarrier">
+<path id="secondary" d="M17,3V5a1,1,0,0,1-1,1H8A1,1,0,0,1,7,5V3A1,1,0,0,1,8,2h8A1,1,0,0,1,17,3ZM16,18H8a1,1,0,0,0-1,1v2a1,1,0,0,0,1,1h8a1,1,0,0,0,1-1V19A1,1,0,0,0,16,18Z" style="fill: #3498DB;"/>
+<rect id="primary" x="5" y="4" width="14" height="16" rx="2" style="fill: #000000;"/>
+<path id="secondary-2" data-name="secondary" d="M12,14.34a1,1,0,0,1-.71-.3L10,12.77a1.83,1.83,0,0,1,0-2.55l0,0a1.79,1.79,0,0,1,1.28-.53,1.59,1.59,0,0,1,.7.14,1.84,1.84,0,0,1,2,.41h0a1.84,1.84,0,0,1,0,2.57L12.72,14A1,1,0,0,1,12,14.34Zm-.82-2.73Z" style="fill: #3498DB;"/>
+</g>
+</svg>

@@ -40,6 +40,9 @@ const MAPPING = {
   'percent': 'percent',
   circle: 'radio-button-unchecked',
   'info.circle': 'info',
+  'applewatch': 'watch',
+  'cross.case': 'medical-services',
+  'cross.fill': 'medical-services',
 } as IconMapping;
 
 /**
