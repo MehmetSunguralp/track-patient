@@ -2,6 +2,7 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import * as Haptics from 'expo-haptics';
+import { useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -11,12 +12,50 @@ const chartColors: Record<string, string> = {
   temperature: '#E74C3C',
   'blood-pressure': '#8E44AD',
   location: '#3498DB',
+  'rr-interval': '#8E44AD',
+  'max-bpm': '#E74C3C',
+  speed: '#27AE60',
+  distance: '#3498DB',
+  'metabolic-power': '#F39C12',
+  'activity-zone': '#9B59B6',
+  'step-side': '#16A085',
+  'step-balance': '#1ABC9C',
 };
 
 export function ScrollableTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const theme = colorScheme ?? 'light';
+  const scrollViewRef = useRef<ScrollView>(null);
+  const tabPositions = useRef<{ [key: number]: number }>({});
+  const scrollViewWidthRef = useRef<number>(0);
+
+  // Scroll to active tab when it changes
+  useEffect(() => {
+    const activeIndex = state.index;
+    const tabPosition = tabPositions.current[activeIndex];
+    
+    if (tabPosition !== undefined && scrollViewRef.current) {
+      // Use requestAnimationFrame to ensure layout is complete
+      requestAnimationFrame(() => {
+        if (scrollViewRef.current) {
+          const scrollViewWidth = scrollViewWidthRef.current || 400; // Fallback to 400 if not measured
+          const tabWidth = 100; // Approximate tab width from styles (minWidth: 100)
+          
+          // Calculate position to center the tab in viewport
+          const scrollPosition = Math.max(
+            0,
+            tabPosition - scrollViewWidth / 2 + tabWidth / 2
+          );
+          
+          scrollViewRef.current.scrollTo({
+            x: scrollPosition,
+            animated: true,
+          });
+        }
+      });
+    }
+  }, [state.index]);
 
   return (
     <View
@@ -29,9 +68,13 @@ export function ScrollableTabBar({ state, descriptors, navigation }: BottomTabBa
       ]}
     >
       <ScrollView
+        ref={scrollViewRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        onLayout={(event) => {
+          scrollViewWidthRef.current = event.nativeEvent.layout.width;
+        }}
       >
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
@@ -87,6 +130,10 @@ export function ScrollableTabBar({ state, descriptors, navigation }: BottomTabBa
               onPress={onPress}
               onLongPress={onLongPress}
               style={styles.tabItem}
+              onLayout={(event) => {
+                const { x } = event.nativeEvent.layout;
+                tabPositions.current[index] = x;
+              }}
             >
               {icon}
               <Text

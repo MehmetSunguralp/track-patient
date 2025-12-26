@@ -2,9 +2,10 @@ import FullscreenMapView from '@/components/custom/FullscreenMapView';
 import CustomMapView from '@/components/custom/MapView';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { usePatients } from '@/hooks/PatientsContext';
+import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type StatusValue = string | number | null | undefined;
@@ -16,9 +17,10 @@ interface StatusItemProps {
   readonly color: string;
   readonly unit?: string;
   readonly previousValue?: StatusValue;
+  readonly onPress?: () => void;
 }
 
-function StatusItem({ icon, label, value, color, unit, previousValue }: StatusItemProps) {
+function StatusItem({ icon, label, value, color, unit, previousValue, onPress }: StatusItemProps) {
   const flashAnim = useRef(new Animated.Value(0)).current;
   const lastKnownValueRef = useRef<string | number | null>(null);
   const hasEverReceivedDataRef = useRef(false);
@@ -81,29 +83,44 @@ function StatusItem({ icon, label, value, color, unit, previousValue }: StatusIt
     outputRange: ['transparent', color + '20'], // 20 = ~12% opacity
   });
 
-  return (
-    <Animated.View style={[styles.statusCard, { backgroundColor }]}>
-      <View style={styles.statusCardContent}>
-        <Text style={styles.statusLabel}>{label}</Text>
-        <View style={styles.statusBottomRow}>
-          <View style={styles.statusIconContainer}>
-            <IconSymbol name={icon as any} size={48} color={color} />
-          </View>
-          <View style={styles.statusValueContainer}>
-            <Text style={[styles.statusValue, { color: displayValue === '-' ? '#999' : color }]}>
-              {displayValue}
-              {unit && displayValue !== '-' && <Text style={styles.statusUnit}> {unit}</Text>}
-            </Text>
-          </View>
+  const cardContent = (
+    <View style={styles.statusCardContent}>
+      <Text style={styles.statusLabel}>{label}</Text>
+      <View style={styles.statusBottomRow}>
+        <View style={styles.statusIconContainer}>
+          <IconSymbol name={icon as any} size={48} color={color} />
+        </View>
+        <View style={styles.statusValueContainer}>
+          <Text style={[styles.statusValue, { color: displayValue === '-' ? '#999' : color }]}>
+            {displayValue}
+            {unit && displayValue !== '-' && <Text style={styles.statusUnit}> {unit}</Text>}
+          </Text>
         </View>
       </View>
+    </View>
+  );
+
+  const animatedCard = (
+    <Animated.View style={[styles.statusCard, { backgroundColor }]}>
+      {cardContent}
     </Animated.View>
   );
+
+  if (onPress) {
+    return (
+      <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={styles.statusCardWrapper}>
+        {animatedCard}
+      </TouchableOpacity>
+    );
+  }
+
+  return animatedCard;
 }
 
 export default function OverallStatusScreen() {
   const insets = useSafeAreaInsets();
   const { selectedPatient } = usePatients();
+  const router = useRouter();
   const [isFullscreenMapVisible, setIsFullscreenMapVisible] = useState(false);
 
   const samples = selectedPatient.data?.data ?? [];
@@ -178,6 +195,7 @@ export default function OverallStatusScreen() {
               previousValue={previousSample?.heart.bpm}
               color="#CEA023"
               unit="bpm"
+              onPress={() => router.push('/(tabs)/heart-rate')}
             />
             <StatusItem
               icon="waveform.path"
@@ -186,6 +204,7 @@ export default function OverallStatusScreen() {
               previousValue={previousSample?.heart.rrMs}
               color="#8E44AD"
               unit="ms"
+              onPress={() => router.push('/(tabs)/rr-interval')}
             />
             <StatusItem
               icon="gauge"
@@ -194,6 +213,7 @@ export default function OverallStatusScreen() {
               previousValue={previousSample?.heart.maxBpmSession}
               color="#E74C3C"
               unit="bpm"
+              onPress={() => router.push('/(tabs)/max-bpm')}
             />
             <StatusItem
               icon="thermometer"
@@ -202,6 +222,7 @@ export default function OverallStatusScreen() {
               previousValue={previousSample?.temperature.skinC}
               color="#E74C3C"
               unit="°C"
+              onPress={() => router.push('/(tabs)/temperature')}
             />
             <StatusItem
               icon="gauge"
@@ -210,6 +231,7 @@ export default function OverallStatusScreen() {
               previousValue={previousSample?.gps.speedKmh}
               color="#27AE60"
               unit="km/h"
+              onPress={() => router.push('/(tabs)/speed')}
             />
             <StatusItem
               icon="location.fill"
@@ -218,6 +240,7 @@ export default function OverallStatusScreen() {
               previousValue={previousSample?.gps.distanceTotalM}
               color="#3498DB"
               unit="m"
+              onPress={() => router.push('/(tabs)/distance')}
             />
             <StatusItem
               icon="bolt.fill"
@@ -226,6 +249,7 @@ export default function OverallStatusScreen() {
               previousValue={previousSample?.movement.metabolicPowerWkg}
               color="#F39C12"
               unit="W/kg"
+              onPress={() => router.push('/(tabs)/metabolic-power')}
             />
             <StatusItem
               icon="gauge"
@@ -233,6 +257,7 @@ export default function OverallStatusScreen() {
               value={latestSample.movement.activityZone ?? null}
               previousValue={previousSample?.movement.activityZone}
               color="#9B59B6"
+              onPress={() => router.push('/(tabs)/activity-zone')}
             />
             <StatusItem
               icon="arrow.left.and.right"
@@ -240,6 +265,7 @@ export default function OverallStatusScreen() {
               value={latestSample.movement.stepBalanceSide ?? null}
               previousValue={previousSample?.movement.stepBalanceSide}
               color="#16A085"
+              onPress={() => router.push('/(tabs)/step-side')}
             />
             <StatusItem
               icon="percent"
@@ -248,6 +274,7 @@ export default function OverallStatusScreen() {
               previousValue={previousSample?.movement.stepBalancePercent}
               color="#1ABC9C"
               unit="%"
+              onPress={() => router.push('/(tabs)/step-balance')}
             />
           </View>
         </ScrollView>
@@ -286,12 +313,15 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     justifyContent: 'space-between',
   },
-  statusCard: {
+  statusCardWrapper: {
     width: '48%',
+    marginBottom: 12,
+  },
+  statusCard: {
+    width: '100%',
     backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 12,
     borderWidth: 1,
     borderColor: '#e0e0e0',
   },

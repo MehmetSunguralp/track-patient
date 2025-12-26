@@ -52,6 +52,62 @@ export default function TabLayout() {
             tabBarIcon: ({ color }) => <IconSymbol size={28} name="location.fill" color={color} />,
           }}
         />
+        <Tabs.Screen
+          name="rr-interval"
+          options={{
+            title: 'RR Interval',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="waveform.path" color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="max-bpm"
+          options={{
+            title: 'Max BPM',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="gauge" color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="speed"
+          options={{
+            title: 'Speed',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="gauge" color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="distance"
+          options={{
+            title: 'Distance',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="location.fill" color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="metabolic-power"
+          options={{
+            title: 'Metabolic Power',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="bolt.fill" color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="activity-zone"
+          options={{
+            title: 'Activity Zone',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="gauge" color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="step-side"
+          options={{
+            title: 'Step Side',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="arrow.left.and.right" color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="step-balance"
+          options={{
+            title: 'Step Balance',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="percent" color={color} />,
+          }}
+        />
       </Tabs>
     </>
   );
