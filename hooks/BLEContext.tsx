@@ -629,6 +629,7 @@ export function BLEProvider({ children }: BLEProviderProps) {
 
                 // Process all complete messages
                 // Packets can be delimited by \n OR end with 'D' (ASCII packet terminator)
+                // Process multiple packets that might be concatenated in the buffer
                 let processed = true;
 
                 while (processed) {
@@ -675,65 +676,108 @@ export function BLEProvider({ children }: BLEProviderProps) {
                   }
 
                   // If no newline, check for ASCII packet ending with 'D' or 'DD' (terminator)
-                  // Based on test data: Live packets can end with DD or D, Total/Status end with D
-                  // CRC is 2-3 hex chars before the terminator
-                  let completePacket: string | null = null;
-                  
-                  // Try to match Live packet (L...)
-                  if (workingBuffer.startsWith('L')) {
-                    // Live packets: Look for DD first (preferred), then fall back to single D
-                    // Minimum length for Live packet is ~70 chars
-                    if (workingBuffer.length >= 70) {
-                      // Try to find DD terminator
-                      const ddIndex = workingBuffer.indexOf('DD', 70);
-                      if (ddIndex > 0 && ddIndex < workingBuffer.length - 1) {
-                        // Check if DD is at the end or followed by newline
-                        if (ddIndex + 2 === workingBuffer.length || workingBuffer[ddIndex + 2] === '\n') {
-                          completePacket = workingBuffer.substring(0, ddIndex + 2);
+                  // Helper function to find packet end by looking for CRC + terminator pattern
+                  // Based on actual data: packets end with 2-3 hex (CRC) + D or DD
+                  const findPacketEnd = (buffer: string, startPos: number, minLength: number, maxLength: number): number | null => {
+                    // Search from startPos to maxLength for CRC + terminator pattern
+                    // Look for patterns: [2-3 hex][D] or [2-3 hex][DD]
+                    for (let i = startPos; i <= Math.min(buffer.length - 1, maxLength); i++) {
+                      // Check for DD terminator (Live packets) - must have 2-3 hex chars before DD
+                      if (i < buffer.length - 1 && buffer[i] === 'D' && buffer[i + 1] === 'D') {
+                        // Check if there are 2-3 hex chars before DD (CRC)
+                        if (i >= 2) {
+                          const crc2 = buffer.substring(i - 2, i);
+                          if (/^[0-9A-Fa-f]{2}$/.test(crc2)) {
+                            return i + 2; // Return position after DD
+                          }
+                        }
+                        if (i >= 3) {
+                          const crc3 = buffer.substring(i - 3, i);
+                          if (/^[0-9A-Fa-f]{3}$/.test(crc3)) {
+                            return i + 2; // Return position after DD
+                          }
                         }
                       }
                       
-                      // If no DD found, try single D (but make sure it's not part of DD)
-                      if (!completePacket) {
-                        // Look for D that's not followed by another D, starting from position 70
-                        for (let i = workingBuffer.length - 1; i >= 70; i--) {
-                          if (workingBuffer[i] === 'D' && (i === workingBuffer.length - 1 || workingBuffer[i + 1] !== 'D')) {
-                            // Check if previous char is hex (0-9, A-F) - indicates it's after CRC
-                            const prevChar = i > 0 ? workingBuffer[i - 1] : '';
-                            if (/[0-9A-Fa-f]/.test(prevChar)) {
-                              completePacket = workingBuffer.substring(0, i + 1);
-                              break;
+                      // Check for single D terminator - must have 2-3 hex chars before it
+                      if (buffer[i] === 'D') {
+                        // Check if previous 2-3 chars are hex (CRC)
+                        if (i >= 2) {
+                          const crc2 = buffer.substring(i - 2, i);
+                          if (/^[0-9A-Fa-f]{2}$/.test(crc2)) {
+                            // Make sure it's not part of DD (next char should not be D)
+                            if (i === buffer.length - 1 || buffer[i + 1] !== 'D') {
+                              return i + 1; // Return position after D
+                            }
+                          }
+                        }
+                        if (i >= 3) {
+                          const crc3 = buffer.substring(i - 3, i);
+                          if (/^[0-9A-Fa-f]{3}$/.test(crc3)) {
+                            // Make sure it's not part of DD (next char should not be D)
+                            if (i === buffer.length - 1 || buffer[i + 1] !== 'D') {
+                              return i + 1; // Return position after D
                             }
                           }
                         }
                       }
                     }
-                  }
+                    return null;
+                  };
                   
-                  // Try to match Total/Status packet (T...D or S...D)
-                  if (!completePacket && (workingBuffer.startsWith('T') || workingBuffer.startsWith('S'))) {
-                    // Total packets should be ~75 chars, Status ~30 chars
-                    const minLength = workingBuffer.startsWith('T') ? 73 : 28;
-                    if (workingBuffer.length >= minLength) {
-                      // Find the last 'D' that's not part of 'DD', starting from minLength
-                      for (let i = workingBuffer.length - 1; i >= minLength; i--) {
-                        if (workingBuffer[i] === 'D') {
-                          // Check if it's not part of DD (i.e., next char is not D, or it's at the end)
-                          if (i === workingBuffer.length - 1 || workingBuffer[i + 1] !== 'D') {
-                            // Check if previous char is hex (0-9, A-F) - indicates it's after CRC
-                            const prevChar = i > 0 ? workingBuffer[i - 1] : '';
-                            if (/[0-9A-Fa-f]/.test(prevChar)) {
-                              completePacket = workingBuffer.substring(0, i + 1);
-                              break;
-                            }
-                          }
-                        }
+                  // Try to find any packet type at the start of buffer
+                  // Use more flexible length ranges based on actual test data
+                  let completePacket: string | null = null;
+                  let packetEndPos: number | null = null;
+                  
+                  if (workingBuffer.startsWith('L')) {
+                    // Live packets: Test data shows 75-77 chars (including CRC and terminator)
+                    // Start searching from position 70 (minimum packet length)
+                    if (workingBuffer.length >= 70) {
+                      // Search up to 85 chars to handle variable lengths
+                      packetEndPos = findPacketEnd(workingBuffer, 70, 70, 85);
+                      if (packetEndPos !== null) {
+                        completePacket = workingBuffer.substring(0, packetEndPos);
+                        console.log(`[BLE] Found Live packet, length: ${completePacket.length}, ends at: ${packetEndPos}`);
+                        console.log(`[BLE] Packet ends with: "${completePacket.substring(Math.max(0, completePacket.length - 5))}"`);
+                      } else {
+                        console.log(`[BLE] No Live packet terminator found. Buffer length: ${workingBuffer.length}, last 10: "${workingBuffer.substring(Math.max(0, workingBuffer.length - 10))}"`);
+                      }
+                    }
+                  } else if (workingBuffer.startsWith('T')) {
+                    // Total packets: Test data shows 75-77 chars
+                    if (workingBuffer.length >= 73) {
+                      // Search up to 85 chars to handle variable lengths
+                      packetEndPos = findPacketEnd(workingBuffer, 73, 73, 85);
+                      if (packetEndPos !== null) {
+                        completePacket = workingBuffer.substring(0, packetEndPos);
+                        console.log(`[BLE] Found Total packet, length: ${completePacket.length}, ends at: ${packetEndPos}`);
+                        console.log(`[BLE] Packet ends with: "${completePacket.substring(Math.max(0, completePacket.length - 5))}"`);
+                      } else {
+                        console.log(`[BLE] No Total packet terminator found. Buffer length: ${workingBuffer.length}, last 10: "${workingBuffer.substring(Math.max(0, workingBuffer.length - 10))}"`);
+                      }
+                    }
+                  } else if (workingBuffer.startsWith('S')) {
+                    // Status packets: Expected length ~28-32 chars
+                    if (workingBuffer.length >= 28) {
+                      packetEndPos = findPacketEnd(workingBuffer, 28, 28, 35);
+                      if (packetEndPos !== null) {
+                        completePacket = workingBuffer.substring(0, packetEndPos);
+                        console.log(`[BLE] Found Status packet, length: ${completePacket.length}, ends at: ${packetEndPos}`);
                       }
                     }
                   }
                   
-                  if (completePacket) {
-                    workingBuffer = workingBuffer.substring(completePacket.length);
+                  if (completePacket && packetEndPos !== null) {
+                    // Remove the complete packet from buffer (including any extra chars after terminator)
+                    // Sometimes there might be extra characters after the terminator, skip them
+                    let nextPacketStart = packetEndPos;
+                    // Skip any non-packet-starting characters (not L, T, S)
+                    while (nextPacketStart < workingBuffer.length && 
+                           !['L', 'T', 'S'].includes(workingBuffer[nextPacketStart])) {
+                      nextPacketStart++;
+                    }
+                    workingBuffer = workingBuffer.substring(nextPacketStart);
 
                     console.log(
                       `[BLE] ✅ Received complete ASCII packet (${
@@ -743,6 +787,8 @@ export function BLEProvider({ children }: BLEProviderProps) {
                       }"`
                     );
                     console.log(`[BLE] Full packet: ${completePacket}`);
+                    console.log(`[BLE] Packet ends with: "${completePacket.substring(Math.max(0, completePacket.length - 5))}"`);
+                    console.log(`[BLE] Remaining buffer length: ${workingBuffer.length}, starts with: "${workingBuffer.substring(0, 10)}"`);
 
                     addLog('data', `📨 Received ASCII packet (${completePacket.length} chars)`, {
                       message: completePacket,
@@ -752,9 +798,19 @@ export function BLEProvider({ children }: BLEProviderProps) {
                       type: 'ASCII_PACKET',
                     });
 
-                    // Send to PatientsContext for parsing
-                    setReceivedData(`${completePacket}|${Date.now()}`);
+                    // Send to PatientsContext for parsing (trim to remove any whitespace)
+                    setReceivedData(`${completePacket.trim()}|${Date.now()}`);
                     processed = true;
+                  } else {
+                    // No complete packet found - stop processing
+                    processed = false;
+                    // Log why we're waiting
+                    if (workingBuffer.length > 0) {
+                      const firstChar = workingBuffer[0];
+                      if (['L', 'T', 'S'].includes(firstChar)) {
+                        console.log(`[BLE Buffer] Waiting for more data... Packet type: ${firstChar}, buffer length: ${workingBuffer.length}, last 15: "${workingBuffer.substring(Math.max(0, workingBuffer.length - 15))}"`);
+                      }
+                    }
                   }
                 }
 

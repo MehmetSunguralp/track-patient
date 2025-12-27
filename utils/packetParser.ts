@@ -138,16 +138,20 @@ function parseLongitude(lonStr: string): number {
 
 /**
  * Parse Live (L) packet
- * Format: L + PodID(2) + GPSTime(6) + GPSFix(1) + Lat(8) + PrevLat1(4) + PrevLat2(4) + Lon(10) + PrevLon1(4) + PrevLon2(4) + Vel(5) + PrevVel1(5) + PrevVel2(5) + HR(3) + Power(5) + CRC(2) + DD
- * Note: Coordinates are numeric only (no N/S/E/W direction letters) based on test data format
+ * Format: L + PodID(2) + GPSTime(6) + GPSFix(1) + Lat(10) + PrevLat1(4) + PrevLat2(4) + Lon(11) + PrevLon1(4) + PrevLon2(4) + Vel(5) + PrevVel1(5) + PrevVel2(5) + HR(3) + Power(5) + CRC(2) + D or DD
+ * Total: 1+2+6+1+10+4+4+11+4+4+5+5+5+3+5+2+1(or2) = 75-76 chars
+ * Note: Based on PDF and test data - Live packets can end with D or DD terminator
  */
 function parseLivePacket(packet: string): ParsedLivePacket | null {
-  // Minimum length: 1 + 2 + 6 + 1 + 8 + 4 + 4 + 10 + 4 + 4 + 5 + 5 + 5 + 3 + 5 + 2 + 2 = 71
-  // But allow some flexibility
+  // Expected length: 1 + 2 + 6 + 1 + 10 + 4 + 4 + 11 + 4 + 4 + 5 + 5 + 5 + 3 + 5 + 2 + 1(or2) = 75-76 chars
+  // But test data shows 73 chars, so allow flexibility
   if (packet.length < 70) {
-    console.log(`[PacketParser] Live packet too short: ${packet.length} chars`);
+    console.log(`[PacketParser] Live packet too short: ${packet.length} chars, expected ~73-76`);
     return null;
   }
+  
+  console.log(`[PacketParser] Parsing Live packet: ${packet.length} chars, first 30: ${packet.substring(0, 30)}`);
+  console.log(`[PacketParser] Last 10 chars: "${packet.substring(Math.max(0, packet.length - 10))}"`);
   
   let pos = 1; // Skip 'L'
   
@@ -244,49 +248,57 @@ function parseLivePacket(packet: string): ParsedLivePacket | null {
   }
   pos += 5;
   
-  // CRC is 2-3 hex chars, then terminator 'D' or 'DD'
-  // Based on test data: Live packets can end with DD or D
-  // Look backwards from the end to find the terminator
-  let terminatorStart = -1;
+  // CRC is 2 hex chars, then terminator 'D' or 'DD'
+  // Based on test data: Live packets end with patterns like "07DD" (2 hex + DD) or "0C9D" (3 hex + D)
+  // Look backwards from the end to find the terminator pattern
+  let crc: string | null = null;
+  let terminatorLength = 0;
   
-  // Check if packet ends with DD (Live packet format)
-  if (packet.length >= 2 && packet[packet.length - 2] === 'D' && packet[packet.length - 1] === 'D') {
-    terminatorStart = packet.length - 2;
-  } else if (packet.length >= 1 && packet[packet.length - 1] === 'D') {
-    // Ends with single D
-    terminatorStart = packet.length - 1;
+  // Check if packet ends with DD (pattern: [2 hex][DD])
+  if (packet.length >= 4) {
+    const last4 = packet.substring(packet.length - 4);
+    const match = last4.match(/^([0-9A-Fa-f]{2})DD$/);
+    if (match) {
+      crc = match[1];
+      terminatorLength = 2;
+    }
   }
   
-  if (terminatorStart === -1 || terminatorStart <= pos) {
-    console.log(`[PacketParser] Could not find terminator 'D' or 'DD' at end of packet. Pos: ${pos}, Packet length: ${packet.length}`);
+  // If not DD, check for single D with 2 hex (pattern: [2 hex][D])
+  if (!crc && packet.length >= 3) {
+    const last3 = packet.substring(packet.length - 3);
+    const match = last3.match(/^([0-9A-Fa-f]{2})D$/);
+    if (match) {
+      crc = match[1];
+      terminatorLength = 1;
+    }
+  }
+  
+  // If still not found, try 3 hex + D (pattern: [3 hex][D])
+  if (!crc && packet.length >= 4) {
+    const last4 = packet.substring(packet.length - 4);
+    const match = last4.match(/^([0-9A-Fa-f]{3})D$/);
+    if (match) {
+      crc = match[1];
+      terminatorLength = 1;
+    }
+  }
+  
+  if (!crc || pos + crc.length + terminatorLength > packet.length) {
+    console.log(`[PacketParser] Could not find CRC + terminator pattern at end of Live packet. Pos: ${pos}, Packet length: ${packet.length}`);
+    console.log(`[PacketParser] Last 10 chars: "${packet.substring(Math.max(0, packet.length - 10))}"`);
     return null;
   }
   
-  // CRC is hex chars before the terminator (2-3 chars based on test data)
-  const crc = packet.substring(pos, terminatorStart);
-  if (crc.length < 2 || crc.length > 3) {
-    console.log(`[PacketParser] CRC length invalid: ${crc.length} (expected 2-3 hex chars). CRC: "${crc}"`);
-    return null;
+  // Verify we're at the right position
+  const expectedCrcStart = packet.length - crc.length - terminatorLength;
+  if (pos !== expectedCrcStart) {
+    console.log(`[PacketParser] ⚠️ Position mismatch: expected CRC at pos ${expectedCrcStart}, but we're at pos ${pos}`);
+    console.log(`[PacketParser] Adjusting position to match CRC location`);
+    pos = expectedCrcStart;
   }
   
-  // Validate CRC contains only hex chars
-  if (!/^[0-9A-Fa-f]+$/.test(crc)) {
-    console.log(`[PacketParser] CRC contains invalid hex chars: "${crc}"`);
-    return null;
-  }
-  
-  pos = terminatorStart;
-  
-  // Verify terminator
-  if (packet[pos] !== 'D') {
-    console.log(`[PacketParser] Expected 'D' at pos ${pos}, got '${packet[pos]}'`);
-    return null;
-  }
-  
-  // Check if there's a second 'D' (some Live packets end with 'DD')
-  if (pos + 1 < packet.length && packet[pos + 1] === 'D') {
-    pos++; // Skip second 'D'
-  }
+  console.log(`[PacketParser] ✅ Live packet CRC: "${crc}", terminator: "${'D'.repeat(terminatorLength)}"`);
   
   return {
     type: PacketType.LIVE,
@@ -304,7 +316,7 @@ function parseLivePacket(packet: string): ParsedLivePacket | null {
     prevVel2,
     heartRate,
     metabolicPower,
-    crc,
+    crc: crc, // Use the detected CRC
   };
 }
 

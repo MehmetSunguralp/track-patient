@@ -168,8 +168,9 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
     console.log(`[PatientsContext] Full message: ${message}`);
     
     // Parse the received data (supports both ASCII packets and JSON)
+    let parsed: { patientId: string; data: SessionData['data'][0] } | null = null;
     try {
-      const parsed = parseBLEData(message);
+      parsed = parseBLEData(message);
       if (!parsed || !parsed.patientId) {
         // Failed to parse - log for debugging
         console.log(`[PatientsContext] ❌ Failed to parse data. Message length: ${message.length}, starts with: ${message.substring(0, 10)}`);
@@ -181,6 +182,12 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
     } catch (error) {
       console.log(`[PatientsContext] ❌ Error parsing data: ${error}`);
       console.log(`[PatientsContext] Error stack: ${error instanceof Error ? error.stack : 'No stack'}`);
+      return;
+    }
+
+    // Ensure parsed is not null before destructuring
+    if (!parsed) {
+      console.log(`[PatientsContext] ❌ Parsed data is null after parsing`);
       return;
     }
 
