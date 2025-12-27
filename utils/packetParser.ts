@@ -244,31 +244,46 @@ function parseLivePacket(packet: string): ParsedLivePacket | null {
   }
   pos += 5;
   
-  // CRC is 2 hex chars, then terminator 'D' or 'DD'
-  // Look for terminator - could be single 'D' or double 'DD' for Live packets
-  let crcEnd = pos;
-  while (crcEnd < packet.length && crcEnd < pos + 4) {
-    if (packet[crcEnd] === 'D') {
-      break;
-    }
-    crcEnd++;
+  // CRC is 2-3 hex chars, then terminator 'D' or 'DD'
+  // Based on test data: Live packets can end with DD or D
+  // Look backwards from the end to find the terminator
+  let terminatorStart = -1;
+  
+  // Check if packet ends with DD (Live packet format)
+  if (packet.length >= 2 && packet[packet.length - 2] === 'D' && packet[packet.length - 1] === 'D') {
+    terminatorStart = packet.length - 2;
+  } else if (packet.length >= 1 && packet[packet.length - 1] === 'D') {
+    // Ends with single D
+    terminatorStart = packet.length - 1;
   }
-  if (crcEnd >= packet.length || crcEnd === pos) {
-    console.log(`[PacketParser] Could not find terminator 'D' at pos ${pos}`);
+  
+  if (terminatorStart === -1 || terminatorStart <= pos) {
+    console.log(`[PacketParser] Could not find terminator 'D' or 'DD' at end of packet. Pos: ${pos}, Packet length: ${packet.length}`);
     return null;
   }
   
-  // CRC is 2 hex chars before the 'D'
-  const crc = packet.substring(pos, crcEnd);
-  pos = crcEnd;
+  // CRC is hex chars before the terminator (2-3 chars based on test data)
+  const crc = packet.substring(pos, terminatorStart);
+  if (crc.length < 2 || crc.length > 3) {
+    console.log(`[PacketParser] CRC length invalid: ${crc.length} (expected 2-3 hex chars). CRC: "${crc}"`);
+    return null;
+  }
   
-  // Should end with 'D' or 'DD' (Live packets use 'DD' based on test data)
+  // Validate CRC contains only hex chars
+  if (!/^[0-9A-Fa-f]+$/.test(crc)) {
+    console.log(`[PacketParser] CRC contains invalid hex chars: "${crc}"`);
+    return null;
+  }
+  
+  pos = terminatorStart;
+  
+  // Verify terminator
   if (packet[pos] !== 'D') {
     console.log(`[PacketParser] Expected 'D' at pos ${pos}, got '${packet[pos]}'`);
     return null;
   }
   
-  // Check if there's a second 'D' (Live packets end with 'DD')
+  // Check if there's a second 'D' (some Live packets end with 'DD')
   if (pos + 1 < packet.length && packet[pos + 1] === 'D') {
     pos++; // Skip second 'D'
   }
@@ -405,18 +420,38 @@ function parseTotalPacket(packet: string): ParsedTotalPacket | null {
   const maxHeartRate = parseInt(packet.substring(pos, pos + 3), 10);
   pos += 3;
   
-  // CRC might be 2 or more hex chars - look for 'D' terminator
-  let crcEnd = pos;
-  while (crcEnd < packet.length && packet[crcEnd] !== 'D') {
-    crcEnd++;
+  // CRC is 2-3 hex chars, then terminator 'D'
+  // Look backwards from the end to find the terminator
+  let terminatorStart = -1;
+  
+  // Total packets end with single 'D'
+  if (packet.length >= 1 && packet[packet.length - 1] === 'D') {
+    terminatorStart = packet.length - 1;
   }
-  if (crcEnd >= packet.length) {
-    console.log(`[PacketParser] Could not find terminator 'D' in Total packet at pos ${pos}`);
+  
+  if (terminatorStart === -1 || terminatorStart <= pos) {
+    console.log(`[PacketParser] Could not find terminator 'D' at end of Total packet. Pos: ${pos}, Packet length: ${packet.length}`);
+    console.log(`[PacketParser] Last 10 chars: "${packet.substring(Math.max(0, packet.length - 10))}"`);
     return null;
   }
-  const crc = packet.substring(pos, crcEnd);
-  pos = crcEnd;
   
+  // CRC is hex chars before the terminator (2-3 chars based on test data)
+  const crc = packet.substring(pos, terminatorStart);
+  if (crc.length < 2 || crc.length > 3) {
+    console.log(`[PacketParser] Total packet CRC length invalid: ${crc.length} (expected 2-3 hex chars). CRC: "${crc}"`);
+    console.log(`[PacketParser] Packet end: "${packet.substring(Math.max(0, packet.length - 10))}"`);
+    return null;
+  }
+  
+  // Validate CRC contains only hex chars
+  if (!/^[0-9A-Fa-f]+$/.test(crc)) {
+    console.log(`[PacketParser] Total packet CRC contains invalid hex chars: "${crc}"`);
+    return null;
+  }
+  
+  pos = terminatorStart;
+  
+  // Verify terminator
   if (packet[pos] !== 'D') {
     console.log(`[PacketParser] Expected 'D' at pos ${pos} in Total packet, got '${packet[pos]}'`);
     console.log(`[PacketParser] Packet at pos ${pos}: "${packet.substring(Math.max(0, pos - 5), pos + 5)}"`);

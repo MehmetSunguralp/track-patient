@@ -675,34 +675,60 @@ export function BLEProvider({ children }: BLEProviderProps) {
                   }
 
                   // If no newline, check for ASCII packet ending with 'D' or 'DD' (terminator)
-                  // Live packets (L) end with 'DD', Total/Status packets (T/S) end with 'D'
-                  // Use greedy matching to get to the end, then check for terminator
+                  // Based on test data: Live packets can end with DD or D, Total/Status end with D
+                  // CRC is 2-3 hex chars before the terminator
                   let completePacket: string | null = null;
                   
-                  // Try to match Live packet (L...DD) - must end with DD
-                  if (workingBuffer.startsWith('L') && workingBuffer.includes('DD')) {
-                    const ddIndex = workingBuffer.indexOf('DD');
-                    // Make sure DD is at the end (or followed by newline/end of buffer)
-                    if (ddIndex > 0 && (ddIndex + 2 === workingBuffer.length || workingBuffer[ddIndex + 2] === '\n')) {
-                      completePacket = workingBuffer.substring(0, ddIndex + 2);
-                    }
-                  }
-                  
-                  // Try to match Total/Status packet (T...D or S...D) - must end with D (not DD)
-                  if (!completePacket && (workingBuffer.startsWith('T') || workingBuffer.startsWith('S'))) {
-                    // Find the last 'D' that's not part of 'DD'
-                    let lastDIndex = -1;
-                    for (let i = workingBuffer.length - 1; i >= 0; i--) {
-                      if (workingBuffer[i] === 'D') {
-                        // Check if it's not part of DD (i.e., previous char is not D)
-                        if (i === 0 || workingBuffer[i - 1] !== 'D') {
-                          lastDIndex = i;
-                          break;
+                  // Try to match Live packet (L...)
+                  if (workingBuffer.startsWith('L')) {
+                    // Live packets: Look for DD first (preferred), then fall back to single D
+                    // Minimum length for Live packet is ~70 chars
+                    if (workingBuffer.length >= 70) {
+                      // Try to find DD terminator
+                      const ddIndex = workingBuffer.indexOf('DD', 70);
+                      if (ddIndex > 0 && ddIndex < workingBuffer.length - 1) {
+                        // Check if DD is at the end or followed by newline
+                        if (ddIndex + 2 === workingBuffer.length || workingBuffer[ddIndex + 2] === '\n') {
+                          completePacket = workingBuffer.substring(0, ddIndex + 2);
+                        }
+                      }
+                      
+                      // If no DD found, try single D (but make sure it's not part of DD)
+                      if (!completePacket) {
+                        // Look for D that's not followed by another D, starting from position 70
+                        for (let i = workingBuffer.length - 1; i >= 70; i--) {
+                          if (workingBuffer[i] === 'D' && (i === workingBuffer.length - 1 || workingBuffer[i + 1] !== 'D')) {
+                            // Check if previous char is hex (0-9, A-F) - indicates it's after CRC
+                            const prevChar = i > 0 ? workingBuffer[i - 1] : '';
+                            if (/[0-9A-Fa-f]/.test(prevChar)) {
+                              completePacket = workingBuffer.substring(0, i + 1);
+                              break;
+                            }
+                          }
                         }
                       }
                     }
-                    if (lastDIndex > 0) {
-                      completePacket = workingBuffer.substring(0, lastDIndex + 1);
+                  }
+                  
+                  // Try to match Total/Status packet (T...D or S...D)
+                  if (!completePacket && (workingBuffer.startsWith('T') || workingBuffer.startsWith('S'))) {
+                    // Total packets should be ~75 chars, Status ~30 chars
+                    const minLength = workingBuffer.startsWith('T') ? 73 : 28;
+                    if (workingBuffer.length >= minLength) {
+                      // Find the last 'D' that's not part of 'DD', starting from minLength
+                      for (let i = workingBuffer.length - 1; i >= minLength; i--) {
+                        if (workingBuffer[i] === 'D') {
+                          // Check if it's not part of DD (i.e., next char is not D, or it's at the end)
+                          if (i === workingBuffer.length - 1 || workingBuffer[i + 1] !== 'D') {
+                            // Check if previous char is hex (0-9, A-F) - indicates it's after CRC
+                            const prevChar = i > 0 ? workingBuffer[i - 1] : '';
+                            if (/[0-9A-Fa-f]/.test(prevChar)) {
+                              completePacket = workingBuffer.substring(0, i + 1);
+                              break;
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                   
