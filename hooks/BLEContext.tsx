@@ -499,11 +499,16 @@ export function BLEProvider({ children }: BLEProviderProps) {
                 // Decode base64 to string (react-native-ble-plx returns base64)
                 const base64Value = char.value;
                 const decodedString = base64ToUtf8(base64Value);
-                console.log(
-                  `[BLE Monitor] Received chunk, length: ${
-                    decodedString.length
-                  }, preview: ${decodedString.substring(0, 50)}`
-                );
+                const chunkLog = `[BLE Monitor] Received chunk, length: ${
+                  decodedString.length
+                }, preview: ${decodedString.substring(0, 50)}`;
+                console.log(chunkLog);
+                // Log chunks to UI - user can clear if needed
+                addLog('info', chunkLog, {
+                  chunkLength: decodedString.length,
+                  preview: decodedString.substring(0, 50),
+                  fullChunk: decodedString,
+                });
 
                 // Accumulate chunks in buffer and extract complete JSON messages
                 // Use ref for synchronous access to avoid race conditions with rapid chunks
@@ -517,14 +522,22 @@ export function BLEProvider({ children }: BLEProviderProps) {
                     ? workingBuffer.substring(Math.max(0, workingBuffer.length - 10))
                     : '';
 
-                console.log(
-                  `[BLE Buffer] Buffer length: ${
-                    workingBuffer.length
-                  }, has newline: ${hasNewline}, last 10 chars: "${lastChars.replace(
-                    /\n/g,
-                    '\\n'
-                  )}"`
-                );
+                const bufferLog = `[BLE Buffer] Buffer length: ${
+                  workingBuffer.length
+                }, has newline: ${hasNewline}, last 10 chars: "${lastChars.replace(
+                  /\n/g,
+                  '\\n'
+                )}"`;
+                console.log(bufferLog);
+                // Only log buffer state if buffer is significant (> 100 chars) to avoid spam
+                if (workingBuffer.length > 100) {
+                  addLog('info', bufferLog, {
+                    bufferLength: workingBuffer.length,
+                    hasNewline,
+                    lastChars: lastChars.replace(/\n/g, '\\n'),
+                    preview: workingBuffer.substring(0, 100),
+                  });
+                }
 
                 // If buffer is getting large but no newline, check for complete JSON
                 // BLE might split the message, so we need to detect complete JSON objects
@@ -688,11 +701,17 @@ export function BLEProvider({ children }: BLEProviderProps) {
 
                 // Log if buffer has data but no newline yet
                 if (workingBuffer.length > 0 && !workingBuffer.includes('\n')) {
-                  console.log(
-                    `[BLE Buffer] Waiting for more data... buffer has ${
-                      workingBuffer.length
-                    } chars, preview: "${workingBuffer.substring(0, 50)}..."`
-                  );
+                  const waitingLog = `[BLE Buffer] Waiting for more data... buffer has ${
+                    workingBuffer.length
+                  } chars, preview: "${workingBuffer.substring(0, 50)}..."`;
+                  console.log(waitingLog);
+                  // Only log if buffer is significant to avoid spam
+                  if (workingBuffer.length > 200) {
+                    addLog('info', waitingLog, {
+                      bufferLength: workingBuffer.length,
+                      preview: workingBuffer.substring(0, 100),
+                    });
+                  }
                 }
 
                 // Update ref with remaining buffer (incomplete message or empty)

@@ -297,6 +297,7 @@ function parseTotalPacket(packet: string): ParsedTotalPacket | null {
   }
   
   console.log(`[PacketParser] Parsing Total packet: ${packet.length} chars, first 30: ${packet.substring(0, 30)}`);
+  console.log(`[PacketParser] Full packet: ${packet}`);
   
   let pos = 1; // Skip 'T'
   
@@ -309,7 +310,9 @@ function parseTotalPacket(packet: string): ParsedTotalPacket | null {
   const gpsFix = packet.substring(pos, pos + 1);
   pos += 1;
   
-  const playerLoad = parseInt(packet.substring(pos, pos + 5), 10);
+  // PlayerLoad can be integer or float (e.g., "062.7")
+  const playerLoadStr = packet.substring(pos, pos + 5);
+  const playerLoad = playerLoadStr.includes('.') ? parseFloat(playerLoadStr) : parseInt(playerLoadStr, 10);
   pos += 5;
   
   const totalDistance = parseInt(packet.substring(pos, pos + 5), 10);
@@ -351,13 +354,34 @@ function parseTotalPacket(packet: string): ParsedTotalPacket | null {
   const stepBalanceValue = parseInt(packet.substring(pos, pos + 4), 10);
   pos += 4;
   
-  const maxSpeed = parseInt(packet.substring(pos, pos + 4), 10) / 10.0;
+  // MaxSpeed can start with decimal point (e.g., ".001") or be integer
+  const maxSpeedStr = packet.substring(pos, pos + 4);
+  let maxSpeed: number;
+  if (maxSpeedStr.startsWith('.')) {
+    // Format: ".001" - parse as direct decimal value (format may have changed from integer*10)
+    maxSpeed = parseFloat(maxSpeedStr);
+    console.log(`[PacketParser] MaxSpeed parsed from "${maxSpeedStr}" as ${maxSpeed}`);
+  } else if (maxSpeedStr.includes('.')) {
+    // Format: "7.12" means 7.12
+    maxSpeed = parseFloat(maxSpeedStr);
+  } else {
+    // Format: integer, divide by 10 (original format)
+    maxSpeed = parseInt(maxSpeedStr, 10) / 10.0;
+  }
   pos += 4;
   
-  const lastMinuteMaxSpeed = parseInt(packet.substring(pos, pos + 4), 10) / 10.0;
+  // LastMinuteMaxSpeed can have decimal (e.g., "7.12")
+  const lastMinuteMaxSpeedStr = packet.substring(pos, pos + 4);
+  const lastMinuteMaxSpeed = lastMinuteMaxSpeedStr.includes('.') 
+    ? parseFloat(lastMinuteMaxSpeedStr) 
+    : parseInt(lastMinuteMaxSpeedStr, 10) / 10.0;
   pos += 4;
   
-  const rrAverage = parseInt(packet.substring(pos, pos + 3), 10);
+  // RRAvg can have decimal (e.g., "0.4")
+  const rrAverageStr = packet.substring(pos, pos + 3);
+  const rrAverage = rrAverageStr.includes('.') 
+    ? parseFloat(rrAverageStr) 
+    : parseInt(rrAverageStr, 10);
   pos += 3;
   
   const maxHeartRate = parseInt(packet.substring(pos, pos + 3), 10);
@@ -377,10 +401,16 @@ function parseTotalPacket(packet: string): ParsedTotalPacket | null {
   
   if (packet[pos] !== 'D') {
     console.log(`[PacketParser] Expected 'D' at pos ${pos} in Total packet, got '${packet[pos]}'`);
+    console.log(`[PacketParser] Packet at pos ${pos}: "${packet.substring(Math.max(0, pos - 5), pos + 5)}"`);
     return null;
   }
   
-  console.log(`[PacketParser] Successfully parsed Total packet: podId=${podId}, distance=${totalDistance}, rrAvg=${rrAverage}, maxHR=${maxHeartRate}`);
+  // Validate parsed values are not NaN
+  if (isNaN(playerLoad) || isNaN(totalDistance) || isNaN(maxSpeed) || isNaN(rrAverage) || isNaN(maxHeartRate)) {
+    console.log(`[PacketParser] Warning: Some parsed values are NaN - playerLoad=${playerLoad}, totalDistance=${totalDistance}, maxSpeed=${maxSpeed}, rrAverage=${rrAverage}, maxHR=${maxHeartRate}`);
+  }
+  
+  console.log(`[PacketParser] Successfully parsed Total packet: podId=${podId}, distance=${totalDistance}, rrAvg=${rrAverage}, maxHR=${maxHeartRate}, maxSpeed=${maxSpeed}`);
   
   return {
     type: PacketType.TOTAL,
@@ -452,19 +482,29 @@ function parseStatusPacket(packet: string): ParsedStatusPacket | null {
  */
 export function parsePacket(packet: string): ParsedPacket | null {
   const trimmed = packet.trim();
-  if (trimmed.length === 0) return null;
+  if (trimmed.length === 0) {
+    console.log('[PacketParser] Empty packet string');
+    return null;
+  }
   
   const firstChar = trimmed[0];
   
-  switch (firstChar) {
-    case 'L':
-      return parseLivePacket(trimmed);
-    case 'T':
-      return parseTotalPacket(trimmed);
-    case 'S':
-      return parseStatusPacket(trimmed);
-    default:
-      return null;
+  try {
+    switch (firstChar) {
+      case 'L':
+        return parseLivePacket(trimmed);
+      case 'T':
+        return parseTotalPacket(trimmed);
+      case 'S':
+        return parseStatusPacket(trimmed);
+      default:
+        console.log(`[PacketParser] Unknown packet type: ${firstChar}`);
+        return null;
+    }
+  } catch (error) {
+    console.log(`[PacketParser] Error parsing packet: ${error}`);
+    console.log(`[PacketParser] Packet that failed: ${trimmed.substring(0, 100)}`);
+    return null;
   }
 }
 

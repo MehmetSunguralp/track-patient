@@ -1,4 +1,5 @@
 import CustomStatusBar from '@/components/custom/StatusBar';
+import BLELogsModal from '@/components/custom/BLELogsModal';
 // import BLEDataLogs from '@/components/custom/BLEDataLogs';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAppMode } from '@/hooks/AppModeContext';
@@ -40,6 +41,7 @@ export default function PatientsScreen() {
     isAvailable,
   } = useBLE();
   const [connectingDeviceId, setConnectingDeviceId] = useState<string | null>(null);
+  const [logsModalVisible, setLogsModalVisible] = useState(false);
   const shakeAnim = useRef(new Animated.Value(0)).current;
 
   // Stop scanning when connected and reset connecting state
@@ -123,14 +125,23 @@ export default function PatientsScreen() {
       style={[styles.container, { paddingTop: insets.top + 40 }]}
     >
       <CustomStatusBar variant="patients-list" />
-      {patients.length > 0 && (
-        <View style={styles.header}>
+      <View style={styles.header}>
+        {patients.length > 0 && (
           <View style={styles.headerTitleContainer}>
             <IconSymbol name="cross.case" size={28} color="#11181C" />
             <Text style={styles.heading}>Patients</Text>
           </View>
-        </View>
-      )}
+        )}
+        {connectedDevice && (
+          <Pressable
+            onPress={() => setLogsModalVisible(true)}
+            style={styles.logsButton}
+          >
+            <IconSymbol name="doc.text" size={20} color="#ffffff" />
+            <Text style={styles.logsButtonText}>LOGS</Text>
+          </Pressable>
+        )}
+      </View>
       {isProductionMode ? (
         <View style={styles.productionContainer}>
           {!connectedDevice ? (
@@ -379,6 +390,10 @@ export default function PatientsScreen() {
           <Text style={styles.modeLabel}>Live</Text>
         </View>
       </View>
+      <BLELogsModal
+        visible={logsModalVisible}
+        onClose={() => setLogsModalVisible(false)}
+      />
     </LinearGradient>
   );
 }
@@ -399,11 +414,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    flex: 1,
   },
   heading: {
     fontSize: 28,
     fontWeight: '600',
     color: '#11181C',
+  },
+  logsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#3498DB',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  logsButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   headerControls: {
     flexDirection: 'row',
