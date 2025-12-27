@@ -165,16 +165,24 @@ export function PatientsProvider({ children }: PatientsProviderProps) {
     }
     
     console.log(`[PatientsContext] Processing data (length: ${message.length}): ${message.substring(0, 150)}`);
+    console.log(`[PatientsContext] Full message: ${message}`);
     
     // Parse the received data (supports both ASCII packets and JSON)
-    const parsed = parseBLEData(message);
-    if (!parsed || !parsed.patientId) {
-      // Failed to parse - log for debugging
-      console.log(`[PatientsContext] ❌ Failed to parse data. Message length: ${message.length}, starts with: ${message.substring(0, 5)}`);
+    try {
+      const parsed = parseBLEData(message);
+      if (!parsed || !parsed.patientId) {
+        // Failed to parse - log for debugging
+        console.log(`[PatientsContext] ❌ Failed to parse data. Message length: ${message.length}, starts with: ${message.substring(0, 10)}`);
+        console.log(`[PatientsContext] Message type check - starts with L/T/S: ${!!message.match(/^[LTS]/)}, starts with {: ${message.startsWith('{')}`);
+        return;
+      }
+      
+      console.log(`[PatientsContext] ✅ Successfully parsed data for patient: ${parsed.patientId}, bpm: ${parsed.data.heart.bpm}, lat: ${parsed.data.gps.lat}, lon: ${parsed.data.gps.lon}`);
+    } catch (error) {
+      console.log(`[PatientsContext] ❌ Error parsing data: ${error}`);
+      console.log(`[PatientsContext] Error stack: ${error instanceof Error ? error.stack : 'No stack'}`);
       return;
     }
-    
-    console.log(`[PatientsContext] ✅ Successfully parsed data for patient: ${parsed.patientId}, bpm: ${parsed.data.heart.bpm}, lat: ${parsed.data.gps.lat}, lon: ${parsed.data.gps.lon}`);
 
     const { patientId, data: parsedData } = parsed;
     

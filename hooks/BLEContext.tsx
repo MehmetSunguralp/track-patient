@@ -68,6 +68,7 @@ interface BLEContextValue {
   readonly isAvailable: boolean;
   readonly logs: LogEntry[];
   readonly receivedData: string; // Last received data string
+  readonly rawDataLogs: string[]; // Raw incoming data chunks
   readonly startScan: () => Promise<void>;
   readonly stopScan: () => void;
   readonly connectToDevice: (deviceId: string) => Promise<void>;
@@ -103,6 +104,7 @@ export function BLEProvider({ children }: BLEProviderProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [receivedData, setReceivedData] = useState<string>('');
+  const [rawDataLogs, setRawDataLogs] = useState<string[]>([]);
   const [dataBuffer, setDataBuffer] = useState<string>('');
   const dataBufferRef = useRef<string>('');
   const [nusService, setNusService] = useState<any | null>(null);
@@ -499,16 +501,18 @@ export function BLEProvider({ children }: BLEProviderProps) {
                 // Decode base64 to string (react-native-ble-plx returns base64)
                 const base64Value = char.value;
                 const decodedString = base64ToUtf8(base64Value);
+                
+                // Store raw data chunk
+                setRawDataLogs((prev) => {
+                  const newLogs = [...prev, decodedString];
+                  // Keep only last 1000 chunks to prevent memory issues
+                  return newLogs.slice(-1000);
+                });
+                
                 const chunkLog = `[BLE Monitor] Received chunk, length: ${
                   decodedString.length
                 }, preview: ${decodedString.substring(0, 50)}`;
                 console.log(chunkLog);
-                // Log chunks to UI - user can clear if needed
-                addLog('info', chunkLog, {
-                  chunkLength: decodedString.length,
-                  preview: decodedString.substring(0, 50),
-                  fullChunk: decodedString,
-                });
 
                 // Accumulate chunks in buffer and extract complete JSON messages
                 // Use ref for synchronous access to avoid race conditions with rapid chunks
@@ -672,10 +676,37 @@ export function BLEProvider({ children }: BLEProviderProps) {
 
                   // If no newline, check for ASCII packet ending with 'D' or 'DD' (terminator)
                   // Live packets (L) end with 'DD', Total/Status packets (T/S) end with 'D'
-                  // Match: L packets ending with DD, or T/S packets ending with D
-                  const packetMatch = workingBuffer.match(/^(L.*?DD|[TS].*?D)/);
-                  if (packetMatch) {
-                    const completePacket = packetMatch[1];
+                  // Use greedy matching to get to the end, then check for terminator
+                  let completePacket: string | null = null;
+                  
+                  // Try to match Live packet (L...DD) - must end with DD
+                  if (workingBuffer.startsWith('L') && workingBuffer.includes('DD')) {
+                    const ddIndex = workingBuffer.indexOf('DD');
+                    // Make sure DD is at the end (or followed by newline/end of buffer)
+                    if (ddIndex > 0 && (ddIndex + 2 === workingBuffer.length || workingBuffer[ddIndex + 2] === '\n')) {
+                      completePacket = workingBuffer.substring(0, ddIndex + 2);
+                    }
+                  }
+                  
+                  // Try to match Total/Status packet (T...D or S...D) - must end with D (not DD)
+                  if (!completePacket && (workingBuffer.startsWith('T') || workingBuffer.startsWith('S'))) {
+                    // Find the last 'D' that's not part of 'DD'
+                    let lastDIndex = -1;
+                    for (let i = workingBuffer.length - 1; i >= 0; i--) {
+                      if (workingBuffer[i] === 'D') {
+                        // Check if it's not part of DD (i.e., previous char is not D)
+                        if (i === 0 || workingBuffer[i - 1] !== 'D') {
+                          lastDIndex = i;
+                          break;
+                        }
+                      }
+                    }
+                    if (lastDIndex > 0) {
+                      completePacket = workingBuffer.substring(0, lastDIndex + 1);
+                    }
+                  }
+                  
+                  if (completePacket) {
                     workingBuffer = workingBuffer.substring(completePacket.length);
 
                     console.log(
@@ -685,6 +716,7 @@ export function BLEProvider({ children }: BLEProviderProps) {
                         completePacket.length > 100 ? '...' : ''
                       }"`
                     );
+                    console.log(`[BLE] Full packet: ${completePacket}`);
 
                     addLog('data', `📨 Received ASCII packet (${completePacket.length} chars)`, {
                       message: completePacket,
@@ -694,6 +726,7 @@ export function BLEProvider({ children }: BLEProviderProps) {
                       type: 'ASCII_PACKET',
                     });
 
+                    // Send to PatientsContext for parsing
                     setReceivedData(`${completePacket}|${Date.now()}`);
                     processed = true;
                   }
@@ -741,6 +774,7 @@ export function BLEProvider({ children }: BLEProviderProps) {
           setEsp32RxCharacteristic(null);
           setDeviceType(null);
           setReceivedData('');
+          setRawDataLogs([]);
           setError('Device disconnected');
           addLog('info', 'Device disconnected');
         });
@@ -788,6 +822,7 @@ export function BLEProvider({ children }: BLEProviderProps) {
     setEsp32RxCharacteristic(null);
     setDeviceType(null);
     setReceivedData('');
+    setRawDataLogs([]);
     setDataBuffer('');
     dataBufferRef.current = '';
     setError(null);
@@ -834,6 +869,7 @@ export function BLEProvider({ children }: BLEProviderProps) {
 
   const clearLogs = useCallback(() => {
     setLogs([]);
+    setRawDataLogs([]);
   }, []);
 
   // Cleanup on unmount
@@ -859,6 +895,7 @@ export function BLEProvider({ children }: BLEProviderProps) {
       isAvailable: checkBLEAvailability() && manager !== null,
       logs,
       receivedData,
+      rawDataLogs,
       startScan,
       stopScan,
       connectToDevice,
@@ -876,6 +913,7 @@ export function BLEProvider({ children }: BLEProviderProps) {
       manager,
       logs,
       receivedData,
+      rawDataLogs,
       startScan,
       stopScan,
       connectToDevice,

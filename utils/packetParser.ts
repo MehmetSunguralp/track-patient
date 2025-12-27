@@ -226,10 +226,22 @@ function parseLivePacket(packet: string): ParsedLivePacket | null {
   const prevVel2 = packet.substring(pos, pos + 5);
   pos += 5;
   
-  const heartRate = parseInt(packet.substring(pos, pos + 3), 10);
+  const heartRateStr = packet.substring(pos, pos + 3);
+  const heartRate = parseInt(heartRateStr, 10);
+  if (isNaN(heartRate)) {
+    console.log(`[PacketParser] ❌ Error: Could not parse heartRate from "${heartRateStr}" at pos ${pos}`);
+    return null;
+  }
   pos += 3;
   
-  const metabolicPower = parseInt(packet.substring(pos, pos + 5), 10) / 10.0;
+  const metabolicPowerStr = packet.substring(pos, pos + 5);
+  const metabolicPower = metabolicPowerStr.includes('.') 
+    ? parseFloat(metabolicPowerStr) 
+    : parseInt(metabolicPowerStr, 10) / 10.0;
+  if (isNaN(metabolicPower)) {
+    console.log(`[PacketParser] ❌ Error: Could not parse metabolicPower from "${metabolicPowerStr}" at pos ${pos}`);
+    return null;
+  }
   pos += 5;
   
   // CRC is 2 hex chars, then terminator 'D' or 'DD'
@@ -315,43 +327,49 @@ function parseTotalPacket(packet: string): ParsedTotalPacket | null {
   const playerLoad = playerLoadStr.includes('.') ? parseFloat(playerLoadStr) : parseInt(playerLoadStr, 10);
   pos += 5;
   
-  const totalDistance = parseInt(packet.substring(pos, pos + 5), 10);
+  // Parse numeric fields with better error handling
+  const totalDistanceStr = packet.substring(pos, pos + 5);
+  const totalDistance = parseInt(totalDistanceStr, 10);
+  if (isNaN(totalDistance)) {
+    console.log(`[PacketParser] ❌ Error: Could not parse totalDistance from "${totalDistanceStr}" at pos ${pos}`);
+    return null;
+  }
   pos += 5;
   
-  const hmdlDistance = parseInt(packet.substring(pos, pos + 5), 10);
+  const hmdlDistance = parseInt(packet.substring(pos, pos + 5), 10) || 0;
   pos += 5;
   
-  const z6Distance = parseInt(packet.substring(pos, pos + 4), 10);
+  const z6Distance = parseInt(packet.substring(pos, pos + 4), 10) || 0;
   pos += 4;
   
-  const z5Distance = parseInt(packet.substring(pos, pos + 4), 10);
+  const z5Distance = parseInt(packet.substring(pos, pos + 4), 10) || 0;
   pos += 4;
   
-  const z4Distance = parseInt(packet.substring(pos, pos + 4), 10);
+  const z4Distance = parseInt(packet.substring(pos, pos + 4), 10) || 0;
   pos += 4;
   
-  const z6Count = parseInt(packet.substring(pos, pos + 2), 10);
+  const z6Count = parseInt(packet.substring(pos, pos + 2), 10) || 0;
   pos += 2;
   
-  const z5Count = parseInt(packet.substring(pos, pos + 3), 10);
+  const z5Count = parseInt(packet.substring(pos, pos + 3), 10) || 0;
   pos += 3;
   
-  const z4Count = parseInt(packet.substring(pos, pos + 3), 10);
+  const z4Count = parseInt(packet.substring(pos, pos + 3), 10) || 0;
   pos += 3;
   
-  const totalAccelerations = parseInt(packet.substring(pos, pos + 3), 10);
+  const totalAccelerations = parseInt(packet.substring(pos, pos + 3), 10) || 0;
   pos += 3;
   
-  const totalDecelerations = parseInt(packet.substring(pos, pos + 3), 10);
+  const totalDecelerations = parseInt(packet.substring(pos, pos + 3), 10) || 0;
   pos += 3;
   
-  const totalImpacts = parseInt(packet.substring(pos, pos + 2), 10);
+  const totalImpacts = parseInt(packet.substring(pos, pos + 2), 10) || 0;
   pos += 2;
   
   const stepBalanceSide = packet.substring(pos, pos + 1);
   pos += 1;
   
-  const stepBalanceValue = parseInt(packet.substring(pos, pos + 4), 10);
+  const stepBalanceValue = parseInt(packet.substring(pos, pos + 4), 10) || 0;
   pos += 4;
   
   // MaxSpeed can start with decimal point (e.g., ".001") or be integer
@@ -405,12 +423,23 @@ function parseTotalPacket(packet: string): ParsedTotalPacket | null {
     return null;
   }
   
-  // Validate parsed values are not NaN
+  // Validate parsed values are not NaN - critical values must be valid
   if (isNaN(playerLoad) || isNaN(totalDistance) || isNaN(maxSpeed) || isNaN(rrAverage) || isNaN(maxHeartRate)) {
-    console.log(`[PacketParser] Warning: Some parsed values are NaN - playerLoad=${playerLoad}, totalDistance=${totalDistance}, maxSpeed=${maxSpeed}, rrAverage=${rrAverage}, maxHR=${maxHeartRate}`);
+    console.log(`[PacketParser] ❌ Error: Some parsed values are NaN - playerLoad=${playerLoad}, totalDistance=${totalDistance}, maxSpeed=${maxSpeed}, rrAverage=${rrAverage}, maxHR=${maxHeartRate}`);
+    console.log(`[PacketParser] Packet content at problematic positions:`);
+    console.log(`[PacketParser]   PlayerLoad (pos 10-14): "${packet.substring(10, 15)}"`);
+    console.log(`[PacketParser]   MaxSpeed (pos 58-61): "${packet.substring(58, 62)}"`);
+    console.log(`[PacketParser]   RRAvg (pos 66-68): "${packet.substring(66, 69)}"`);
+    return null;
   }
   
-  console.log(`[PacketParser] Successfully parsed Total packet: podId=${podId}, distance=${totalDistance}, rrAvg=${rrAverage}, maxHR=${maxHeartRate}, maxSpeed=${maxSpeed}`);
+  // Validate that we consumed the entire packet (should end with D)
+  if (pos !== packet.length - 1) {
+    console.log(`[PacketParser] ⚠️ Warning: Packet length mismatch. Expected to end at pos ${packet.length - 1}, but ended at ${pos}`);
+    console.log(`[PacketParser] Remaining: "${packet.substring(pos)}"`);
+  }
+  
+  console.log(`[PacketParser] ✅ Successfully parsed Total packet: podId=${podId}, distance=${totalDistance}, rrAvg=${rrAverage}, maxHR=${maxHeartRate}, maxSpeed=${maxSpeed}`);
   
   return {
     type: PacketType.TOTAL,
